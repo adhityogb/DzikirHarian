@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Sun, Moon, Check, RotateCcw, Settings2, Languages, AlignLeft, BookOpen, X, ChevronRight, Info, Type } from 'lucide-react';
+import appLogo from './assets/app-logo.png';
 
 // --- DATA DZIKIR (Super Lengkap) ---
 const dzikirData = {
@@ -412,7 +413,7 @@ const dzikirData = {
 function AppLogo({ compact = false }) {
   return (
     <div className={`relative ${compact ? 'w-11 h-11' : 'w-14 h-14'} shrink-0 overflow-hidden rounded-2xl shadow-sm`}>
-      <img src="/icons/icon-192x192.png" alt="DzikirHarian Logo" className="w-full h-full object-cover" />
+      <img src={appLogo} alt="DzikirHarian Logo" className="w-full h-full object-cover" />
     </div>
   );
 }
