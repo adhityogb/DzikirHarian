@@ -520,8 +520,8 @@ export default function App() {
   }, [counts, currentDzikirList]);
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans text-gray-800 flex justify-center items-center overflow-hidden selection:bg-emerald-200">
-      <div className="w-full max-w-[414px] h-[100dvh] bg-white relative flex flex-col shadow-2xl overflow-hidden sm:rounded-[2.5rem] sm:h-[90vh] sm:border-8 border-gray-900">
+    <div className="min-h-screen bg-gray-50 font-sans text-gray-800 flex justify-center items-stretch lg:items-center overflow-x-hidden selection:bg-emerald-200 px-0 sm:px-4 lg:px-8">
+      <div className="w-full max-w-4xl h-[100dvh] lg:h-[92vh] bg-white relative flex flex-col overflow-hidden sm:rounded-[2rem] lg:shadow-2xl lg:border border-gray-200">
         {!isReadingMode && (
             <header className="px-6 py-5 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-b-3xl shadow-md z-10 relative shrink-0">
             <div className="flex justify-between items-center mb-6">
@@ -575,7 +575,7 @@ export default function App() {
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto no-scrollbar relative bg-gray-50 pb-safe">
             {activeTab === 'home' && !isReadingMode && (
-                <div className="p-6 space-y-6 pb-32 animate-fade-in-up">
+                <div className="p-4 sm:p-6 lg:p-8 space-y-6 pb-32 animate-fade-in-up">
                     <h2 className="font-bold text-gray-700 text-lg">Pilih Waktu Dzikir</h2>
                     
                     <button 
@@ -709,7 +709,7 @@ export default function App() {
             )}
 
             {isReadingMode && (
-                <div className="px-4 py-6 space-y-8 animate-fade-in-up">
+                <div className="px-4 sm:px-6 lg:px-8 py-6 space-y-8 animate-fade-in-up">
                     {currentDzikirList.map((dzikir, index) => {
                         const currentCount = counts[dzikir.id] || 0;
                         const isCompleted = currentCount >= dzikir.target;
@@ -821,7 +821,7 @@ export default function App() {
         </div>
 
         {!isReadingMode && (
-            <nav className="absolute bottom-0 w-full bg-white border-t border-gray-100 px-6 py-4 flex justify-around items-center z-20 pb-safe shrink-0">
+            <nav className="absolute bottom-0 w-full bg-white border-t border-gray-100 px-4 sm:px-6 py-3 sm:py-4 flex justify-around items-center z-20 pb-safe shrink-0">
                 <button 
                     onClick={() => setActiveTab('home')}
                     className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'home' ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}
@@ -885,7 +885,3 @@ export default function App() {
     </div>
   );
 }
-git status
-git add .
-git commit -m "Setup Dzikir Harian app with logo"
-git push -u origin main
