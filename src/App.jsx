@@ -411,8 +411,8 @@ const dzikirData = {
 
 function AppLogo({ compact = false }) {
   return (
-    <div className={`relative ${compact ? 'w-11 h-11' : 'w-14 h-14'} shrink-0`}>
-      <img src="/favicon.svg" alt="DzikirHarian Logo" className="w-full h-full object-contain" />
+    <div className={`relative ${compact ? 'w-11 h-11' : 'w-14 h-14'} shrink-0 overflow-hidden rounded-2xl shadow-sm`}>
+      <img src="/icons/icon-192x192.png" alt="DzikirHarian Logo" className="w-full h-full object-cover" />
     </div>
   );
 }
@@ -641,8 +641,8 @@ export default function App() {
                       key={idx}
                       onClick={() => setFontSize(idx)}
                       className={`py-3 rounded-xl border font-medium text-sm transition-all ${fontSize === idx
-                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-200'
-                          : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
+                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-200'
+                        : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
                         }`}
                     >
                       {label}
@@ -770,8 +770,8 @@ export default function App() {
                         onClick={() => handleIncrement(dzikir.id, dzikir.target, index)}
                         disabled={isCompleted}
                         className={`relative w-full py-4 rounded-2xl font-bold text-lg transition-all transform active:scale-[0.98] flex justify-center items-center gap-2 overflow-hidden group ${isCompleted
-                            ? 'bg-emerald-500 text-white cursor-default'
-                            : 'bg-gray-900 text-white shadow-md hover:bg-gray-800 active:bg-gray-700'
+                          ? 'bg-emerald-500 text-white cursor-default'
+                          : 'bg-gray-900 text-white shadow-md hover:bg-gray-800 active:bg-gray-700'
                           }`}
                       >
                         {isCompleted ? (
