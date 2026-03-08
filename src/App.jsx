@@ -412,26 +412,20 @@ const dzikirData = {
 function AppLogo({ compact = false }) {
   return (
     <div className={`relative ${compact ? 'w-11 h-11' : 'w-14 h-14'} shrink-0`}>
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-emerald-400 via-teal-500 to-emerald-700 shadow-lg shadow-emerald-900/20" />
-      <div className="absolute inset-[3px] rounded-[14px] bg-white/14 backdrop-blur-sm border border-white/20" />
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className={`text-white font-bold drop-shadow-sm ${compact ? 'text-lg' : 'text-2xl'}`}>۞</span>
-      </div>
-      <div className={`absolute -bottom-1 -right-1 rounded-xl bg-white text-emerald-700 shadow-md border border-emerald-100 flex items-center justify-center ${compact ? 'w-5 h-5' : 'w-6 h-6'}`}>
-        <BookOpen className={compact ? 'w-3 h-3' : 'w-3.5 h-3.5'} />
-      </div>
+      <img src="/favicon.svg" alt="DzikirHarian Logo" className="w-full h-full object-contain" />
     </div>
   );
 }
+
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [activeTime, setActiveTime] = useState('pagi');
   const [counts, setCounts] = useState({});
   const [isReadingMode, setIsReadingMode] = useState(false);
-  
+
   const scrollRef = useRef(null);
-  
+
   const [fontSize, setFontSize] = useState(2);
   const [showArabic, setShowArabic] = useState(true);
   const [showLatin, setShowLatin] = useState(true);
@@ -465,18 +459,18 @@ export default function App() {
         if (window.navigator && window.navigator.vibrate) {
           window.navigator.vibrate(50);
         }
-        
+
         const newCount = current + 1;
-        
+
         if (newCount === target && index < currentDzikirList.length - 1) {
-            setTimeout(() => {
-                const nextElement = document.getElementById(`dzikir-${currentDzikirList[index + 1].id}`);
-                if (nextElement && scrollRef.current) {
-                    nextElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            }, 600);
+          setTimeout(() => {
+            const nextElement = document.getElementById(`dzikir-${currentDzikirList[index + 1].id}`);
+            if (nextElement && scrollRef.current) {
+              nextElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }, 600);
         }
-        
+
         return { ...prev, [id]: newCount };
       }
       return prev;
@@ -484,38 +478,38 @@ export default function App() {
   };
 
   const handleReset = () => {
-    if(window.confirm('Apakah Anda yakin ingin mengulang hitungan dzikir ini dari awal?')) {
-        const initialCounts = {};
-        currentDzikirList.forEach(d => initialCounts[d.id] = 0);
-        setCounts(initialCounts);
-        
-        if(isReadingMode && scrollRef.current) {
-            scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+    if (window.confirm('Apakah Anda yakin ingin mengulang hitungan dzikir ini dari awal?')) {
+      const initialCounts = {};
+      currentDzikirList.forEach(d => initialCounts[d.id] = 0);
+      setCounts(initialCounts);
+
+      if (isReadingMode && scrollRef.current) {
+        scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
   };
 
   const startReading = (time) => {
-      setActiveTime(time);
-      setIsReadingMode(true);
-      setTimeout(() => {
-          if (scrollRef.current) {
-              scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-          }
-      }, 100);
+    setActiveTime(time);
+    setIsReadingMode(true);
+    setTimeout(() => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 100);
   };
 
   const progress = useMemo(() => {
     if (Object.keys(counts).length === 0) return 0;
-    
+
     let totalTarget = 0;
     let totalCompleted = 0;
-    
+
     currentDzikirList.forEach(d => {
       totalTarget += d.target;
       totalCompleted += Math.min(counts[d.id] || 0, d.target);
     });
-    
+
     return totalTarget === 0 ? 0 : Math.round((totalCompleted / totalTarget) * 100);
   }, [counts, currentDzikirList]);
 
@@ -523,329 +517,326 @@ export default function App() {
     <div className="min-h-screen bg-gray-50 font-sans text-gray-800 flex justify-center items-stretch lg:items-center overflow-x-hidden selection:bg-emerald-200 px-0 sm:px-4 lg:px-8">
       <div className="w-full max-w-4xl h-[100dvh] lg:h-[92vh] bg-white relative flex flex-col overflow-hidden sm:rounded-[2rem] lg:shadow-2xl lg:border border-gray-200">
         {!isReadingMode && (
-            <header className="px-6 py-5 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-b-3xl shadow-md z-10 relative shrink-0">
+          <header className="px-6 py-5 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-b-3xl shadow-md z-10 relative shrink-0">
             <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center gap-4">
-                  <AppLogo />
-                  <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Dzikir Harian</h1>
-                    <p className="text-emerald-100 text-sm font-medium">Sesuai Sunnah Nabi ﷺ</p>
-                  </div>
+              <div className="flex items-center gap-4">
+                <AppLogo />
+                <div>
+                  <h1 className="text-2xl font-bold tracking-tight">Dzikir Harian</h1>
+                  <p className="text-emerald-100 text-sm font-medium">Sesuai Sunnah Nabi ﷺ</p>
                 </div>
+              </div>
             </div>
 
             <div className="bg-white/20 backdrop-blur-md rounded-2xl p-4 border border-white/20 shadow-inner">
-                <div className="flex gap-3">
-                    <Info className="w-5 h-5 text-emerald-100 shrink-0 mt-0.5" />
-                    <p className="text-sm leading-relaxed text-white">
-                        "Maka bertasbihlah kepada Allah di waktu petang dan waktu pagi." <span className="block text-emerald-100 text-xs mt-1">(QS. Ar-Rum: 17)</span>
-                    </p>
-                </div>
+              <div className="flex gap-3">
+                <Info className="w-5 h-5 text-emerald-100 shrink-0 mt-0.5" />
+                <p className="text-sm leading-relaxed text-white">
+                  "Maka bertasbihlah kepada Allah di waktu petang dan waktu pagi." <span className="block text-emerald-100 text-xs mt-1">(QS. Ar-Rum: 17)</span>
+                </p>
+              </div>
             </div>
-            </header>
+          </header>
         )}
 
         {isReadingMode && (
-            <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100 bg-white/95 backdrop-blur z-20 shrink-0 shadow-sm">
-                <button onClick={() => setIsReadingMode(false)} className="p-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
-                    <X className="w-6 h-6" />
-                </button>
-                <div className="text-center flex-1">
-                    <h2 className="font-bold text-gray-800 text-sm">
-                        {activeTime === 'pagi' ? 'Dzikir Pagi' : 'Dzikir Petang'}
-                    </h2>
-                    <p className="text-xs text-emerald-600 font-bold tracking-wide">
-                        {progress}% SELESAI
-                    </p>
-                </div>
-                <button onClick={() => { setActiveTab('settings'); setIsReadingMode(false); }} className="p-2 -mr-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
-                    <Settings2 className="w-5 h-5" />
-                </button>
+          <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100 bg-white/95 backdrop-blur z-20 shrink-0 shadow-sm">
+            <button onClick={() => setIsReadingMode(false)} className="p-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
+              <X className="w-6 h-6" />
+            </button>
+            <div className="text-center flex-1">
+              <h2 className="font-bold text-gray-800 text-sm">
+                {activeTime === 'pagi' ? 'Dzikir Pagi' : 'Dzikir Petang'}
+              </h2>
+              <p className="text-xs text-emerald-600 font-bold tracking-wide">
+                {progress}% SELESAI
+              </p>
             </div>
+            <button onClick={() => { setActiveTab('settings'); setIsReadingMode(false); }} className="p-2 -mr-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
+              <Settings2 className="w-5 h-5" />
+            </button>
+          </div>
         )}
 
         {isReadingMode && (
-            <div className="w-full bg-gray-100 h-1 shrink-0">
-                <div 
-                    className="bg-emerald-500 h-1 transition-all duration-500 ease-out"
-                    style={{ width: `${progress}%` }}
-                />
-            </div>
+          <div className="w-full bg-gray-100 h-1 shrink-0">
+            <div
+              className="bg-emerald-500 h-1 transition-all duration-500 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
         )}
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto no-scrollbar relative bg-gray-50 pb-safe">
-            {activeTab === 'home' && !isReadingMode && (
-                <div className="p-4 sm:p-6 lg:p-8 space-y-6 pb-32 animate-fade-in-up">
-                    <h2 className="font-bold text-gray-700 text-lg">Pilih Waktu Dzikir</h2>
-                    
-                    <button 
-                        onClick={() => startReading('pagi')}
-                        className="w-full bg-white rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex items-center justify-between group hover:border-emerald-200 transition-all active:scale-[0.98]"
+          {activeTab === 'home' && !isReadingMode && (
+            <div className="p-4 sm:p-6 lg:p-8 space-y-6 pb-32 animate-fade-in-up">
+              <h2 className="font-bold text-gray-700 text-lg">Pilih Waktu Dzikir</h2>
+
+              <button
+                onClick={() => startReading('pagi')}
+                className="w-full bg-white rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex items-center justify-between group hover:border-emerald-200 transition-all active:scale-[0.98]"
+              >
+                <div className="flex items-center gap-5">
+                  <div className="w-14 h-14 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
+                    <Sun className="w-7 h-7" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="font-bold text-gray-800 text-lg">Dzikir Pagi</h3>
+                    <p className="text-gray-500 text-sm">Dibaca setelah Shubuh</p>
+                  </div>
+                </div>
+                <ChevronRight className="text-gray-300 group-hover:text-emerald-500" />
+              </button>
+
+              <button
+                onClick={() => startReading('petang')}
+                className="w-full bg-white rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex items-center justify-between group hover:border-indigo-200 transition-all active:scale-[0.98]"
+              >
+                <div className="flex items-center gap-5">
+                  <div className="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-500 group-hover:scale-110 transition-transform">
+                    <Moon className="w-7 h-7" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="font-bold text-gray-800 text-lg">Dzikir Petang</h3>
+                    <p className="text-gray-500 text-sm">Dibaca setelah Ashar</p>
+                  </div>
+                </div>
+                <ChevronRight className="text-gray-300 group-hover:text-indigo-500" />
+              </button>
+
+              <div className="mt-8 pt-8 border-t border-gray-200">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-bold text-gray-700">Progres Hari Ini</h3>
+                  <button onClick={handleReset} className="text-xs text-emerald-600 font-medium flex items-center gap-1 bg-emerald-50 px-3 py-1.5 rounded-lg hover:bg-emerald-100 transition-colors">
+                    <RotateCcw className="w-3 h-3" /> Ulang Hitungan
+                  </button>
+                </div>
+                <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                  <div className="flex justify-between text-sm font-medium mb-2">
+                    <span className="text-gray-500">Penyelesaian Keseluruhan</span>
+                    <span className="text-emerald-600 font-bold">{progress}%</span>
+                  </div>
+                  <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
+                    <div
+                      className="bg-gradient-to-r from-emerald-400 to-teal-500 h-full rounded-full transition-all duration-1000 ease-out"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'settings' && !isReadingMode && (
+            <div className="p-6 space-y-8 animate-fade-in-up">
+              <h2 className="font-bold text-gray-800 text-xl mb-4">Pengaturan Tampilan</h2>
+
+              <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
+                <label className="flex items-center gap-3 text-gray-700 font-semibold mb-4">
+                  <Type className="w-5 h-5 text-emerald-600" /> Ukuran Huruf Arab
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  {['Kecil', 'Sedang', 'Besar', 'Sgt Besar'].map((label, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setFontSize(idx)}
+                      className={`py-3 rounded-xl border font-medium text-sm transition-all ${fontSize === idx
+                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-200'
+                          : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
+                        }`}
                     >
-                        <div className="flex items-center gap-5">
-                            <div className="w-14 h-14 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
-                                <Sun className="w-7 h-7" />
-                            </div>
-                            <div className="text-left">
-                                <h3 className="font-bold text-gray-800 text-lg">Dzikir Pagi</h3>
-                                <p className="text-gray-500 text-sm">Dibaca setelah Shubuh</p>
-                            </div>
-                        </div>
-                        <ChevronRight className="text-gray-300 group-hover:text-emerald-500" />
+                      {label}
                     </button>
-
-                    <button 
-                        onClick={() => startReading('petang')}
-                        className="w-full bg-white rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex items-center justify-between group hover:border-indigo-200 transition-all active:scale-[0.98]"
-                    >
-                        <div className="flex items-center gap-5">
-                            <div className="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-500 group-hover:scale-110 transition-transform">
-                                <Moon className="w-7 h-7" />
-                            </div>
-                            <div className="text-left">
-                                <h3 className="font-bold text-gray-800 text-lg">Dzikir Petang</h3>
-                                <p className="text-gray-500 text-sm">Dibaca setelah Ashar</p>
-                            </div>
-                        </div>
-                        <ChevronRight className="text-gray-300 group-hover:text-indigo-500" />
-                    </button>
-
-                    <div className="mt-8 pt-8 border-t border-gray-200">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="font-bold text-gray-700">Progres Hari Ini</h3>
-                            <button onClick={handleReset} className="text-xs text-emerald-600 font-medium flex items-center gap-1 bg-emerald-50 px-3 py-1.5 rounded-lg hover:bg-emerald-100 transition-colors">
-                                <RotateCcw className="w-3 h-3" /> Ulang Hitungan
-                            </button>
-                        </div>
-                        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                            <div className="flex justify-between text-sm font-medium mb-2">
-                                <span className="text-gray-500">Penyelesaian Keseluruhan</span>
-                                <span className="text-emerald-600 font-bold">{progress}%</span>
-                            </div>
-                            <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
-                                <div 
-                                    className="bg-gradient-to-r from-emerald-400 to-teal-500 h-full rounded-full transition-all duration-1000 ease-out"
-                                    style={{ width: `${progress}%` }}
-                                />
-                            </div>
-                        </div>
-                    </div>
+                  ))}
                 </div>
-            )}
+              </div>
 
-            {activeTab === 'settings' && !isReadingMode && (
-                <div className="p-6 space-y-8 animate-fade-in-up">
-                    <h2 className="font-bold text-gray-800 text-xl mb-4">Pengaturan Tampilan</h2>
-                    
-                    <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
-                        <label className="flex items-center gap-3 text-gray-700 font-semibold mb-4">
-                            <Type className="w-5 h-5 text-emerald-600" /> Ukuran Huruf Arab
-                        </label>
-                        <div className="grid grid-cols-2 gap-3">
-                            {['Kecil', 'Sedang', 'Besar', 'Sgt Besar'].map((label, idx) => (
-                            <button
-                                key={idx}
-                                onClick={() => setFontSize(idx)}
-                                className={`py-3 rounded-xl border font-medium text-sm transition-all ${
-                                fontSize === idx 
-                                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-200' 
-                                    : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
-                                }`}
-                            >
-                                {label}
-                            </button>
-                            ))}
-                        </div>
+              <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-100">
+                <div className="p-5 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500">
+                      <span className="text-xl">ع</span>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-800">Teks Arab</h4>
+                      <p className="text-xs text-gray-500">Tampilkan tulisan Arab</p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" checked={showArabic} onChange={(e) => setShowArabic(e.target.checked)} className="sr-only peer" />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                  </label>
+                </div>
+                <div className="p-5 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500">
+                      <Languages className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-800">Teks Latin</h4>
+                      <p className="text-xs text-gray-500">Tampilkan cara baca</p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" checked={showLatin} onChange={(e) => setShowLatin(e.target.checked)} className="sr-only peer" />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                  </label>
+                </div>
+                <div className="p-5 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-500">
+                      <AlignLeft className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-800">Terjemahan</h4>
+                      <p className="text-xs text-gray-500">Tampilkan arti bahasa</p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" checked={showTranslation} onChange={(e) => setShowTranslation(e.target.checked)} className="sr-only peer" />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                  </label>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isReadingMode && (
+            <div className="px-4 sm:px-6 lg:px-8 py-6 space-y-8 animate-fade-in-up">
+              {currentDzikirList.map((dzikir, index) => {
+                const currentCount = counts[dzikir.id] || 0;
+                const isCompleted = currentCount >= dzikir.target;
+
+                return (
+                  <div
+                    key={dzikir.id}
+                    id={`dzikir-${dzikir.id}`}
+                    className={`bg-white rounded-[2rem] shadow-sm border overflow-hidden relative transition-all duration-500 ${isCompleted ? 'border-emerald-200 ring-1 ring-emerald-50 opacity-70' : 'border-gray-100'
+                      }`}
+                  >
+                    <div className="px-5 py-4 border-b border-gray-50 flex items-center justify-between bg-gray-50/50">
+                      <div className="flex items-center gap-3">
+                        <span className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${isCompleted ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-600'
+                          }`}>
+                          {index + 1}
+                        </span>
+                        <h3 className="font-bold text-gray-800 line-clamp-1">{dzikir.title}</h3>
+                      </div>
+                      <div className="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700">
+                        {dzikir.target}x
+                      </div>
                     </div>
 
-                    <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-100">
-                        <div className="p-5 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500">
-                                    <span className="text-xl">ع</span>
-                                </div>
-                                <div>
-                                    <h4 className="font-semibold text-gray-800">Teks Arab</h4>
-                                    <p className="text-xs text-gray-500">Tampilkan tulisan Arab</p>
-                                </div>
-                            </div>
-                            <label className="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" checked={showArabic} onChange={(e) => setShowArabic(e.target.checked)} className="sr-only peer" />
-                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-                            </label>
+                    <div className="p-6 space-y-6">
+                      {showArabic && (
+                        <div
+                          dir="rtl"
+                          className={`text-right text-gray-900 leading-[2.5] ${fontSizeClasses[fontSize]}`}
+                          style={{ fontFamily: "'Scheherazade New', 'Amiri', 'Traditional Arabic', serif" }}
+                        >
+                          {dzikir.arabic}
                         </div>
-                        <div className="p-5 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500">
-                                    <Languages className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <h4 className="font-semibold text-gray-800">Teks Latin</h4>
-                                    <p className="text-xs text-gray-500">Tampilkan cara baca</p>
-                                </div>
+                      )}
+
+                      {(showLatin || showTranslation) && (
+                        <div className={`space-y-4 ${showArabic ? 'pt-4 border-t border-dashed border-gray-200' : ''}`}>
+                          {showLatin && (
+                            <div className="text-emerald-800/90 italic font-medium leading-relaxed text-[15px]">
+                              {dzikir.latin}
                             </div>
-                            <label className="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" checked={showLatin} onChange={(e) => setShowLatin(e.target.checked)} className="sr-only peer" />
-                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-                            </label>
-                        </div>
-                        <div className="p-5 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-500">
-                                    <AlignLeft className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <h4 className="font-semibold text-gray-800">Terjemahan</h4>
-                                    <p className="text-xs text-gray-500">Tampilkan arti bahasa</p>
-                                </div>
+                          )}
+                          {showTranslation && (
+                            <div className="text-gray-600 leading-relaxed text-[15px]">
+                              {dzikir.translation}
                             </div>
-                            <label className="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" checked={showTranslation} onChange={(e) => setShowTranslation(e.target.checked)} className="sr-only peer" />
-                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-                            </label>
+                          )}
                         </div>
+                      )}
+
+                      {(dzikir.fadhilah || dzikir.source) && (
+                        <div className="bg-gray-50 rounded-2xl p-4 text-sm mt-6">
+                          {dzikir.fadhilah && (
+                            <p className="text-gray-700 mb-2"><strong className="font-semibold text-amber-600">💡 Keutamaan: </strong>{dzikir.fadhilah}</p>
+                          )}
+                          {dzikir.source && (
+                            <p className="text-gray-500 text-xs"><strong className="font-semibold">📚 Sumber: </strong>{dzikir.source}</p>
+                          )}
+                        </div>
+                      )}
                     </div>
+
+                    <div className="p-4 bg-gray-50/50 flex flex-col gap-3">
+                      <button
+                        onClick={() => handleIncrement(dzikir.id, dzikir.target, index)}
+                        disabled={isCompleted}
+                        className={`relative w-full py-4 rounded-2xl font-bold text-lg transition-all transform active:scale-[0.98] flex justify-center items-center gap-2 overflow-hidden group ${isCompleted
+                            ? 'bg-emerald-500 text-white cursor-default'
+                            : 'bg-gray-900 text-white shadow-md hover:bg-gray-800 active:bg-gray-700'
+                          }`}
+                      >
+                        {isCompleted ? (
+                          <>
+                            <Check className="w-6 h-6 animate-scale-in" /> Selesai
+                          </>
+                        ) : (
+                          <>
+                            Hitung ({currentCount}/{dzikir.target})
+                          </>
+                        )}
+                        {!isCompleted && <div className="absolute inset-0 bg-white/20 opacity-0 active:opacity-100 transition-opacity" />}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {progress === 100 && (
+                <div className="bg-emerald-50 rounded-[2rem] p-8 text-center border-2 border-emerald-100 animate-fade-in-up mt-8 mb-8">
+                  <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Check className="w-10 h-10 animate-scale-in" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-emerald-900 mb-3">Alhamdulillah!</h2>
+                  <p className="text-emerald-700 font-medium mb-8">Anda telah menyelesaikan seluruh rangkaian dzikir {activeTime} ini.</p>
+
+                  <button
+                    onClick={() => { setIsReadingMode(false); setActiveTab('home'); }}
+                    className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold hover:bg-emerald-700 transition-colors shadow-md shadow-emerald-200"
+                  >
+                    Kembali ke Beranda
+                  </button>
                 </div>
-            )}
-
-            {isReadingMode && (
-                <div className="px-4 sm:px-6 lg:px-8 py-6 space-y-8 animate-fade-in-up">
-                    {currentDzikirList.map((dzikir, index) => {
-                        const currentCount = counts[dzikir.id] || 0;
-                        const isCompleted = currentCount >= dzikir.target;
-                        
-                        return (
-                            <div 
-                                key={dzikir.id} 
-                                id={`dzikir-${dzikir.id}`}
-                                className={`bg-white rounded-[2rem] shadow-sm border overflow-hidden relative transition-all duration-500 ${
-                                    isCompleted ? 'border-emerald-200 ring-1 ring-emerald-50 opacity-70' : 'border-gray-100'
-                                }`}
-                            >
-                                <div className="px-5 py-4 border-b border-gray-50 flex items-center justify-between bg-gray-50/50">
-                                    <div className="flex items-center gap-3">
-                                        <span className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
-                                            isCompleted ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-600'
-                                        }`}>
-                                            {index + 1}
-                                        </span>
-                                        <h3 className="font-bold text-gray-800 line-clamp-1">{dzikir.title}</h3>
-                                    </div>
-                                    <div className="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700">
-                                        {dzikir.target}x
-                                    </div>
-                                </div>
-
-                                <div className="p-6 space-y-6">
-                                    {showArabic && (
-                                        <div 
-                                            dir="rtl" 
-                                            className={`text-right text-gray-900 leading-[2.5] ${fontSizeClasses[fontSize]}`}
-                                            style={{ fontFamily: "'Scheherazade New', 'Amiri', 'Traditional Arabic', serif" }}
-                                        >
-                                            {dzikir.arabic}
-                                        </div>
-                                    )}
-
-                                    {(showLatin || showTranslation) && (
-                                        <div className={`space-y-4 ${showArabic ? 'pt-4 border-t border-dashed border-gray-200' : ''}`}>
-                                            {showLatin && (
-                                                <div className="text-emerald-800/90 italic font-medium leading-relaxed text-[15px]">
-                                                    {dzikir.latin}
-                                                </div>
-                                            )}
-                                            {showTranslation && (
-                                                <div className="text-gray-600 leading-relaxed text-[15px]">
-                                                    {dzikir.translation}
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-
-                                    {(dzikir.fadhilah || dzikir.source) && (
-                                        <div className="bg-gray-50 rounded-2xl p-4 text-sm mt-6">
-                                            {dzikir.fadhilah && (
-                                                <p className="text-gray-700 mb-2"><strong className="font-semibold text-amber-600">💡 Keutamaan: </strong>{dzikir.fadhilah}</p>
-                                            )}
-                                            {dzikir.source && (
-                                                <p className="text-gray-500 text-xs"><strong className="font-semibold">📚 Sumber: </strong>{dzikir.source}</p>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="p-4 bg-gray-50/50 flex flex-col gap-3">
-                                    <button
-                                        onClick={() => handleIncrement(dzikir.id, dzikir.target, index)}
-                                        disabled={isCompleted}
-                                        className={`relative w-full py-4 rounded-2xl font-bold text-lg transition-all transform active:scale-[0.98] flex justify-center items-center gap-2 overflow-hidden group ${
-                                            isCompleted 
-                                                ? 'bg-emerald-500 text-white cursor-default' 
-                                                : 'bg-gray-900 text-white shadow-md hover:bg-gray-800 active:bg-gray-700'
-                                        }`}
-                                    >
-                                        {isCompleted ? (
-                                            <>
-                                                <Check className="w-6 h-6 animate-scale-in" /> Selesai
-                                            </>
-                                        ) : (
-                                            <>
-                                                Hitung ({currentCount}/{dzikir.target})
-                                            </>
-                                        )}
-                                        {!isCompleted && <div className="absolute inset-0 bg-white/20 opacity-0 active:opacity-100 transition-opacity" />}
-                                    </button>
-                                </div>
-                            </div>
-                        );
-                    })}
-
-                    {progress === 100 && (
-                        <div className="bg-emerald-50 rounded-[2rem] p-8 text-center border-2 border-emerald-100 animate-fade-in-up mt-8 mb-8">
-                            <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <Check className="w-10 h-10 animate-scale-in" />
-                            </div>
-                            <h2 className="text-2xl font-bold text-emerald-900 mb-3">Alhamdulillah!</h2>
-                            <p className="text-emerald-700 font-medium mb-8">Anda telah menyelesaikan seluruh rangkaian dzikir {activeTime} ini.</p>
-                            
-                            <button 
-                                onClick={() => { setIsReadingMode(false); setActiveTab('home'); }}
-                                className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold hover:bg-emerald-700 transition-colors shadow-md shadow-emerald-200"
-                            >
-                                Kembali ke Beranda
-                            </button>
-                        </div>
-                    )}
-                </div>
-            )}
+              )}
+            </div>
+          )}
         </div>
 
         {!isReadingMode && (
-            <nav className="absolute bottom-0 w-full bg-white border-t border-gray-100 px-4 sm:px-6 py-3 sm:py-4 flex justify-around items-center z-20 pb-safe shrink-0">
-                <button 
-                    onClick={() => setActiveTab('home')}
-                    className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'home' ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}
-                >
-                    <div className={`p-2 rounded-xl transition-colors ${activeTab === 'home' ? 'bg-emerald-50' : 'bg-transparent'}`}>
-                        <BookOpen className="w-6 h-6" />
-                    </div>
-                    <span className="text-[10px] font-semibold">Dzikir</span>
-                </button>
-                
-                <button 
-                    onClick={() => setActiveTab('settings')}
-                    className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'settings' ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}
-                >
-                    <div className={`p-2 rounded-xl transition-colors ${activeTab === 'settings' ? 'bg-emerald-50' : 'bg-transparent'}`}>
-                        <Settings2 className="w-6 h-6" />
-                    </div>
-                    <span className="text-[10px] font-semibold">Pengaturan</span>
-                </button>
-            </nav>
+          <nav className="absolute bottom-0 w-full bg-white border-t border-gray-100 px-4 sm:px-6 py-3 sm:py-4 flex justify-around items-center z-20 pb-safe shrink-0">
+            <button
+              onClick={() => setActiveTab('home')}
+              className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'home' ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}
+            >
+              <div className={`p-2 rounded-xl transition-colors ${activeTab === 'home' ? 'bg-emerald-50' : 'bg-transparent'}`}>
+                <BookOpen className="w-6 h-6" />
+              </div>
+              <span className="text-[10px] font-semibold">Dzikir</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'settings' ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}
+            >
+              <div className={`p-2 rounded-xl transition-colors ${activeTab === 'settings' ? 'bg-emerald-50' : 'bg-transparent'}`}>
+                <Settings2 className="w-6 h-6" />
+              </div>
+              <span className="text-[10px] font-semibold">Pengaturan</span>
+            </button>
+          </nav>
         )}
       </div>
 
-      <style dangerouslySetInnerHTML={{__html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&display=swap');
         
         .no-scrollbar::-webkit-scrollbar {
