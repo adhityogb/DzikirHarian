@@ -431,6 +431,9 @@ export default function App() {
   const [showArabic, setShowArabic] = useState(true);
   const [showLatin, setShowLatin] = useState(true);
   const [showTranslation, setShowTranslation] = useState(true);
+  const [isNightView, setIsNightView] = useState(() => {
+    return localStorage.getItem('dzikir_night_view') === 'true';
+  });
 
   const currentDzikirList = dzikirData[activeTime];
 
@@ -452,6 +455,40 @@ export default function App() {
       localStorage.setItem(`dzikir_counts_${activeTime}`, JSON.stringify(counts));
     }
   }, [counts, activeTime]);
+
+  useEffect(() => {
+    localStorage.setItem('dzikir_night_view', String(isNightView));
+  }, [isNightView]);
+
+  useEffect(() => {
+    const preventPinchZoom = (event) => {
+      if (event.touches && event.touches.length > 1) {
+        event.preventDefault();
+      }
+    };
+
+    const preventCtrlZoom = (event) => {
+      if (event.ctrlKey || event.metaKey) {
+        event.preventDefault();
+      }
+    };
+
+    const preventGesture = (event) => {
+      event.preventDefault();
+    };
+
+    document.addEventListener('touchmove', preventPinchZoom, { passive: false });
+    document.addEventListener('wheel', preventCtrlZoom, { passive: false });
+    document.addEventListener('gesturestart', preventGesture);
+    document.addEventListener('gesturechange', preventGesture);
+
+    return () => {
+      document.removeEventListener('touchmove', preventPinchZoom);
+      document.removeEventListener('wheel', preventCtrlZoom);
+      document.removeEventListener('gesturestart', preventGesture);
+      document.removeEventListener('gesturechange', preventGesture);
+    };
+  }, []);
 
   const handleIncrement = (id, target, index) => {
     setCounts(prev => {
@@ -515,7 +552,7 @@ export default function App() {
   }, [counts, currentDzikirList]);
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans text-gray-800 flex justify-center items-stretch lg:items-center overflow-x-hidden selection:bg-emerald-200 px-0 sm:px-4 lg:px-8">
+    <div className={`min-h-screen bg-gray-50 font-sans text-gray-800 flex justify-center items-stretch lg:items-center overflow-x-hidden selection:bg-emerald-200 px-0 sm:px-4 lg:px-8 ${isNightView ? 'night-view' : ''}`}>
       <div className="w-full max-w-4xl h-[100dvh] lg:h-[92vh] bg-white relative flex flex-col overflow-hidden sm:rounded-[2rem] lg:shadow-2xl lg:border border-gray-200">
         {!isReadingMode && (
           <header className="px-6 py-5 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-b-3xl shadow-md z-10 relative shrink-0">
@@ -653,6 +690,21 @@ export default function App() {
               </div>
 
               <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-100">
+                <div className="p-5 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
+                      <Moon className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-800">Night View</h4>
+                      <p className="text-xs text-gray-500">Mode malam untuk membaca lebih nyaman</p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" checked={isNightView} onChange={(e) => setIsNightView(e.target.checked)} className="sr-only peer" />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                  </label>
+                </div>
                 <div className="p-5 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500">
@@ -850,6 +902,46 @@ export default function App() {
         
         .pb-safe {
             padding-bottom: env(safe-area-inset-bottom, 16px);
+        }
+
+        .night-view {
+          background: #0f172a;
+          color: #e2e8f0;
+        }
+
+        .night-view > div {
+          background: #111827;
+          border-color: #1f2937;
+        }
+
+        .night-view .bg-white,
+        .night-view .bg-white\\/95,
+        .night-view .bg-gray-50,
+        .night-view .bg-gray-50\\/50,
+        .night-view .bg-emerald-50 {
+          background-color: #1f2937 !important;
+        }
+
+        .night-view .text-gray-800,
+        .night-view .text-gray-700,
+        .night-view .text-gray-600,
+        .night-view .text-gray-500,
+        .night-view .text-gray-400,
+        .night-view .text-emerald-900,
+        .night-view .text-emerald-700 {
+          color: #e5e7eb !important;
+        }
+
+        .night-view .border-gray-50,
+        .night-view .border-gray-100,
+        .night-view .border-gray-200,
+        .night-view .border-emerald-100,
+        .night-view .border-emerald-200 {
+          border-color: #374151 !important;
+        }
+
+        .night-view img {
+          filter: brightness(0.9);
         }
 
         @keyframes fadeInDown {
