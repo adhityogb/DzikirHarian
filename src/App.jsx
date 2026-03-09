@@ -675,13 +675,14 @@ export default function App() {
                 <AppLogo />
                 <div>
                   <h1 className="text-2xl font-bold tracking-tight">Dzikir Harian</h1>
-                  <div className="mt-1 leading-none">
+                  <div className="mt-1 flex items-center gap-2 text-emerald-100">
+                    <p className="text-sm font-medium">Sesuai Sunnah Nabi</p>
                     <p
-                      className="text-emerald-50/95 text-lg sm:text-xl calligraphy-subtitle"
+                      className="text-lg sm:text-xl calligraphy-subtitle"
                       dir="rtl"
-                      aria-label="Muhammad shallallahu alaihi wa sallam"
+                      aria-label="Kaligrafi Muhammad"
                     >
-                      مُحَمَّدٌ صَلَّى ٱللَّٰهُ عَلَيْهِ وَسَلَّمَ
+                      (مُحَمَّد)
                     </p>
                   </div>
                 </div>
