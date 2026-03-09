@@ -682,7 +682,7 @@ export default function App() {
                       dir="rtl"
                       aria-label="Kaligrafi Muhammad"
                     >
-                      (مُحَمَّد)
+                      مُحَمَّد
                     </p>
                   </div>
                 </div>
