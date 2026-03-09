@@ -8,7 +8,6 @@ const STORAGE_KEYS = {
   showArabic: 'dzikir_show_arabic',
   showLatin: 'dzikir_show_latin',
   showTranslation: 'dzikir_show_translation',
-  installBannerDismissed: 'dzikir_install_banner_dismissed',
 };
 
 const isStandaloneDisplay = () => {
@@ -448,10 +447,13 @@ export default function App() {
   const [installPromptEvent, setInstallPromptEvent] = useState(null);
   const [isMobileView, setIsMobileView] = useState(() => window.innerWidth < 768);
   const [isStandaloneMode, setIsStandaloneMode] = useState(() => isStandaloneDisplay());
-  const [showInstallBanner, setShowInstallBanner] = useState(() => {
-    const dismissed = localStorage.getItem(STORAGE_KEYS.installBannerDismissed) === 'true';
-    return window.innerWidth < 768 && !isStandaloneDisplay() && !dismissed;
-  });
+  const [showInstallBanner, setShowInstallBanner] = useState(() => window.innerWidth < 768 && !isStandaloneDisplay());
+  const installPlatform = useMemo(() => {
+    const ua = window.navigator.userAgent.toLowerCase();
+    if (/iphone|ipad|ipod/.test(ua)) return 'ios';
+    if (/android/.test(ua)) return 'android';
+    return 'other';
+  }, []);
 
   const currentDzikirList = dzikirData[activeTime];
 
@@ -502,10 +504,9 @@ export default function App() {
     const syncInstallState = () => {
       const mobile = window.innerWidth < 768;
       const standalone = isStandaloneDisplay();
-      const dismissed = localStorage.getItem(STORAGE_KEYS.installBannerDismissed) === 'true';
       setIsMobileView(mobile);
       setIsStandaloneMode(standalone);
-      setShowInstallBanner(mobile && !standalone && !dismissed);
+      setShowInstallBanner(mobile && !standalone);
     };
 
     const handleBeforeInstallPrompt = (event) => {
@@ -515,7 +516,6 @@ export default function App() {
     };
 
     const handleAppInstalled = () => {
-      localStorage.setItem(STORAGE_KEYS.installBannerDismissed, 'true');
       setShowInstallBanner(false);
       setInstallPromptEvent(null);
       syncInstallState();
@@ -657,17 +657,8 @@ export default function App() {
   const handleInstallApp = async () => {
     if (!installPromptEvent) return;
     await installPromptEvent.prompt();
-    const choiceResult = await installPromptEvent.userChoice;
-    if (choiceResult.outcome !== 'accepted') {
-      localStorage.setItem(STORAGE_KEYS.installBannerDismissed, 'true');
-      setShowInstallBanner(false);
-    }
+    await installPromptEvent.userChoice;
     setInstallPromptEvent(null);
-  };
-
-  const dismissInstallBanner = () => {
-    localStorage.setItem(STORAGE_KEYS.installBannerDismissed, 'true');
-    setShowInstallBanner(false);
   };
 
   return (
@@ -819,14 +810,32 @@ export default function App() {
                       </div>
                       <div className="flex-1">
                         <p className="font-semibold text-emerald-900 text-sm">Install Dzikir Harian</p>
-                        <p className="text-xs text-emerald-700 mt-1">Akses lebih cepat dari homescreen dan pengalaman seperti aplikasi native.</p>
+                        <p className="text-xs text-emerald-700 mt-1">Pasang aplikasi agar akses lebih cepat dari homescreen.</p>
+                        <div className="mt-2 rounded-xl bg-white/80 p-3 border border-emerald-100">
+                          {installPlatform === 'ios' && (
+                            <ol className="text-xs text-emerald-800 list-decimal pl-4 space-y-1">
+                              <li>Buka di Safari, lalu ketuk tombol <strong>Share</strong> (ikon kotak + panah).</li>
+                              <li>Pilih <strong>Add to Home Screen</strong>.</li>
+                              <li>Ketuk <strong>Add</strong> sampai ikon muncul di layar utama.</li>
+                            </ol>
+                          )}
+                          {installPlatform === 'android' && (
+                            <ol className="text-xs text-emerald-800 list-decimal pl-4 space-y-1">
+                              <li>Ketuk tombol <strong>Install</strong> di bawah ini.</li>
+                              <li>Jika tidak muncul, buka menu browser (⋮).</li>
+                              <li>Pilih <strong>Install app</strong> atau <strong>Add to Home screen</strong>.</li>
+                            </ol>
+                          )}
+                          {installPlatform === 'other' && (
+                            <p className="text-xs text-emerald-800">Gunakan menu browser lalu pilih <strong>Install app</strong> atau <strong>Add to Home Screen</strong>.</p>
+                          )}
+                        </div>
                         <div className="flex gap-2 mt-3">
                           {installPromptEvent ? (
                             <button onClick={handleInstallApp} className="px-3 py-2 text-xs font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors">Install</button>
                           ) : (
-                            <span className="px-3 py-2 text-xs font-semibold rounded-lg bg-white text-emerald-700 border border-emerald-200">Pakai menu browser: Add to Home Screen</span>
+                            <span className="px-3 py-2 text-xs font-semibold rounded-lg bg-white text-emerald-700 border border-emerald-200">Ikuti langkah sesuai HP di atas</span>
                           )}
-                          <button onClick={dismissInstallBanner} className="px-3 py-2 text-xs font-semibold rounded-lg bg-white text-emerald-700 border border-emerald-200 hover:bg-emerald-50 transition-colors">Nanti</button>
                         </div>
                       </div>
                     </div>
