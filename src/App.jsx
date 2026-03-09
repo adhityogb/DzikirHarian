@@ -14,6 +14,33 @@ const isStandaloneDisplay = () => {
   return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 };
 
+const dalilByTitle = {
+  'Membaca Ayat Kursi': '"Barangsiapa yang membaca Ayat Kursi ketika pagi, ia akan dilindungi hingga petang. Dan barangsiapa membacanya ketika petang, ia akan dilindungi hingga pagi."',
+  'Membaca Surah Al-Ikhlas': 'Abdullah bin Khubaib radhiyallahu anhu berkata, Rasulullah ﷺ bersabda: "Bacalah Qul huwallahu ahad dan al-mu\'awwidzatain (Al-Falaq dan An-Naas) saat pagi dan petang masing-masing tiga kali, niscaya itu akan mencukupimu dari segala sesuatu."',
+  'Membaca Surah Al-Falaq': 'Abdullah bin Khubaib radhiyallahu anhu berkata, Rasulullah ﷺ bersabda: "Bacalah Qul huwallahu ahad dan al-mu\'awwidzatain (Al-Falaq dan An-Naas) saat pagi dan petang masing-masing tiga kali, niscaya itu akan mencukupimu dari segala sesuatu."',
+  'Membaca Surah An-Naas': 'Abdullah bin Khubaib radhiyallahu anhu berkata, Rasulullah ﷺ bersabda: "Bacalah Qul huwallahu ahad dan al-mu\'awwidzatain (Al-Falaq dan An-Naas) saat pagi dan petang masing-masing tiga kali, niscaya itu akan mencukupimu dari segala sesuatu."',
+  'Doa Memasuki Pagi Hari': 'Nabi ﷺ mengajarkan doa pagi: "Kami memasuki pagi dan kerajaan hanya milik Allah..." sebagai dzikir pembuka pagi untuk meneguhkan tauhid dan tawakal.',
+  'Doa Memasuki Petang Hari': 'Nabi ﷺ mengajarkan doa petang: "Kami memasuki petang dan kerajaan hanya milik Allah..." sebagai dzikir pembuka petang untuk meneguhkan tauhid dan tawakal.',
+  'Doa Perlindungan Pagi': 'Rasulullah ﷺ tidak pernah meninggalkan doa ini di pagi dan petang: "Allahumma inni as\'alukal \`afwa wal \`afiyah fid-dunya wal akhirah..."',
+  'Doa Perlindungan Petang': 'Rasulullah ﷺ tidak pernah meninggalkan doa ini di pagi dan petang: "Allahumma inni as\'alukal \`afwa wal \`afiyah fid-dunya wal akhirah..."',
+  'Sayyidul Istighfar': 'Nabi ﷺ bersabda: "Barangsiapa mengucapkan sayyidul istighfar di siang hari dengan yakin, lalu ia meninggal sebelum petang, maka ia termasuk penghuni surga. Dan barangsiapa mengucapkannya di malam hari dengan yakin, lalu meninggal sebelum pagi, maka ia termasuk penghuni surga."',
+  'Doa Mempersaksikan Allah (4x)': 'Nabi ﷺ bersabda: "Barangsiapa ketika pagi membaca: Allahumma inni asbahtu usyhiduka... sebanyak empat kali, maka Allah membebaskannya dari neraka." (juga berlaku saat petang).',
+  'Doa Keselamatan (Al-\'Afiyah)': 'Al-\'Abbas radhiyallahu anhu bertanya kepada Nabi ﷺ tentang doa yang diminta. Nabi ﷺ menjawab: "Mintalah kepada Allah al-\'afiyah (keselamatan) di dunia dan akhirat."',
+  'Doa Berlindung dari Godaan Setan': 'Nabi ﷺ mengajarkan doa perlindungan: "Ya Allah, Yang mengetahui yang gaib dan nyata... aku berlindung kepada-Mu dari kejahatan diriku, setan, dan pasukannya."',
+  'Doa Memohon Kesehatan (3x)': 'Nabi ﷺ bersabda: "Siapa yang membaca di pagi hari dan petang hari: Bismillahil ladzi la yadurru ma\'asmihi syai\'... sebanyak tiga kali, maka tidak ada sesuatu pun yang membahayakannya."',
+  'Doa Kecukupan (7x)': 'Nabi ﷺ bersabda: "Barangsiapa membaca: Hasbiyallahu la ilaha illa huwa... sebanyak tujuh kali di pagi dan petang, Allah akan mencukupinya dari urusan dunia dan akhirat."',
+  'Membaca Bismillahilladzi (3x)': 'Nabi ﷺ bersabda: "Tidaklah seorang hamba membaca pada pagi setiap hari dan petang setiap malam: Bismillahil ladzi la yadurru ma\'asmihi syai\'... sebanyak tiga kali, kecuali tidak ada sesuatu pun yang membahayakannya."',
+  'Doa Ridha Kepada Allah (3x)': 'Nabi ﷺ bersabda: "Siapa yang membaca saat pagi dan petang: Radhitu billahi rabba... sebanyak tiga kali, Allah akan meridhainya pada hari kiamat."',
+  'Memohon Perbaikan Urusan': 'Nabi ﷺ mengajarkan Fatimah radhiyallahu anha: "Wahai Dzat Yang Maha Hidup, dengan rahmat-Mu aku memohon pertolongan, perbaikilah seluruh urusanku dan jangan serahkan aku kepada diriku walau sekejap mata."',
+  'Syukur Atas Nikmat Islam': 'Nabi ﷺ mengajarkan doa syukur pagi/petang: "Kami memasuki pagi di atas fitrah Islam, kalimat ikhlas, agama Nabi Muhammad ﷺ, dan millah Ibrahim hanif."',
+  'Dzikir Khusus Pagi (1): Ilmu & Rezeki': 'Ummu Salamah radhiyallahu anha meriwayatkan bahwa Nabi ﷺ ketika selesai salam subuh membaca: "Allahumma inni as\'aluka \`ilman nafi\'an, rizqan thayyiban, wa \`amalan mutaqabbalan."',
+  'Dzikir Khusus Pagi (2): Tasbih (3x)': 'Juwairiyah radhiyallahu anha meriwayatkan Nabi ﷺ bersabda bahwa dzikir "Subhanallahi wa bihamdih..." tiga kali setara dengan dzikir panjang sejak pagi.',
+  'Dzikir Khusus Petang: A\'udzu bikalimatillah (3x)': 'Nabi ﷺ bersabda: "Barangsiapa singgah di suatu tempat lalu membaca: A\'udzu bikalimatillahit-tammati min syarri ma khalaq, maka tidak ada sesuatu yang membahayakannya sampai ia pergi dari tempat itu."',
+  'Tasbih 100x': 'Nabi ﷺ bersabda: "Barangsiapa membaca Subhanallahi wa bihamdih seratus kali dalam sehari, dosa-dosanya dihapus walaupun sebanyak buih di lautan."',
+  'Tahlil 100x (Atau 10x)': 'Nabi ﷺ bersabda: "Siapa yang mengucapkan La ilaha illallahu wahdahu la syarika lah... dalam sehari seratus kali, baginya pahala besar, perlindungan dari setan, dan kebaikan yang banyak."',
+  'Istighfar 100x': 'Nabi ﷺ bersabda: "Wahai manusia, bertaubatlah kepada Allah. Sesungguhnya aku beristighfar kepada-Nya dalam sehari seratus kali."',
+};
+
 // --- DATA DZIKIR (Super Lengkap) ---
 const dzikirData = {
   pagi: [
@@ -422,6 +449,16 @@ const dzikirData = {
   ]
 };
 
+const ISTIGHFAR_LINK = {
+  pagi: { id: 'p17', otherTime: 'petang', otherId: 'pt16' },
+  petang: { id: 'pt16', otherTime: 'pagi', otherId: 'p17' },
+};
+
+const readStoredCounts = (time) => {
+  const saved = localStorage.getItem(`dzikir_counts_${time}`);
+  return saved ? JSON.parse(saved) : {};
+};
+
 function AppLogo({ compact = false }) {
   return (
     <div className={`relative ${compact ? 'w-11 h-11' : 'w-14 h-14'} shrink-0 overflow-hidden rounded-2xl shadow-sm`}>
@@ -448,6 +485,7 @@ export default function App() {
   const [isMobileView, setIsMobileView] = useState(() => window.innerWidth < 768);
   const [isStandaloneMode, setIsStandaloneMode] = useState(() => isStandaloneDisplay());
   const [showInstallBanner, setShowInstallBanner] = useState(() => window.innerWidth < 768 && !isStandaloneDisplay());
+  const [activeDalil, setActiveDalil] = useState(null);
   const installPlatform = useMemo(() => {
     const ua = window.navigator.userAgent.toLowerCase();
     if (/iphone|ipad|ipod/.test(ua)) return 'ios';
@@ -460,14 +498,21 @@ export default function App() {
   const fontSizeClasses = ['text-2xl', 'text-3xl', 'text-4xl', 'text-5xl'];
 
   useEffect(() => {
-    const savedCounts = localStorage.getItem(`dzikir_counts_${activeTime}`);
-    if (savedCounts) {
-      setCounts(JSON.parse(savedCounts));
-    } else {
-      const initialCounts = {};
-      currentDzikirList.forEach(d => initialCounts[d.id] = 0);
-      setCounts(initialCounts);
+    const savedCounts = readStoredCounts(activeTime);
+
+    const initialCounts = {};
+    currentDzikirList.forEach((d) => {
+      initialCounts[d.id] = savedCounts[d.id] || 0;
+    });
+
+    const istighfarMeta = ISTIGHFAR_LINK[activeTime];
+    if (istighfarMeta) {
+      const oppositeCounts = readStoredCounts(istighfarMeta.otherTime);
+      const linkedValue = Math.max(initialCounts[istighfarMeta.id] || 0, oppositeCounts[istighfarMeta.otherId] || 0);
+      initialCounts[istighfarMeta.id] = linkedValue;
     }
+
+    setCounts(initialCounts);
   }, [activeTime, currentDzikirList]);
 
   useEffect(() => {
@@ -475,6 +520,16 @@ export default function App() {
 
     const persistCounts = setTimeout(() => {
       localStorage.setItem(`dzikir_counts_${activeTime}`, JSON.stringify(counts));
+
+      const istighfarMeta = ISTIGHFAR_LINK[activeTime];
+      if (istighfarMeta) {
+        const linkedValue = counts[istighfarMeta.id] || 0;
+        const oppositeCounts = readStoredCounts(istighfarMeta.otherTime);
+        localStorage.setItem(
+          `dzikir_counts_${istighfarMeta.otherTime}`,
+          JSON.stringify({ ...oppositeCounts, [istighfarMeta.otherId]: linkedValue })
+        );
+      }
     }, 80);
 
     return () => clearTimeout(persistCounts);
@@ -595,8 +650,19 @@ export default function App() {
   const handleReset = () => {
     if (window.confirm('Apakah Anda yakin ingin mengulang hitungan dzikir ini dari awal?')) {
       const initialCounts = {};
-      currentDzikirList.forEach(d => initialCounts[d.id] = 0);
+      currentDzikirList.forEach((d) => {
+        initialCounts[d.id] = 0;
+      });
       setCounts(initialCounts);
+
+      const istighfarMeta = ISTIGHFAR_LINK[activeTime];
+      if (istighfarMeta) {
+        const oppositeCounts = readStoredCounts(istighfarMeta.otherTime);
+        localStorage.setItem(
+          `dzikir_counts_${istighfarMeta.otherTime}`,
+          JSON.stringify({ ...oppositeCounts, [istighfarMeta.otherId]: 0 })
+        );
+      }
 
       if (isReadingMode && scrollRef.current) {
         scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
@@ -630,9 +696,15 @@ export default function App() {
   }, [counts, currentDzikirList]);
 
   const getStoredCounts = (time) => {
-    if (time === activeTime) return counts;
-    const saved = localStorage.getItem(`dzikir_counts_${time}`);
-    return saved ? JSON.parse(saved) : {};
+    const savedCounts = time === activeTime ? counts : readStoredCounts(time);
+    const istighfarMeta = ISTIGHFAR_LINK[time];
+
+    if (!istighfarMeta) return savedCounts;
+
+    const oppositeCounts = time === activeTime ? readStoredCounts(istighfarMeta.otherTime) : getStoredCounts(istighfarMeta.otherTime);
+    const linkedValue = Math.max(savedCounts[istighfarMeta.id] || 0, oppositeCounts[istighfarMeta.otherId] || 0);
+
+    return { ...savedCounts, [istighfarMeta.id]: linkedValue };
   };
 
   const getProgressForTime = (time) => {
@@ -977,7 +1049,19 @@ export default function App() {
                             <p className="text-gray-700 mb-2"><strong className="font-semibold text-amber-600">💡 Keutamaan: </strong>{dzikir.fadhilah}</p>
                           )}
                           {dzikir.source && (
-                            <p className="text-gray-500 text-xs"><strong className="font-semibold">📚 Sumber: </strong>{dzikir.source}</p>
+                            <div className="text-gray-500 text-xs">
+                              <button
+                                type="button"
+                                onClick={() => setActiveDalil({
+                                  title: dzikir.title,
+                                  source: dzikir.source,
+                                  dalil: dalilByTitle[dzikir.title] || 'Dalil lengkap belum tersedia untuk dzikir ini.',
+                                })}
+                                className="font-semibold text-emerald-700 hover:text-emerald-800 underline underline-offset-2"
+                              >
+                                📚 Sumber
+                              </button>
+                            </div>
                           )}
                         </div>
                       )}
@@ -1027,6 +1111,34 @@ export default function App() {
             </div>
           )}
         </div>
+
+
+
+        {activeDalil && (
+          <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setActiveDalil(null)}>
+            <div className="w-full max-w-lg bg-white rounded-3xl shadow-xl border border-gray-100 p-5 sm:p-6" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-start justify-between gap-3 mb-4">
+                <div>
+                  <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wide">Dalil dari sumber</p>
+                  <h3 className="text-lg font-bold text-gray-900">{activeDalil.title}</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveDalil(null)}
+                  className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center"
+                  aria-label="Tutup popup dalil"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="bg-gray-50 rounded-2xl p-4 space-y-3">
+                <p className="text-sm text-gray-700 leading-relaxed">{activeDalil.dalil}</p>
+                <p className="text-xs text-gray-500"><span className="font-semibold">Referensi:</span> {activeDalil.source}</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {!isReadingMode && (
           <nav className="absolute bottom-0 w-full bg-white border-t border-gray-100 px-4 sm:px-6 py-3 sm:py-4 flex justify-around items-center z-20 pb-safe shrink-0">
