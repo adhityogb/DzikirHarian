@@ -905,43 +905,73 @@ export default function App() {
         }
 
         .night-view {
-          background: #0f172a;
-          color: #e2e8f0;
+          background: radial-gradient(circle at top, #1e293b, #020617 55%);
+          color: #ffffff;
         }
 
         .night-view > div {
-          background: #111827;
-          border-color: #1f2937;
+          background: #0f172a;
+          border-color: #334155;
         }
 
         .night-view .bg-white,
-        .night-view .bg-white\\/95,
+        .night-view [class*='bg-white/95'],
         .night-view .bg-gray-50,
-        .night-view .bg-gray-50\\/50,
-        .night-view .bg-emerald-50 {
-          background-color: #1f2937 !important;
+        .night-view [class*='bg-gray-50/50'],
+        .night-view .bg-emerald-50,
+        .night-view [class*='bg-emerald-100'],
+        .night-view .bg-indigo-50,
+        .night-view .bg-blue-50,
+        .night-view .bg-purple-50,
+        .night-view .bg-amber-50 {
+          background-color: #1e293b !important;
         }
 
-        .night-view .text-gray-800,
-        .night-view .text-gray-700,
-        .night-view .text-gray-600,
-        .night-view .text-gray-500,
-        .night-view .text-gray-400,
+        .night-view .from-emerald-600,
+        .night-view .to-teal-700,
+        .night-view .from-emerald-400,
+        .night-view .to-teal-500 {
+          --tw-gradient-from: #0f766e var(--tw-gradient-from-position) !important;
+          --tw-gradient-to: rgb(6 95 70 / 0) var(--tw-gradient-to-position) !important;
+          --tw-gradient-stops: var(--tw-gradient-from), #115e59 var(--tw-gradient-via-position), var(--tw-gradient-to) !important;
+        }
+
+        .night-view *,
+        .night-view .text-emerald-600,
+        .night-view .text-emerald-100,
+        .night-view .text-emerald-700,
         .night-view .text-emerald-900,
-        .night-view .text-emerald-700 {
-          color: #e5e7eb !important;
+        .night-view .text-indigo-500,
+        .night-view .text-amber-500,
+        .night-view .text-blue-500,
+        .night-view .text-purple-500,
+        .night-view .text-gray-300,
+        .night-view .text-gray-400,
+        .night-view .text-gray-500,
+        .night-view .text-gray-600,
+        .night-view .text-gray-700,
+        .night-view .text-gray-800,
+        .night-view .text-gray-900 {
+          color: #ffffff !important;
         }
 
         .night-view .border-gray-50,
         .night-view .border-gray-100,
         .night-view .border-gray-200,
         .night-view .border-emerald-100,
-        .night-view .border-emerald-200 {
-          border-color: #374151 !important;
+        .night-view .border-emerald-200,
+        .night-view .divide-gray-100 > :not([hidden]) ~ :not([hidden]) {
+          border-color: #334155 !important;
+        }
+
+        .night-view .shadow-sm,
+        .night-view .shadow-md,
+        .night-view .shadow-2xl {
+          box-shadow: none !important;
         }
 
         .night-view img {
-          filter: brightness(0.9);
+          filter: brightness(0.85);
         }
 
         @keyframes fadeInDown {
