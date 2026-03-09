@@ -2,6 +2,19 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Sun, Moon, Check, RotateCcw, Settings2, Languages, AlignLeft, BookOpen, X, ChevronRight, Info, Type, Download } from 'lucide-react';
 import appLogo from './assets/app-logo.png';
 
+const STORAGE_KEYS = {
+  nightView: 'dzikir_night_view',
+  fontSize: 'dzikir_font_size',
+  showArabic: 'dzikir_show_arabic',
+  showLatin: 'dzikir_show_latin',
+  showTranslation: 'dzikir_show_translation',
+  installBannerDismissed: 'dzikir_install_banner_dismissed',
+};
+
+const isStandaloneDisplay = () => {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+};
+
 // --- DATA DZIKIR (Super Lengkap) ---
 const dzikirData = {
   pagi: [
@@ -427,19 +440,17 @@ export default function App() {
 
   const scrollRef = useRef(null);
 
-  const [fontSize, setFontSize] = useState(() => Number(localStorage.getItem('dzikir_font_size') ?? 2));
-  const [showArabic, setShowArabic] = useState(() => localStorage.getItem('dzikir_show_arabic') !== 'false');
-  const [showLatin, setShowLatin] = useState(() => localStorage.getItem('dzikir_show_latin') !== 'false');
-  const [showTranslation, setShowTranslation] = useState(() => localStorage.getItem('dzikir_show_translation') !== 'false');
-  const [isNightView, setIsNightView] = useState(() => localStorage.getItem('dzikir_night_view') === 'true');
+  const [fontSize, setFontSize] = useState(() => Number(localStorage.getItem(STORAGE_KEYS.fontSize) ?? 2));
+  const [showArabic, setShowArabic] = useState(() => localStorage.getItem(STORAGE_KEYS.showArabic) !== 'false');
+  const [showLatin, setShowLatin] = useState(() => localStorage.getItem(STORAGE_KEYS.showLatin) !== 'false');
+  const [showTranslation, setShowTranslation] = useState(() => localStorage.getItem(STORAGE_KEYS.showTranslation) !== 'false');
+  const [isNightView, setIsNightView] = useState(() => localStorage.getItem(STORAGE_KEYS.nightView) === 'true');
   const [installPromptEvent, setInstallPromptEvent] = useState(null);
   const [isMobileView, setIsMobileView] = useState(() => window.innerWidth < 768);
-  const [isStandaloneMode, setIsStandaloneMode] = useState(() => {
-    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-  });
+  const [isStandaloneMode, setIsStandaloneMode] = useState(() => isStandaloneDisplay());
   const [showInstallBanner, setShowInstallBanner] = useState(() => {
-    const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-    return window.innerWidth < 768 && !standalone;
+    const dismissed = localStorage.getItem(STORAGE_KEYS.installBannerDismissed) === 'true';
+    return window.innerWidth < 768 && !isStandaloneDisplay() && !dismissed;
   });
 
   const currentDzikirList = dzikirData[activeTime];
@@ -464,58 +475,61 @@ export default function App() {
   }, [counts, activeTime]);
 
   useEffect(() => {
-    localStorage.setItem('dzikir_night_view', String(isNightView));
+    localStorage.setItem(STORAGE_KEYS.nightView, String(isNightView));
   }, [isNightView]);
 
   useEffect(() => {
-    localStorage.setItem('dzikir_font_size', String(fontSize));
+    localStorage.setItem(STORAGE_KEYS.fontSize, String(fontSize));
   }, [fontSize]);
 
   useEffect(() => {
-    localStorage.setItem('dzikir_show_arabic', String(showArabic));
+    localStorage.setItem(STORAGE_KEYS.showArabic, String(showArabic));
   }, [showArabic]);
 
   useEffect(() => {
-    localStorage.setItem('dzikir_show_latin', String(showLatin));
+    localStorage.setItem(STORAGE_KEYS.showLatin, String(showLatin));
   }, [showLatin]);
 
   useEffect(() => {
-    localStorage.setItem('dzikir_show_translation', String(showTranslation));
+    localStorage.setItem(STORAGE_KEYS.showTranslation, String(showTranslation));
   }, [showTranslation]);
 
   useEffect(() => {
-    const checkMobile = () => {
+    const syncInstallState = () => {
       const mobile = window.innerWidth < 768;
-      const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+      const standalone = isStandaloneDisplay();
+      const dismissed = localStorage.getItem(STORAGE_KEYS.installBannerDismissed) === 'true';
       setIsMobileView(mobile);
       setIsStandaloneMode(standalone);
-      if (standalone) {
-        setShowInstallBanner(false);
-      }
+      setShowInstallBanner(mobile && !standalone && !dismissed);
     };
 
     const handleBeforeInstallPrompt = (event) => {
       event.preventDefault();
       setInstallPromptEvent(event);
-      const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-      if (!standalone && window.innerWidth < 768) {
-        setShowInstallBanner(true);
-      }
+      syncInstallState();
     };
 
     const handleAppInstalled = () => {
+      localStorage.setItem(STORAGE_KEYS.installBannerDismissed, 'true');
       setShowInstallBanner(false);
       setInstallPromptEvent(null);
+      syncInstallState();
     };
+
+    const displayModeMediaQuery = window.matchMedia('(display-mode: standalone)');
+    syncInstallState();
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
-    window.addEventListener('resize', checkMobile);
+    window.addEventListener('resize', syncInstallState);
+    displayModeMediaQuery.addEventListener('change', syncInstallState);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
-      window.removeEventListener('resize', checkMobile);
+      window.removeEventListener('resize', syncInstallState);
+      displayModeMediaQuery.removeEventListener('change', syncInstallState);
     };
   }, []);
 
@@ -642,9 +656,15 @@ export default function App() {
     await installPromptEvent.prompt();
     const choiceResult = await installPromptEvent.userChoice;
     if (choiceResult.outcome !== 'accepted') {
+      localStorage.setItem(STORAGE_KEYS.installBannerDismissed, 'true');
       setShowInstallBanner(false);
     }
     setInstallPromptEvent(null);
+  };
+
+  const dismissInstallBanner = () => {
+    localStorage.setItem(STORAGE_KEYS.installBannerDismissed, 'true');
+    setShowInstallBanner(false);
   };
 
   return (
@@ -708,7 +728,7 @@ export default function App() {
                 <h2 className="font-bold text-gray-700 text-lg">Pilih Waktu Dzikir</h2>
                 <button
                   onClick={() => setIsNightView((prev) => !prev)}
-                  className={`relative inline-flex items-center w-28 p-1 rounded-full transition-all duration-300 shadow-sm ${isNightView ? 'bg-slate-900 border border-slate-700' : 'bg-amber-100 border border-amber-200'}`}
+                  className={`relative inline-flex items-center w-28 p-1 rounded-full transition-all duration-300 shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${isNightView ? 'bg-slate-900 border border-slate-700' : 'bg-amber-100 border border-amber-200'}`}
                   aria-label="Toggle night/day view"
                 >
                   <span className={`absolute top-1 left-1 h-8 w-12 rounded-full transition-transform duration-300 ${isNightView ? 'translate-x-[56px] bg-slate-700' : 'translate-x-0 bg-amber-400'}`} />
@@ -788,7 +808,7 @@ export default function App() {
                           ) : (
                             <span className="px-3 py-2 text-xs font-semibold rounded-lg bg-white text-emerald-700 border border-emerald-200">Pakai menu browser: Add to Home Screen</span>
                           )}
-                          <button onClick={() => setShowInstallBanner(false)} className="px-3 py-2 text-xs font-semibold rounded-lg bg-white text-emerald-700 border border-emerald-200 hover:bg-emerald-50 transition-colors">Nanti</button>
+                          <button onClick={dismissInstallBanner} className="px-3 py-2 text-xs font-semibold rounded-lg bg-white text-emerald-700 border border-emerald-200 hover:bg-emerald-50 transition-colors">Nanti</button>
                         </div>
                       </div>
                     </div>
