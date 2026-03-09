@@ -1,6 +1,19 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Sun, Moon, Check, RotateCcw, Settings2, Languages, AlignLeft, BookOpen, X, ChevronRight, Info, Type } from 'lucide-react';
+import { Sun, Moon, Check, RotateCcw, Settings2, Languages, AlignLeft, BookOpen, X, ChevronRight, Info, Type, Download } from 'lucide-react';
 import appLogo from './assets/app-logo.png';
+
+const STORAGE_KEYS = {
+  nightView: 'dzikir_night_view',
+  fontSize: 'dzikir_font_size',
+  showArabic: 'dzikir_show_arabic',
+  showLatin: 'dzikir_show_latin',
+  showTranslation: 'dzikir_show_translation',
+  installBannerDismissed: 'dzikir_install_banner_dismissed',
+};
+
+const isStandaloneDisplay = () => {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+};
 
 // --- DATA DZIKIR (Super Lengkap) ---
 const dzikirData = {
@@ -427,10 +440,18 @@ export default function App() {
 
   const scrollRef = useRef(null);
 
-  const [fontSize, setFontSize] = useState(2);
-  const [showArabic, setShowArabic] = useState(true);
-  const [showLatin, setShowLatin] = useState(true);
-  const [showTranslation, setShowTranslation] = useState(true);
+  const [fontSize, setFontSize] = useState(() => Number(localStorage.getItem(STORAGE_KEYS.fontSize) ?? 2));
+  const [showArabic, setShowArabic] = useState(() => localStorage.getItem(STORAGE_KEYS.showArabic) !== 'false');
+  const [showLatin, setShowLatin] = useState(() => localStorage.getItem(STORAGE_KEYS.showLatin) !== 'false');
+  const [showTranslation, setShowTranslation] = useState(() => localStorage.getItem(STORAGE_KEYS.showTranslation) !== 'false');
+  const [isNightView, setIsNightView] = useState(() => localStorage.getItem(STORAGE_KEYS.nightView) === 'true');
+  const [installPromptEvent, setInstallPromptEvent] = useState(null);
+  const [isMobileView, setIsMobileView] = useState(() => window.innerWidth < 768);
+  const [isStandaloneMode, setIsStandaloneMode] = useState(() => isStandaloneDisplay());
+  const [showInstallBanner, setShowInstallBanner] = useState(() => {
+    const dismissed = localStorage.getItem(STORAGE_KEYS.installBannerDismissed) === 'true';
+    return window.innerWidth < 768 && !isStandaloneDisplay() && !dismissed;
+  });
 
   const currentDzikirList = dzikirData[activeTime];
 
@@ -448,10 +469,103 @@ export default function App() {
   }, [activeTime, currentDzikirList]);
 
   useEffect(() => {
-    if (Object.keys(counts).length > 0) {
+    if (Object.keys(counts).length === 0) return;
+
+    const persistCounts = setTimeout(() => {
       localStorage.setItem(`dzikir_counts_${activeTime}`, JSON.stringify(counts));
-    }
+    }, 80);
+
+    return () => clearTimeout(persistCounts);
   }, [counts, activeTime]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.nightView, String(isNightView));
+  }, [isNightView]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.fontSize, String(fontSize));
+  }, [fontSize]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.showArabic, String(showArabic));
+  }, [showArabic]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.showLatin, String(showLatin));
+  }, [showLatin]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.showTranslation, String(showTranslation));
+  }, [showTranslation]);
+
+  useEffect(() => {
+    const syncInstallState = () => {
+      const mobile = window.innerWidth < 768;
+      const standalone = isStandaloneDisplay();
+      const dismissed = localStorage.getItem(STORAGE_KEYS.installBannerDismissed) === 'true';
+      setIsMobileView(mobile);
+      setIsStandaloneMode(standalone);
+      setShowInstallBanner(mobile && !standalone && !dismissed);
+    };
+
+    const handleBeforeInstallPrompt = (event) => {
+      event.preventDefault();
+      setInstallPromptEvent(event);
+      syncInstallState();
+    };
+
+    const handleAppInstalled = () => {
+      localStorage.setItem(STORAGE_KEYS.installBannerDismissed, 'true');
+      setShowInstallBanner(false);
+      setInstallPromptEvent(null);
+      syncInstallState();
+    };
+
+    const displayModeMediaQuery = window.matchMedia('(display-mode: standalone)');
+    syncInstallState();
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+    window.addEventListener('resize', syncInstallState);
+    displayModeMediaQuery.addEventListener('change', syncInstallState);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+      window.removeEventListener('resize', syncInstallState);
+      displayModeMediaQuery.removeEventListener('change', syncInstallState);
+    };
+  }, []);
+
+  useEffect(() => {
+    const preventPinchZoom = (event) => {
+      if (event.touches && event.touches.length > 1) {
+        event.preventDefault();
+      }
+    };
+
+    const preventCtrlZoom = (event) => {
+      if (event.ctrlKey || event.metaKey) {
+        event.preventDefault();
+      }
+    };
+
+    const preventGesture = (event) => {
+      event.preventDefault();
+    };
+
+    document.addEventListener('touchmove', preventPinchZoom, { passive: false });
+    document.addEventListener('wheel', preventCtrlZoom, { passive: false });
+    document.addEventListener('gesturestart', preventGesture);
+    document.addEventListener('gesturechange', preventGesture);
+
+    return () => {
+      document.removeEventListener('touchmove', preventPinchZoom);
+      document.removeEventListener('wheel', preventCtrlZoom);
+      document.removeEventListener('gesturestart', preventGesture);
+      document.removeEventListener('gesturechange', preventGesture);
+    };
+  }, []);
 
   const handleIncrement = (id, target, index) => {
     setCounts(prev => {
@@ -493,11 +607,12 @@ export default function App() {
   const startReading = (time) => {
     setActiveTime(time);
     setIsReadingMode(true);
-    setTimeout(() => {
+
+    requestAnimationFrame(() => {
       if (scrollRef.current) {
         scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
       }
-    }, 100);
+    });
   };
 
   const progress = useMemo(() => {
@@ -514,9 +629,50 @@ export default function App() {
     return totalTarget === 0 ? 0 : Math.round((totalCompleted / totalTarget) * 100);
   }, [counts, currentDzikirList]);
 
+  const getStoredCounts = (time) => {
+    if (time === activeTime) return counts;
+    const saved = localStorage.getItem(`dzikir_counts_${time}`);
+    return saved ? JSON.parse(saved) : {};
+  };
+
+  const getProgressForTime = (time) => {
+    const list = dzikirData[time];
+    const savedCounts = getStoredCounts(time);
+
+    let totalTarget = 0;
+    let totalCompleted = 0;
+
+    list.forEach((item) => {
+      totalTarget += item.target;
+      totalCompleted += Math.min(savedCounts[item.id] || 0, item.target);
+    });
+
+    return totalTarget === 0 ? 0 : Math.round((totalCompleted / totalTarget) * 100);
+  };
+
+  const morningProgress = getProgressForTime('pagi');
+  const eveningProgress = getProgressForTime('petang');
+  const dailyProgress = Math.round((morningProgress * 0.5) + (eveningProgress * 0.5));
+
+  const handleInstallApp = async () => {
+    if (!installPromptEvent) return;
+    await installPromptEvent.prompt();
+    const choiceResult = await installPromptEvent.userChoice;
+    if (choiceResult.outcome !== 'accepted') {
+      localStorage.setItem(STORAGE_KEYS.installBannerDismissed, 'true');
+      setShowInstallBanner(false);
+    }
+    setInstallPromptEvent(null);
+  };
+
+  const dismissInstallBanner = () => {
+    localStorage.setItem(STORAGE_KEYS.installBannerDismissed, 'true');
+    setShowInstallBanner(false);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 font-sans text-gray-800 flex justify-center items-stretch lg:items-center overflow-x-hidden selection:bg-emerald-200 px-0 sm:px-4 lg:px-8">
-      <div className="w-full max-w-4xl h-[100dvh] lg:h-[92vh] bg-white relative flex flex-col overflow-hidden sm:rounded-[2rem] lg:shadow-2xl lg:border border-gray-200">
+    <div className={`min-h-screen bg-gray-50 font-sans text-gray-800 flex justify-center items-stretch lg:items-center overflow-x-hidden selection:bg-emerald-200 px-0 sm:px-4 lg:px-8 ${isNightView ? 'night-view' : ''}`}>
+      <div className="app-shell w-full max-w-4xl h-[100dvh] lg:h-[92vh] bg-white relative flex flex-col overflow-hidden sm:rounded-[2rem] lg:shadow-2xl lg:border border-gray-200">
         {!isReadingMode && (
           <header className="px-6 py-5 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-b-3xl shadow-md z-10 relative shrink-0">
             <div className="flex justify-between items-center mb-6">
@@ -524,7 +680,16 @@ export default function App() {
                 <AppLogo />
                 <div>
                   <h1 className="text-2xl font-bold tracking-tight">Dzikir Harian</h1>
-                  <p className="text-emerald-100 text-sm font-medium">Sesuai Sunnah Nabi ﷺ</p>
+                  <div className="mt-1 flex items-center gap-2 text-emerald-100">
+                    <p className="text-sm font-medium">Sesuai Sunnah Nabi</p>
+                    <p
+                      className="text-lg sm:text-xl calligraphy-subtitle"
+                      dir="rtl"
+                      aria-label="Kaligrafi Muhammad"
+                    >
+                      مُحَمَّد
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -568,10 +733,27 @@ export default function App() {
           </div>
         )}
 
-        <div ref={scrollRef} className="flex-1 overflow-y-auto no-scrollbar relative bg-gray-50 pb-safe">
+        <div ref={scrollRef} className="content-scroll flex-1 overflow-y-auto no-scrollbar relative bg-gray-50 pb-safe">
           {activeTab === 'home' && !isReadingMode && (
             <div className="p-4 sm:p-6 lg:p-8 space-y-6 pb-32 animate-fade-in-up">
-              <h2 className="font-bold text-gray-700 text-lg">Pilih Waktu Dzikir</h2>
+              <div className="flex items-center justify-between gap-4">
+                <h2 className="font-bold text-gray-700 text-lg">Pilih Waktu Dzikir</h2>
+                <button
+                  onClick={() => setIsNightView((prev) => !prev)}
+                  className={`relative inline-flex items-center w-[132px] h-10 px-1 rounded-full border transition-all duration-300 shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${isNightView ? 'bg-slate-900 border-slate-700' : 'bg-amber-50 border-amber-200'}`}
+                  aria-label="Toggle night/day view"
+                >
+                  <span className={`absolute top-1 h-8 w-[62px] rounded-full transition-transform duration-300 shadow-sm ${isNightView ? 'translate-x-[64px] bg-slate-700' : 'translate-x-0 bg-amber-400'}`} />
+                  <span className="relative z-10 w-1/2 flex items-center justify-center gap-1.5 text-[11px] font-semibold">
+                    <Sun className={`w-3.5 h-3.5 ${isNightView ? 'text-slate-300' : 'text-white'}`} />
+                    <span className={`${isNightView ? 'text-slate-300' : 'text-white'}`}>Day</span>
+                  </span>
+                  <span className="relative z-10 w-1/2 flex items-center justify-center gap-1.5 text-[11px] font-semibold">
+                    <Moon className={`w-3.5 h-3.5 ${isNightView ? 'text-white' : 'text-amber-500'}`} />
+                    <span className={`${isNightView ? 'text-white' : 'text-amber-600'}`}>Night</span>
+                  </span>
+                </button>
+              </div>
 
               <button
                 onClick={() => startReading('pagi')}
@@ -615,15 +797,41 @@ export default function App() {
                 <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
                   <div className="flex justify-between text-sm font-medium mb-2">
                     <span className="text-gray-500">Penyelesaian Keseluruhan</span>
-                    <span className="text-emerald-600 font-bold">{progress}%</span>
+                    <span className="text-emerald-600 font-bold">{dailyProgress}%</span>
                   </div>
                   <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
                     <div
                       className="bg-gradient-to-r from-emerald-400 to-teal-500 h-full rounded-full transition-all duration-1000 ease-out"
-                      style={{ width: `${progress}%` }}
+                      style={{ width: `${dailyProgress}%` }}
                     />
                   </div>
+
+                  <p className="text-xs text-gray-500 mt-3">
+                    Progress realtime: Pagi {morningProgress}% • Petang {eveningProgress}%
+                  </p>
                 </div>
+
+                {isMobileView && !isStandaloneMode && showInstallBanner && (
+                  <div className="mt-4 rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 p-4 shadow-sm animate-fade-in-up">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                        <Download className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-emerald-900 text-sm">Install Dzikir Harian</p>
+                        <p className="text-xs text-emerald-700 mt-1">Akses lebih cepat dari homescreen dan pengalaman seperti aplikasi native.</p>
+                        <div className="flex gap-2 mt-3">
+                          {installPromptEvent ? (
+                            <button onClick={handleInstallApp} className="px-3 py-2 text-xs font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors">Install</button>
+                          ) : (
+                            <span className="px-3 py-2 text-xs font-semibold rounded-lg bg-white text-emerald-700 border border-emerald-200">Pakai menu browser: Add to Home Screen</span>
+                          )}
+                          <button onClick={dismissInstallBanner} className="px-3 py-2 text-xs font-semibold rounded-lg bg-white text-emerald-700 border border-emerald-200 hover:bg-emerald-50 transition-colors">Nanti</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -848,8 +1056,91 @@ export default function App() {
             scrollbar-width: none;
         }
         
+        .content-scroll {
+          scroll-behavior: smooth;
+          -webkit-overflow-scrolling: touch;
+          overscroll-behavior-y: contain;
+        }
+
+        .calligraphy-subtitle {
+          font-family: 'Scheherazade New', 'Amiri', serif;
+          font-weight: 700;
+          letter-spacing: 0.01em;
+          text-shadow: 0 1px 8px rgba(0, 0, 0, 0.18);
+        }
+
         .pb-safe {
             padding-bottom: env(safe-area-inset-bottom, 16px);
+        }
+
+        .night-view {
+          background: radial-gradient(circle at top, #1e293b, #020617 55%);
+          color: #ffffff;
+        }
+
+        .night-view > div {
+          background: #0f172a;
+          border-color: #334155;
+        }
+
+        .night-view .bg-white,
+        .night-view [class*='bg-white/95'],
+        .night-view .bg-gray-50,
+        .night-view [class*='bg-gray-50/50'],
+        .night-view .bg-emerald-50,
+        .night-view [class*='bg-emerald-100'],
+        .night-view .bg-indigo-50,
+        .night-view .bg-blue-50,
+        .night-view .bg-purple-50,
+        .night-view .bg-amber-50 {
+          background-color: #1e293b !important;
+        }
+
+        .night-view .from-emerald-600,
+        .night-view .to-teal-700,
+        .night-view .from-emerald-400,
+        .night-view .to-teal-500 {
+          --tw-gradient-from: #0f766e var(--tw-gradient-from-position) !important;
+          --tw-gradient-to: rgb(6 95 70 / 0) var(--tw-gradient-to-position) !important;
+          --tw-gradient-stops: var(--tw-gradient-from), #115e59 var(--tw-gradient-via-position), var(--tw-gradient-to) !important;
+        }
+
+        .night-view *,
+        .night-view .text-emerald-600,
+        .night-view .text-emerald-100,
+        .night-view .text-emerald-700,
+        .night-view .text-emerald-900,
+        .night-view .text-indigo-500,
+        .night-view .text-amber-500,
+        .night-view .text-blue-500,
+        .night-view .text-purple-500,
+        .night-view .text-gray-300,
+        .night-view .text-gray-400,
+        .night-view .text-gray-500,
+        .night-view .text-gray-600,
+        .night-view .text-gray-700,
+        .night-view .text-gray-800,
+        .night-view .text-gray-900 {
+          color: #ffffff !important;
+        }
+
+        .night-view .border-gray-50,
+        .night-view .border-gray-100,
+        .night-view .border-gray-200,
+        .night-view .border-emerald-100,
+        .night-view .border-emerald-200,
+        .night-view .divide-gray-100 > :not([hidden]) ~ :not([hidden]) {
+          border-color: #334155 !important;
+        }
+
+        .night-view .shadow-sm,
+        .night-view .shadow-md,
+        .night-view .shadow-2xl {
+          box-shadow: none !important;
+        }
+
+        .night-view img {
+          filter: brightness(0.85);
         }
 
         @keyframes fadeInDown {
@@ -872,6 +1163,27 @@ export default function App() {
         }
         .animate-scale-in {
           animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @media (orientation: landscape) and (max-height: 560px) {
+          .app-shell {
+            height: 100dvh !important;
+            border-radius: 0 !important;
+          }
+
+          .app-shell header {
+            padding-top: 1rem !important;
+            padding-bottom: 1rem !important;
+          }
+
+          .app-shell .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom, 8px);
+          }
+
+          .app-shell nav {
+            padding-top: 0.45rem !important;
+            padding-bottom: 0.45rem !important;
+          }
         }
       `}} />
     </div>
