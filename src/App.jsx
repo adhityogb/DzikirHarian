@@ -1049,7 +1049,7 @@ export default function App() {
                             <p className="text-gray-700 mb-2"><strong className="font-semibold text-amber-600">💡 Keutamaan: </strong>{dzikir.fadhilah}</p>
                           )}
                           {dzikir.source && (
-                            <div className="text-gray-500 text-xs">
+                            <div className="text-gray-500 text-xs leading-relaxed">
                               <button
                                 type="button"
                                 onClick={() => setActiveDalil({
@@ -1057,9 +1057,10 @@ export default function App() {
                                   source: dzikir.source,
                                   dalil: dalilByTitle[dzikir.title] || 'Dalil lengkap belum tersedia untuk dzikir ini.',
                                 })}
-                                className="font-semibold text-emerald-700 hover:text-emerald-800 underline underline-offset-2"
+                                className="text-left hover:text-gray-700"
                               >
-                                📚 Sumber
+                                <strong className="font-semibold">📚 Sumber: </strong>
+                                <span className="underline underline-offset-2 decoration-dotted">{dzikir.source}</span>
                               </button>
                             </div>
                           )}
