@@ -675,7 +675,15 @@ export default function App() {
                 <AppLogo />
                 <div>
                   <h1 className="text-2xl font-bold tracking-tight">Dzikir Harian</h1>
-                  <p className="text-emerald-100 text-sm font-medium">Sesuai Sunnah Nabi ﷺ</p>
+                  <div className="mt-1 leading-none">
+                    <p
+                      className="text-emerald-50/95 text-lg sm:text-xl calligraphy-subtitle"
+                      dir="rtl"
+                      aria-label="Muhammad shallallahu alaihi wa sallam"
+                    >
+                      مُحَمَّدٌ صَلَّى ٱللَّٰهُ عَلَيْهِ وَسَلَّمَ
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1042,6 +1050,13 @@ export default function App() {
             scrollbar-width: none;
         }
         
+        .calligraphy-subtitle {
+          font-family: 'Scheherazade New', 'Amiri', serif;
+          font-weight: 700;
+          letter-spacing: 0.01em;
+          text-shadow: 0 1px 8px rgba(0, 0, 0, 0.18);
+        }
+
         .pb-safe {
             padding-bottom: env(safe-area-inset-bottom, 16px);
         }
