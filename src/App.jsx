@@ -427,13 +427,11 @@ export default function App() {
 
   const scrollRef = useRef(null);
 
-  const [fontSize, setFontSize] = useState(2);
-  const [showArabic, setShowArabic] = useState(true);
-  const [showLatin, setShowLatin] = useState(true);
-  const [showTranslation, setShowTranslation] = useState(true);
-  const [isNightView, setIsNightView] = useState(() => {
-    return localStorage.getItem('dzikir_night_view') === 'true';
-  });
+  const [fontSize, setFontSize] = useState(() => Number(localStorage.getItem('dzikir_font_size') ?? 2));
+  const [showArabic, setShowArabic] = useState(() => localStorage.getItem('dzikir_show_arabic') !== 'false');
+  const [showLatin, setShowLatin] = useState(() => localStorage.getItem('dzikir_show_latin') !== 'false');
+  const [showTranslation, setShowTranslation] = useState(() => localStorage.getItem('dzikir_show_translation') !== 'false');
+  const [isNightView, setIsNightView] = useState(() => localStorage.getItem('dzikir_night_view') === 'true');
   const [installPromptEvent, setInstallPromptEvent] = useState(null);
   const [isMobileView, setIsMobileView] = useState(() => window.innerWidth < 768);
   const [isStandaloneMode, setIsStandaloneMode] = useState(() => {
@@ -468,6 +466,22 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('dzikir_night_view', String(isNightView));
   }, [isNightView]);
+
+  useEffect(() => {
+    localStorage.setItem('dzikir_font_size', String(fontSize));
+  }, [fontSize]);
+
+  useEffect(() => {
+    localStorage.setItem('dzikir_show_arabic', String(showArabic));
+  }, [showArabic]);
+
+  useEffect(() => {
+    localStorage.setItem('dzikir_show_latin', String(showLatin));
+  }, [showLatin]);
+
+  useEffect(() => {
+    localStorage.setItem('dzikir_show_translation', String(showTranslation));
+  }, [showTranslation]);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -619,7 +633,9 @@ export default function App() {
 
   const morningProgress = getProgressForTime('pagi');
   const eveningProgress = getProgressForTime('petang');
-  const dailyProgress = Math.round((morningProgress * 0.5) + (eveningProgress * 0.5));
+  const isMorningDone = morningProgress === 100;
+  const isEveningDone = eveningProgress === 100;
+  const dailyProgress = (isMorningDone ? 50 : 0) + (isEveningDone ? 50 : 0);
 
   const handleInstallApp = async () => {
     if (!installPromptEvent) return;
@@ -692,10 +708,10 @@ export default function App() {
                 <h2 className="font-bold text-gray-700 text-lg">Pilih Waktu Dzikir</h2>
                 <button
                   onClick={() => setIsNightView((prev) => !prev)}
-                  className={`relative inline-flex items-center w-28 p-1 rounded-full transition-all duration-300 ${isNightView ? 'bg-indigo-500/20 border border-indigo-300' : 'bg-amber-100 border border-amber-200'}`}
+                  className={`relative inline-flex items-center w-28 p-1 rounded-full transition-all duration-300 shadow-sm ${isNightView ? 'bg-slate-900 border border-slate-700' : 'bg-amber-100 border border-amber-200'}`}
                   aria-label="Toggle night/day view"
                 >
-                  <span className={`absolute top-1 left-1 h-8 w-12 rounded-full transition-transform duration-300 ${isNightView ? 'translate-x-[56px] bg-indigo-500' : 'translate-x-0 bg-amber-400'}`} />
+                  <span className={`absolute top-1 left-1 h-8 w-12 rounded-full transition-transform duration-300 ${isNightView ? 'translate-x-[56px] bg-slate-700' : 'translate-x-0 bg-amber-400'}`} />
                   <span className="relative z-10 w-1/2 flex justify-center"><Sun className={`w-4 h-4 ${isNightView ? 'text-indigo-200' : 'text-white'}`} /></span>
                   <span className="relative z-10 w-1/2 flex justify-center"><Moon className={`w-4 h-4 ${isNightView ? 'text-white' : 'text-amber-500'}`} /></span>
                 </button>
@@ -752,16 +768,9 @@ export default function App() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3 mt-4">
-                    <div className="rounded-xl bg-amber-50 border border-amber-100 px-3 py-2">
-                      <p className="text-[11px] text-gray-500 font-semibold uppercase tracking-wide">Pagi (50%)</p>
-                      <p className="text-lg font-bold text-amber-600">{morningProgress}%</p>
-                    </div>
-                    <div className="rounded-xl bg-indigo-50 border border-indigo-100 px-3 py-2">
-                      <p className="text-[11px] text-gray-500 font-semibold uppercase tracking-wide">Petang (50%)</p>
-                      <p className="text-lg font-bold text-indigo-600">{eveningProgress}%</p>
-                    </div>
-                  </div>
+                  <p className="text-xs text-gray-500 mt-3">
+                    Status: {isMorningDone ? 'Dzikir pagi selesai (50%)' : 'Dzikir pagi belum selesai'} • {isEveningDone ? 'Dzikir petang selesai' : 'Dzikir petang belum selesai'}
+                  </p>
                 </div>
 
                 {isMobileView && !isStandaloneMode && showInstallBanner && (
