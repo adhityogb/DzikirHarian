@@ -834,7 +834,7 @@ export default function App() {
                           {installPromptEvent ? (
                             <button onClick={handleInstallApp} className="px-3 py-2 text-xs font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors">Install</button>
                           ) : (
-                            <span className="px-3 py-2 text-xs font-semibold rounded-lg bg-white text-emerald-700 border border-emerald-200">Ikuti langkah sesuai HP di atas</span>
+                            <span className="px-3 py-2 text-xs font-semibold rounded-lg bg-white text-emerald-700 border border-emerald-200">Buka menu browser untuk install</span>
                           )}
                         </div>
                       </div>
