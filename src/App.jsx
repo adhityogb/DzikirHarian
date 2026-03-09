@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Sun, Moon, Check, RotateCcw, Settings2, Languages, AlignLeft, BookOpen, X, ChevronRight, Info, Type } from 'lucide-react';
+import { Sun, Moon, Check, RotateCcw, Settings2, Languages, AlignLeft, BookOpen, X, ChevronRight, Info, Type, Download } from 'lucide-react';
 import appLogo from './assets/app-logo.png';
 
 // --- DATA DZIKIR (Super Lengkap) ---
@@ -434,6 +434,15 @@ export default function App() {
   const [isNightView, setIsNightView] = useState(() => {
     return localStorage.getItem('dzikir_night_view') === 'true';
   });
+  const [installPromptEvent, setInstallPromptEvent] = useState(null);
+  const [isMobileView, setIsMobileView] = useState(() => window.innerWidth < 768);
+  const [isStandaloneMode, setIsStandaloneMode] = useState(() => {
+    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  });
+  const [showInstallBanner, setShowInstallBanner] = useState(() => {
+    const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    return window.innerWidth < 768 && !standalone;
+  });
 
   const currentDzikirList = dzikirData[activeTime];
 
@@ -459,6 +468,42 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('dzikir_night_view', String(isNightView));
   }, [isNightView]);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768;
+      const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+      setIsMobileView(mobile);
+      setIsStandaloneMode(standalone);
+      if (standalone) {
+        setShowInstallBanner(false);
+      }
+    };
+
+    const handleBeforeInstallPrompt = (event) => {
+      event.preventDefault();
+      setInstallPromptEvent(event);
+      const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+      if (!standalone && window.innerWidth < 768) {
+        setShowInstallBanner(true);
+      }
+    };
+
+    const handleAppInstalled = () => {
+      setShowInstallBanner(false);
+      setInstallPromptEvent(null);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+    window.addEventListener('resize', checkMobile);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
 
   useEffect(() => {
     const preventPinchZoom = (event) => {
@@ -551,6 +596,41 @@ export default function App() {
     return totalTarget === 0 ? 0 : Math.round((totalCompleted / totalTarget) * 100);
   }, [counts, currentDzikirList]);
 
+  const getStoredCounts = (time) => {
+    if (time === activeTime) return counts;
+    const saved = localStorage.getItem(`dzikir_counts_${time}`);
+    return saved ? JSON.parse(saved) : {};
+  };
+
+  const getProgressForTime = (time) => {
+    const list = dzikirData[time];
+    const savedCounts = getStoredCounts(time);
+
+    let totalTarget = 0;
+    let totalCompleted = 0;
+
+    list.forEach((item) => {
+      totalTarget += item.target;
+      totalCompleted += Math.min(savedCounts[item.id] || 0, item.target);
+    });
+
+    return totalTarget === 0 ? 0 : Math.round((totalCompleted / totalTarget) * 100);
+  };
+
+  const morningProgress = getProgressForTime('pagi');
+  const eveningProgress = getProgressForTime('petang');
+  const dailyProgress = Math.round((morningProgress * 0.5) + (eveningProgress * 0.5));
+
+  const handleInstallApp = async () => {
+    if (!installPromptEvent) return;
+    await installPromptEvent.prompt();
+    const choiceResult = await installPromptEvent.userChoice;
+    if (choiceResult.outcome !== 'accepted') {
+      setShowInstallBanner(false);
+    }
+    setInstallPromptEvent(null);
+  };
+
   return (
     <div className={`min-h-screen bg-gray-50 font-sans text-gray-800 flex justify-center items-stretch lg:items-center overflow-x-hidden selection:bg-emerald-200 px-0 sm:px-4 lg:px-8 ${isNightView ? 'night-view' : ''}`}>
       <div className="w-full max-w-4xl h-[100dvh] lg:h-[92vh] bg-white relative flex flex-col overflow-hidden sm:rounded-[2rem] lg:shadow-2xl lg:border border-gray-200">
@@ -608,7 +688,18 @@ export default function App() {
         <div ref={scrollRef} className="flex-1 overflow-y-auto no-scrollbar relative bg-gray-50 pb-safe">
           {activeTab === 'home' && !isReadingMode && (
             <div className="p-4 sm:p-6 lg:p-8 space-y-6 pb-32 animate-fade-in-up">
-              <h2 className="font-bold text-gray-700 text-lg">Pilih Waktu Dzikir</h2>
+              <div className="flex items-center justify-between gap-4">
+                <h2 className="font-bold text-gray-700 text-lg">Pilih Waktu Dzikir</h2>
+                <button
+                  onClick={() => setIsNightView((prev) => !prev)}
+                  className={`relative inline-flex items-center w-28 p-1 rounded-full transition-all duration-300 ${isNightView ? 'bg-indigo-500/20 border border-indigo-300' : 'bg-amber-100 border border-amber-200'}`}
+                  aria-label="Toggle night/day view"
+                >
+                  <span className={`absolute top-1 left-1 h-8 w-12 rounded-full transition-transform duration-300 ${isNightView ? 'translate-x-[56px] bg-indigo-500' : 'translate-x-0 bg-amber-400'}`} />
+                  <span className="relative z-10 w-1/2 flex justify-center"><Sun className={`w-4 h-4 ${isNightView ? 'text-indigo-200' : 'text-white'}`} /></span>
+                  <span className="relative z-10 w-1/2 flex justify-center"><Moon className={`w-4 h-4 ${isNightView ? 'text-white' : 'text-amber-500'}`} /></span>
+                </button>
+              </div>
 
               <button
                 onClick={() => startReading('pagi')}
@@ -652,15 +743,48 @@ export default function App() {
                 <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
                   <div className="flex justify-between text-sm font-medium mb-2">
                     <span className="text-gray-500">Penyelesaian Keseluruhan</span>
-                    <span className="text-emerald-600 font-bold">{progress}%</span>
+                    <span className="text-emerald-600 font-bold">{dailyProgress}%</span>
                   </div>
                   <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
                     <div
                       className="bg-gradient-to-r from-emerald-400 to-teal-500 h-full rounded-full transition-all duration-1000 ease-out"
-                      style={{ width: `${progress}%` }}
+                      style={{ width: `${dailyProgress}%` }}
                     />
                   </div>
+
+                  <div className="grid grid-cols-2 gap-3 mt-4">
+                    <div className="rounded-xl bg-amber-50 border border-amber-100 px-3 py-2">
+                      <p className="text-[11px] text-gray-500 font-semibold uppercase tracking-wide">Pagi (50%)</p>
+                      <p className="text-lg font-bold text-amber-600">{morningProgress}%</p>
+                    </div>
+                    <div className="rounded-xl bg-indigo-50 border border-indigo-100 px-3 py-2">
+                      <p className="text-[11px] text-gray-500 font-semibold uppercase tracking-wide">Petang (50%)</p>
+                      <p className="text-lg font-bold text-indigo-600">{eveningProgress}%</p>
+                    </div>
+                  </div>
                 </div>
+
+                {isMobileView && !isStandaloneMode && showInstallBanner && (
+                  <div className="mt-4 rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 p-4 shadow-sm animate-fade-in-up">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                        <Download className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-emerald-900 text-sm">Install Dzikir Harian</p>
+                        <p className="text-xs text-emerald-700 mt-1">Akses lebih cepat dari homescreen dan pengalaman seperti aplikasi native.</p>
+                        <div className="flex gap-2 mt-3">
+                          {installPromptEvent ? (
+                            <button onClick={handleInstallApp} className="px-3 py-2 text-xs font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors">Install</button>
+                          ) : (
+                            <span className="px-3 py-2 text-xs font-semibold rounded-lg bg-white text-emerald-700 border border-emerald-200">Pakai menu browser: Add to Home Screen</span>
+                          )}
+                          <button onClick={() => setShowInstallBanner(false)} className="px-3 py-2 text-xs font-semibold rounded-lg bg-white text-emerald-700 border border-emerald-200 hover:bg-emerald-50 transition-colors">Nanti</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -690,21 +814,6 @@ export default function App() {
               </div>
 
               <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-100">
-                <div className="p-5 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
-                      <Moon className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-800">Night View</h4>
-                      <p className="text-xs text-gray-500">Mode malam untuk membaca lebih nyaman</p>
-                    </div>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" checked={isNightView} onChange={(e) => setIsNightView(e.target.checked)} className="sr-only peer" />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-                  </label>
-                </div>
                 <div className="p-5 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500">
