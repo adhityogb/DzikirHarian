@@ -647,9 +647,7 @@ export default function App() {
 
   const morningProgress = getProgressForTime('pagi');
   const eveningProgress = getProgressForTime('petang');
-  const isMorningDone = morningProgress === 100;
-  const isEveningDone = eveningProgress === 100;
-  const dailyProgress = (isMorningDone ? 50 : 0) + (isEveningDone ? 50 : 0);
+  const dailyProgress = Math.round((morningProgress * 0.5) + (eveningProgress * 0.5));
 
   const handleInstallApp = async () => {
     if (!installPromptEvent) return;
@@ -669,7 +667,7 @@ export default function App() {
 
   return (
     <div className={`min-h-screen bg-gray-50 font-sans text-gray-800 flex justify-center items-stretch lg:items-center overflow-x-hidden selection:bg-emerald-200 px-0 sm:px-4 lg:px-8 ${isNightView ? 'night-view' : ''}`}>
-      <div className="w-full max-w-4xl h-[100dvh] lg:h-[92vh] bg-white relative flex flex-col overflow-hidden sm:rounded-[2rem] lg:shadow-2xl lg:border border-gray-200">
+      <div className="app-shell w-full max-w-4xl h-[100dvh] lg:h-[92vh] bg-white relative flex flex-col overflow-hidden sm:rounded-[2rem] lg:shadow-2xl lg:border border-gray-200">
         {!isReadingMode && (
           <header className="px-6 py-5 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-b-3xl shadow-md z-10 relative shrink-0">
             <div className="flex justify-between items-center mb-6">
@@ -728,12 +726,18 @@ export default function App() {
                 <h2 className="font-bold text-gray-700 text-lg">Pilih Waktu Dzikir</h2>
                 <button
                   onClick={() => setIsNightView((prev) => !prev)}
-                  className={`relative inline-flex items-center w-28 p-1 rounded-full transition-all duration-300 shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${isNightView ? 'bg-slate-900 border border-slate-700' : 'bg-amber-100 border border-amber-200'}`}
+                  className={`relative inline-flex items-center w-[132px] h-10 px-1 rounded-full border transition-all duration-300 shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${isNightView ? 'bg-slate-900 border-slate-700' : 'bg-amber-50 border-amber-200'}`}
                   aria-label="Toggle night/day view"
                 >
-                  <span className={`absolute top-1 left-1 h-8 w-12 rounded-full transition-transform duration-300 ${isNightView ? 'translate-x-[56px] bg-slate-700' : 'translate-x-0 bg-amber-400'}`} />
-                  <span className="relative z-10 w-1/2 flex justify-center"><Sun className={`w-4 h-4 ${isNightView ? 'text-indigo-200' : 'text-white'}`} /></span>
-                  <span className="relative z-10 w-1/2 flex justify-center"><Moon className={`w-4 h-4 ${isNightView ? 'text-white' : 'text-amber-500'}`} /></span>
+                  <span className={`absolute top-1 h-8 w-[62px] rounded-full transition-transform duration-300 shadow-sm ${isNightView ? 'translate-x-[64px] bg-slate-700' : 'translate-x-0 bg-amber-400'}`} />
+                  <span className="relative z-10 w-1/2 flex items-center justify-center gap-1.5 text-[11px] font-semibold">
+                    <Sun className={`w-3.5 h-3.5 ${isNightView ? 'text-slate-300' : 'text-white'}`} />
+                    <span className={`${isNightView ? 'text-slate-300' : 'text-white'}`}>Day</span>
+                  </span>
+                  <span className="relative z-10 w-1/2 flex items-center justify-center gap-1.5 text-[11px] font-semibold">
+                    <Moon className={`w-3.5 h-3.5 ${isNightView ? 'text-white' : 'text-amber-500'}`} />
+                    <span className={`${isNightView ? 'text-white' : 'text-amber-600'}`}>Night</span>
+                  </span>
                 </button>
               </div>
 
@@ -789,7 +793,7 @@ export default function App() {
                   </div>
 
                   <p className="text-xs text-gray-500 mt-3">
-                    Status: {isMorningDone ? 'Dzikir pagi selesai (50%)' : 'Dzikir pagi belum selesai'} • {isEveningDone ? 'Dzikir petang selesai' : 'Dzikir petang belum selesai'}
+                    Progress realtime: Pagi {morningProgress}% • Petang {eveningProgress}%
                   </p>
                 </div>
 
@@ -1132,6 +1136,27 @@ export default function App() {
         }
         .animate-scale-in {
           animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @media (orientation: landscape) and (max-height: 560px) {
+          .app-shell {
+            height: 100dvh !important;
+            border-radius: 0 !important;
+          }
+
+          .app-shell header {
+            padding-top: 1rem !important;
+            padding-bottom: 1rem !important;
+          }
+
+          .app-shell .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom, 8px);
+          }
+
+          .app-shell nav {
+            padding-top: 0.45rem !important;
+            padding-bottom: 0.45rem !important;
+          }
         }
       `}} />
     </div>
