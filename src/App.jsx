@@ -469,9 +469,13 @@ export default function App() {
   }, [activeTime, currentDzikirList]);
 
   useEffect(() => {
-    if (Object.keys(counts).length > 0) {
+    if (Object.keys(counts).length === 0) return;
+
+    const persistCounts = setTimeout(() => {
       localStorage.setItem(`dzikir_counts_${activeTime}`, JSON.stringify(counts));
-    }
+    }, 80);
+
+    return () => clearTimeout(persistCounts);
   }, [counts, activeTime]);
 
   useEffect(() => {
@@ -603,11 +607,12 @@ export default function App() {
   const startReading = (time) => {
     setActiveTime(time);
     setIsReadingMode(true);
-    setTimeout(() => {
+
+    requestAnimationFrame(() => {
       if (scrollRef.current) {
         scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
       }
-    }, 100);
+    });
   };
 
   const progress = useMemo(() => {
@@ -728,7 +733,7 @@ export default function App() {
           </div>
         )}
 
-        <div ref={scrollRef} className="flex-1 overflow-y-auto no-scrollbar relative bg-gray-50 pb-safe">
+        <div ref={scrollRef} className="content-scroll flex-1 overflow-y-auto no-scrollbar relative bg-gray-50 pb-safe">
           {activeTab === 'home' && !isReadingMode && (
             <div className="p-4 sm:p-6 lg:p-8 space-y-6 pb-32 animate-fade-in-up">
               <div className="flex items-center justify-between gap-4">
@@ -1051,6 +1056,12 @@ export default function App() {
             scrollbar-width: none;
         }
         
+        .content-scroll {
+          scroll-behavior: smooth;
+          -webkit-overflow-scrolling: touch;
+          overscroll-behavior-y: contain;
+        }
+
         .calligraphy-subtitle {
           font-family: 'Scheherazade New', 'Amiri', serif;
           font-weight: 700;
