@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Sun, Moon, Check, RotateCcw, Settings2, Languages, AlignLeft, BookOpen, X, ChevronRight, Info, Type, Download } from 'lucide-react';
+import { Sun, Moon, Check, RotateCcw, Settings2, Languages, AlignLeft, BookOpen, X, ChevronRight, Info, Type, Download, BellRing } from 'lucide-react';
 import appLogo from './assets/app-logo.png';
 
 const STORAGE_KEYS = {
@@ -8,10 +8,33 @@ const STORAGE_KEYS = {
   showArabic: 'dzikir_show_arabic',
   showLatin: 'dzikir_show_latin',
   showTranslation: 'dzikir_show_translation',
+  remindersEnabled: 'dzikir_reminders_enabled',
 };
 
 const isStandaloneDisplay = () => {
   return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+};
+
+const getLocalDateKey = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const date = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${date}`;
+};
+
+const getCountsStorageKey = (time, dateKey) => `dzikir_counts_${time}_${dateKey}`;
+
+const getMsUntilNextTrigger = (hour, minute) => {
+  const now = new Date();
+  const trigger = new Date(now);
+  trigger.setHours(hour, minute, 0, 0);
+
+  if (trigger <= now) {
+    trigger.setDate(trigger.getDate() + 1);
+  }
+
+  return trigger.getTime() - now.getTime();
 };
 
 // --- DATA DZIKIR (Super Lengkap) ---
@@ -23,7 +46,6 @@ const dzikirData = {
       arabic: 'أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ',
       latin: 'A\'udzu billahi minasy-syaithoonir rojiim.',
       translation: 'Aku berlindung kepada Allah dari godaan syaitan yang terkutuk.',
-      fadhilah: 'Disunnahkan membaca ta\'awudz sebelum memulai dzikir agar terhindar dari godaan setan.',
       target: 1,
     },
     {
@@ -39,7 +61,7 @@ const dzikirData = {
     {
       id: 'p2',
       title: 'Membaca Surah Al-Ikhlas',
-      arabic: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ. قُلْ هُوَ اللَّهُ أَحَدٌ. اللَّهُ الصَّمَدُ. لَمْ يَلِدْ وَلَمْ يُولَدْ. وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ',
+      arabic: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ ۝ قُلْ هُوَ اللَّهُ أَحَدٌ ۝١ اللَّهُ الصَّمَدُ ۝٢ لَمْ يَلِدْ وَلَمْ يُولَدْ ۝٣ وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ ۝٤',
       latin: 'Bismillāhir-raḥmānir-raḥīm. Qul huwallāhu aḥad. Allāhuṣ-ṣamad. Lam yalid wa lam yūlad. Wa lam yakul lahū kufuwan aḥad.',
       translation: 'Katakanlah: "Dialah Allah, Yang Maha Esa. Allah adalah Tuhan yang bergantung kepada-Nya segala sesuatu. Dia tiada beranak dan tidak pula diperanakkan, dan tidak ada seorangpun yang setara dengan Dia."',
       fadhilah: 'Membaca Al-Ikhlas, Al-Falaq, dan An-Naas pagi dan sore 3x cukuplah baginya (penjagaan) dari segala sesuatu.',
@@ -49,7 +71,7 @@ const dzikirData = {
     {
       id: 'p3',
       title: 'Membaca Surah Al-Falaq',
-      arabic: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ. قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ. مِن شَرِّ مَا خَلَقَ. وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ. وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ. وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ',
+      arabic: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ ۝ قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ ۝١ مِن شَرِّ مَا خَلَقَ ۝٢ وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ ۝٣ وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ ۝٤ وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ ۝٥',
       latin: 'Bismillāhir-raḥmānir-raḥīm. Qul a‘ūżu birabbil-falaq. Min syarri mā khalaq. Wa min syarri gāsiqin iżā waqab. Wa min syarrin-naffāṡāti fil-‘uqad. Wa min syarri ḥāsidin iżā ḥasad.',
       translation: 'Katakanlah: "Aku berlindung kepada Tuhan Yang Menguasai subuh, dari kejahatan makhluk-Nya, dan dari kejahatan malam apabila telah gelap gulita, dan dari kejahatan wanita-wanita tukang sihir yang menghembus pada buhul-buhul, dan dari kejahatan pendengki bila ia dengki."',
       source: 'HR. Abu Dawud no. 5082, Tirmidzi no. 3575, dan An-Nasa\'i no. 5428.',
@@ -58,7 +80,7 @@ const dzikirData = {
     {
       id: 'p4',
       title: 'Membaca Surah An-Naas',
-      arabic: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ. قُلْ أَعُوذُ بِرَبِّ النَّاسِ. مَلِكِ النَّاسِ. إِلَٰهِ النَّاسِ. مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ. الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ. مِنَ الْجِنَّةِ وَالنَّاسِ',
+      arabic: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ ۝ قُلْ أَعُوذُ بِرَبِّ النَّاسِ ۝١ مَلِكِ النَّاسِ ۝٢ إِلَٰهِ النَّاسِ ۝٣ مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ ۝٤ الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ ۝٥ مِنَ الْجِنَّةِ وَالنَّاسِ ۝٦',
       latin: 'Bismillāhir-raḥmānir-raḥīm. Qul a‘ūżu birabbin-nās. Malikin-nās. Ilāhin-nās. Min syarril-waswāsil-khannās. Allażī yuwaswisu fī ṣudūrin-nās. Minal-jinnati wan-nās.',
       translation: 'Katakanlah: "Aku berlindung kepada Tuhan (yang memelihara dan menguasai) manusia. Raja manusia. Sembahan manusia. Dari kejahatan (bisikan) syaitan yang biasa bersembunyi, yang membisikkan (kejahatan) ke dalam dada manusia, dari (golongan) jin dan manusia."',
       source: 'HR. Abu Dawud no. 5082, Tirmidzi no. 3575, dan An-Nasa\'i no. 5428.',
@@ -231,7 +253,6 @@ const dzikirData = {
       arabic: 'أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ',
       latin: 'A\'udzu billahi minasy-syaithoonir rojiim.',
       translation: 'Aku berlindung kepada Allah dari godaan syaitan yang terkutuk.',
-      fadhilah: 'Disunnahkan membaca ta\'awudz sebelum memulai dzikir agar terhindar dari godaan setan.',
       target: 1,
     },
     {
@@ -247,7 +268,7 @@ const dzikirData = {
     {
       id: 'pt2',
       title: 'Membaca Surah Al-Ikhlas',
-      arabic: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ. قُلْ هُوَ اللَّهُ أَحَدٌ. اللَّهُ الصَّمَدُ. لَمْ يَلِدْ وَلَمْ يُولَدْ. وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ',
+      arabic: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ ۝ قُلْ هُوَ اللَّهُ أَحَدٌ ۝١ اللَّهُ الصَّمَدُ ۝٢ لَمْ يَلِدْ وَلَمْ يُولَدْ ۝٣ وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ ۝٤',
       latin: 'Bismillāhir-raḥmānir-raḥīm. Qul huwallāhu aḥad. Allāhuṣ-ṣamad. Lam yalid wa lam yūlad. Wa lam yakul lahū kufuwan aḥad.',
       translation: 'Katakanlah: "Dialah Allah, Yang Maha Esa. Allah adalah Tuhan yang bergantung kepada-Nya segala sesuatu. Dia tiada beranak dan tidak pula diperanakkan, dan tidak ada seorangpun yang setara dengan Dia."',
       source: 'HR. Abu Dawud no. 5082, Tirmidzi no. 3575.',
@@ -256,7 +277,7 @@ const dzikirData = {
     {
       id: 'pt3',
       title: 'Membaca Surah Al-Falaq',
-      arabic: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ. قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ. مِن شَرِّ مَا خَلَقَ. وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ. وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ. وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ',
+      arabic: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ ۝ قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ ۝١ مِن شَرِّ مَا خَلَقَ ۝٢ وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ ۝٣ وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ ۝٤ وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ ۝٥',
       latin: 'Bismillāhir-raḥmānir-raḥīm. Qul a‘ūżu birabbil-falaq. Min syarri mā khalaq. Wa min syarri gāsiqin iżā waqab. Wa min syarrin-naffāṡāti fil-‘uqad. Wa min syarri ḥāsidin iżā ḥasad.',
       translation: 'Katakanlah: "Aku berlindung kepada Tuhan Yang Menguasai subuh, dari kejahatan makhluk-Nya, dan dari kejahatan malam apabila telah gelap gulita, dan dari kejahatan wanita-wanita tukang sihir yang menghembus pada buhul-buhul, dan dari kejahatan pendengki bila ia dengki."',
       source: 'HR. Abu Dawud no. 5082, Tirmidzi no. 3575.',
@@ -265,7 +286,7 @@ const dzikirData = {
     {
       id: 'pt4',
       title: 'Membaca Surah An-Naas',
-      arabic: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ. قُلْ أَعُوذُ بِرَبِّ النَّاسِ. مَلِكِ النَّاسِ. إِلَٰهِ النَّاسِ. مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ. الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ. مِنَ الْجِنَّةِ وَالنَّاسِ',
+      arabic: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ ۝ قُلْ أَعُوذُ بِرَبِّ النَّاسِ ۝١ مَلِكِ النَّاسِ ۝٢ إِلَٰهِ النَّاسِ ۝٣ مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ ۝٤ الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ ۝٥ مِنَ الْجِنَّةِ وَالنَّاسِ ۝٦',
       latin: 'Bismillāhir-raḥmānir-raḥīm. Qul a‘ūżu birabbin-nās. Malikin-nās. Ilāhin-nās. Min syarril-waswāsil-khannās. Allażī yuwaswisu fī ṣudūrin-nās. Minal-jinnati wan-nās.',
       translation: 'Katakanlah: "Aku berlindung kepada Tuhan (yang memelihara dan menguasai) manusia. Raja manusia. Sembahan manusia. Dari kejahatan (bisikan) syaitan yang biasa bersembunyi, yang membisikkan (kejahatan) ke dalam dada manusia, dari (golongan) jin dan manusia."',
       source: 'HR. Abu Dawud no. 5082, Tirmidzi no. 3575.',
@@ -448,6 +469,8 @@ export default function App() {
   const [isMobileView, setIsMobileView] = useState(() => window.innerWidth < 768);
   const [isStandaloneMode, setIsStandaloneMode] = useState(() => isStandaloneDisplay());
   const [showInstallBanner, setShowInstallBanner] = useState(() => window.innerWidth < 768 && !isStandaloneDisplay());
+  const [currentDateKey, setCurrentDateKey] = useState(() => getLocalDateKey());
+  const [remindersEnabled, setRemindersEnabled] = useState(() => localStorage.getItem(STORAGE_KEYS.remindersEnabled) !== 'false');
   const installPlatform = useMemo(() => {
     const ua = window.navigator.userAgent.toLowerCase();
     if (/iphone|ipad|ipod/.test(ua)) return 'ios';
@@ -460,25 +483,30 @@ export default function App() {
   const fontSizeClasses = ['text-2xl', 'text-3xl', 'text-4xl', 'text-5xl'];
 
   useEffect(() => {
-    const savedCounts = localStorage.getItem(`dzikir_counts_${activeTime}`);
-    if (savedCounts) {
-      setCounts(JSON.parse(savedCounts));
-    } else {
-      const initialCounts = {};
-      currentDzikirList.forEach(d => initialCounts[d.id] = 0);
-      setCounts(initialCounts);
-    }
-  }, [activeTime, currentDzikirList]);
+    const syncCounts = () => {
+      const savedCounts = localStorage.getItem(getCountsStorageKey(activeTime, currentDateKey));
+      if (savedCounts) {
+        setCounts(JSON.parse(savedCounts));
+      } else {
+        const initialCounts = {};
+        currentDzikirList.forEach(d => initialCounts[d.id] = 0);
+        setCounts(initialCounts);
+      }
+    };
+
+    const frame = window.requestAnimationFrame(syncCounts);
+    return () => window.cancelAnimationFrame(frame);
+  }, [activeTime, currentDzikirList, currentDateKey]);
 
   useEffect(() => {
     if (Object.keys(counts).length === 0) return;
 
     const persistCounts = setTimeout(() => {
-      localStorage.setItem(`dzikir_counts_${activeTime}`, JSON.stringify(counts));
+      localStorage.setItem(getCountsStorageKey(activeTime, currentDateKey), JSON.stringify(counts));
     }, 80);
 
     return () => clearTimeout(persistCounts);
-  }, [counts, activeTime]);
+  }, [counts, activeTime, currentDateKey]);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.nightView, String(isNightView));
@@ -499,6 +527,102 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.showTranslation, String(showTranslation));
   }, [showTranslation]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.remindersEnabled, String(remindersEnabled));
+  }, [remindersEnabled]);
+
+  useEffect(() => {
+    const updateCurrentDateKey = () => {
+      setCurrentDateKey(getLocalDateKey());
+    };
+
+    updateCurrentDateKey();
+    const interval = window.setInterval(updateCurrentDateKey, 30 * 1000);
+
+    return () => window.clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (!('Notification' in window) || !('serviceWorker' in navigator) || !remindersEnabled) {
+      return;
+    }
+
+    if (Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, [remindersEnabled]);
+
+  useEffect(() => {
+    if (!('Notification' in window) || !('serviceWorker' in navigator) || !remindersEnabled) {
+      return;
+    }
+
+    let mounted = true;
+    let morningTimeout;
+    let eveningTimeout;
+
+    const scheduleReminder = async (hour, minute, title, body, assignTimeout) => {
+      const registration = await navigator.serviceWorker.ready;
+
+      const run = async () => {
+        if (!mounted) return;
+
+        if (Notification.permission === 'granted') {
+          await registration.showNotification(title, {
+            body,
+            tag: title,
+            renotify: true,
+            icon: '/icons/android-chrome-192x192.png',
+            badge: '/icons/favicon-48x48.png',
+          });
+        }
+
+        const nextMs = getMsUntilNextTrigger(hour, minute);
+        assignTimeout(window.setTimeout(run, nextMs));
+      };
+
+      const initialMs = getMsUntilNextTrigger(hour, minute);
+      assignTimeout(window.setTimeout(run, initialMs));
+    };
+
+    const init = async () => {
+      try {
+        await navigator.serviceWorker.register('/sw.js');
+        if (Notification.permission === 'granted') {
+          await scheduleReminder(
+            5,
+            30,
+            'Dzikir Pagi',
+            'Waktunya dzikir pagi. Tenangkan hati, awali hari dengan mengingat Allah.',
+            (timeout) => {
+              morningTimeout = timeout;
+            }
+          );
+
+          await scheduleReminder(
+            17,
+            0,
+            'Dzikir Petang',
+            'Waktunya dzikir petang. Tutup sore dengan dzikir dan doa.',
+            (timeout) => {
+              eveningTimeout = timeout;
+            }
+          );
+        }
+      } catch {
+        // no-op untuk browser yang tidak mendukung scheduling ini.
+      }
+    };
+
+    init();
+
+    return () => {
+      mounted = false;
+      window.clearTimeout(morningTimeout);
+      window.clearTimeout(eveningTimeout);
+    };
+  }, [remindersEnabled]);
 
   useEffect(() => {
     const syncInstallState = () => {
@@ -631,7 +755,7 @@ export default function App() {
 
   const getStoredCounts = (time) => {
     if (time === activeTime) return counts;
-    const saved = localStorage.getItem(`dzikir_counts_${time}`);
+    const saved = localStorage.getItem(getCountsStorageKey(time, currentDateKey));
     return saved ? JSON.parse(saved) : {};
   };
 
@@ -848,6 +972,28 @@ export default function App() {
           {activeTab === 'settings' && !isReadingMode && (
             <div className="p-6 space-y-8 animate-fade-in-up">
               <h2 className="font-bold text-gray-800 text-xl mb-4">Pengaturan Tampilan</h2>
+
+              <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-500">
+                      <BellRing className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-800">Notifikasi Pengingat</h4>
+                      <p className="text-xs text-gray-500">Pagi 05.30 & Petang 17.00 (default aktif)</p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" checked={remindersEnabled} onChange={(e) => setRemindersEnabled(e.target.checked)} className="sr-only peer" />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                  </label>
+                </div>
+                <p className="text-xs text-gray-500 mt-3 leading-relaxed">
+                  Pesan notifikasi: “Waktunya dzikir pagi. Tenangkan hati, awali hari dengan mengingat Allah.” dan
+                  “Waktunya dzikir petang. Tutup sore dengan dzikir dan doa.”
+                </p>
+              </div>
 
               <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
                 <label className="flex items-center gap-3 text-gray-700 font-semibold mb-4">
