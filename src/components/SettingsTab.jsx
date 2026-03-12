@@ -1,0 +1,29 @@
+import React from 'react';
+import { BellRing, Type, Languages, AlignLeft } from 'lucide-react';
+
+export default function SettingsTab({ remindersEnabled, setRemindersEnabled, fontSize, setFontSize, showArabic, setShowArabic, showLatin, setShowLatin, showTranslation, setShowTranslation }) {
+  return (
+    <div className="p-6 space-y-8 animate-fade-in-up">
+      <h2 className="font-bold text-gray-800 text-xl mb-4">Pengaturan Tampilan</h2>
+      <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
+        <div className="flex items-center justify-between gap-4"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-500"><BellRing className="w-5 h-5" /></div><div><h4 className="font-semibold text-gray-800">Notifikasi Pengingat</h4><p className="text-xs text-gray-500">Pagi 05.30 & Petang 17.00 (default aktif)</p></div></div><label className="relative inline-flex items-center cursor-pointer"><input type="checkbox" checked={remindersEnabled} onChange={(e) => setRemindersEnabled(e.target.checked)} className="sr-only peer" /><div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div></label></div>
+        <p className="text-xs text-gray-500 mt-3 leading-relaxed">Pesan notifikasi: “Waktunya dzikir pagi. Tenangkan hati, awali hari dengan mengingat Allah.” dan “Waktunya dzikir petang. Tutup sore dengan dzikir dan doa.”</p>
+      </div>
+
+      <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
+        <label className="flex items-center gap-3 text-gray-700 font-semibold mb-4"><Type className="w-5 h-5 text-emerald-600" /> Ukuran Huruf Arab</label>
+        <div className="grid grid-cols-2 gap-3">{['Kecil', 'Sedang', 'Besar', 'Sgt Besar'].map((label, idx) => <button key={idx} onClick={() => setFontSize(idx)} className={`py-3 rounded-xl border font-medium text-sm transition-all ${fontSize === idx ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-200' : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'}`}>{label}</button>)}</div>
+      </div>
+
+      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-100">
+        {[
+          ['ع', 'Teks Arab', 'Tampilkan tulisan Arab', showArabic, setShowArabic, 'bg-emerald-50', 'text-emerald-500'],
+          [<Languages className="w-5 h-5" key="latin" />, 'Teks Latin', 'Tampilkan cara baca', showLatin, setShowLatin, 'bg-blue-50', 'text-blue-500'],
+          [<AlignLeft className="w-5 h-5" key="tr" />, 'Terjemahan', 'Tampilkan arti bahasa', showTranslation, setShowTranslation, 'bg-purple-50', 'text-purple-500'],
+        ].map(([icon, title, subtitle, checked, setter, bg, color]) => (
+          <div key={title} className="p-5 flex items-center justify-between"><div className="flex items-center gap-3"><div className={`w-10 h-10 rounded-full ${bg} flex items-center justify-center ${color}`}>{icon}</div><div><h4 className="font-semibold text-gray-800">{title}</h4><p className="text-xs text-gray-500">{subtitle}</p></div></div><label className="relative inline-flex items-center cursor-pointer"><input type="checkbox" checked={checked} onChange={(e) => setter(e.target.checked)} className="sr-only peer" /><div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div></label></div>
+        ))}
+      </div>
+    </div>
+  );
+}
