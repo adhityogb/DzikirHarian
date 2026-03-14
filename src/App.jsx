@@ -35,6 +35,10 @@ export default function App() {
   const [isStandaloneMode, setIsStandaloneMode] = useState(() => isStandaloneDisplay());
   const [showInstallBanner, setShowInstallBanner] = useState(() => window.innerWidth < 768 && !isStandaloneDisplay());
   const [activeDalil, setActiveDalil] = useState(null);
+  const [tahlilTargetByTime, setTahlilTargetByTime] = useState(() => ({
+    pagi: Number(localStorage.getItem('dzikir_tahlil_target_pagi') || 10),
+    petang: Number(localStorage.getItem('dzikir_tahlil_target_petang') || 10),
+  }));
 
   const installPlatform = useMemo(() => {
     const ua = window.navigator.userAgent.toLowerCase();
@@ -43,7 +47,20 @@ export default function App() {
     return 'other';
   }, []);
 
-  const currentDzikirList = dzikirData[activeTime];
+  const currentDzikirList = useMemo(
+    () => dzikirData[activeTime].map((item) => {
+      if (item.title !== 'Tahlil 100x (Atau 10x)' || !item.targetOptions) return item;
+      const selectedTarget = tahlilTargetByTime[activeTime] === 100 ? 100 : 10;
+      const selectedOption = item.targetOptions[selectedTarget];
+      return {
+        ...item,
+        target: selectedTarget,
+        fadhilah: selectedOption?.fadhilah || item.fadhilah,
+        source: selectedOption?.source || item.source,
+      };
+    }),
+    [activeTime, tahlilTargetByTime],
+  );
   const fontSizeClasses = ['text-2xl', 'text-3xl', 'text-4xl', 'text-5xl'];
 
   useEffect(() => {
@@ -78,6 +95,10 @@ export default function App() {
   useEffect(() => { localStorage.setItem(STORAGE_KEYS.showLatin, String(showLatin)); }, [showLatin]);
   useEffect(() => { localStorage.setItem(STORAGE_KEYS.showTranslation, String(showTranslation)); }, [showTranslation]);
   useEffect(() => { localStorage.setItem(STORAGE_KEYS.remindersEnabled, String(remindersEnabled)); }, [remindersEnabled]);
+  useEffect(() => {
+    localStorage.setItem('dzikir_tahlil_target_pagi', String(tahlilTargetByTime.pagi));
+    localStorage.setItem('dzikir_tahlil_target_petang', String(tahlilTargetByTime.petang));
+  }, [tahlilTargetByTime]);
 
   useEffect(() => {
     const interval = window.setInterval(() => setCurrentDateKey(getLocalDateKey()), 30 * 1000);
@@ -226,7 +247,7 @@ export default function App() {
         <div ref={scrollRef} className="content-scroll flex-1 overflow-y-auto no-scrollbar relative bg-gray-50 pb-safe">
           {activeTab === 'home' && !isReadingMode && <HomeTab isNightView={isNightView} setIsNightView={setIsNightView} startReading={startReading} handleReset={handleReset} dailyProgress={dailyProgress} morningProgress={morningProgress} eveningProgress={eveningProgress} isMobileView={isMobileView} isStandaloneMode={isStandaloneMode} showInstallBanner={showInstallBanner} installPlatform={installPlatform} installPromptEvent={installPromptEvent} handleInstallApp={handleInstallApp} />}
           {activeTab === 'settings' && !isReadingMode && <SettingsTab remindersEnabled={remindersEnabled} setRemindersEnabled={setRemindersEnabled} fontSize={fontSize} setFontSize={setFontSize} showArabic={showArabic} setShowArabic={setShowArabic} showLatin={showLatin} setShowLatin={setShowLatin} showTranslation={showTranslation} setShowTranslation={setShowTranslation} />}
-          {isReadingMode && <ReadingTab currentDzikirList={currentDzikirList} counts={counts} showArabic={showArabic} fontSize={fontSize} fontSizeClasses={fontSizeClasses} showLatin={showLatin} showTranslation={showTranslation} handleIncrement={handleIncrement} setActiveDalil={setActiveDalil} dalilByTitle={dalilByTitle} progress={progress} activeTime={activeTime} setIsReadingMode={setIsReadingMode} setActiveTab={setActiveTab} />}
+          {isReadingMode && <ReadingTab currentDzikirList={currentDzikirList} counts={counts} showArabic={showArabic} fontSize={fontSize} fontSizeClasses={fontSizeClasses} showLatin={showLatin} showTranslation={showTranslation} handleIncrement={handleIncrement} setActiveDalil={setActiveDalil} dalilByTitle={dalilByTitle} progress={progress} activeTime={activeTime} setIsReadingMode={setIsReadingMode} setActiveTab={setActiveTab} tahlilTarget={tahlilTargetByTime[activeTime]} setTahlilTarget={(value) => setTahlilTargetByTime((prev) => ({ ...prev, [activeTime]: value }))} />}
         </div>
 
         {activeDalil && <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setActiveDalil(null)}><div className="w-full max-w-lg bg-white rounded-3xl shadow-xl border border-gray-100 p-5 sm:p-6" onClick={(e) => e.stopPropagation()}><div className="flex items-start justify-between gap-3 mb-4"><div><p className="text-xs font-semibold text-emerald-600 uppercase tracking-wide">Dalil dari sumber</p><h3 className="text-lg font-bold text-gray-900">{activeDalil.title}</h3></div><button type="button" onClick={() => setActiveDalil(null)} className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center" aria-label="Tutup popup dalil"><X className="w-5 h-5" /></button></div><div className="bg-gray-50 rounded-2xl p-4 space-y-3"><p className="text-sm text-gray-700 leading-relaxed">{activeDalil.dalil}</p><p className="text-xs text-gray-500"><span className="font-semibold">Referensi:</span> {activeDalil.source}</p></div></div></div>}
