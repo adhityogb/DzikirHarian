@@ -1,7 +1,7 @@
 import React from 'react';
 import { Check } from 'lucide-react';
 
-export default function ReadingTab({ currentDzikirList, counts, showArabic, fontSize, fontSizeClasses, showLatin, showTranslation, handleIncrement, setActiveDalil, dalilByTitle, progress, activeTime, setIsReadingMode, setActiveTab }) {
+export default function ReadingTab({ currentDzikirList, counts, showArabic, fontSize, fontSizeClasses, showLatin, showTranslation, handleIncrement, setActiveDalil, dalilByTitle, progress, activeTime, setIsReadingMode, setActiveTab, tahlilTarget, setTahlilTarget }) {
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-6 space-y-8 animate-fade-in-up">
       {currentDzikirList.map((dzikir, index) => {
@@ -14,6 +14,23 @@ export default function ReadingTab({ currentDzikirList, counts, showArabic, font
               {showArabic && <div dir="rtl" className={`text-right text-gray-900 leading-[2.5] ${fontSizeClasses[fontSize]}`} style={{ fontFamily: "'Scheherazade New', 'Amiri', 'Traditional Arabic', serif" }}>{dzikir.arabic}</div>}
               {(showLatin || showTranslation) && <div className={`space-y-4 ${showArabic ? 'pt-4 border-t border-dashed border-gray-200' : ''}`}>{showLatin && <div className="text-emerald-800/90 italic font-medium leading-relaxed text-[15px]">{dzikir.latin}</div>}{showTranslation && <div className="text-gray-600 leading-relaxed text-[15px]">{dzikir.translation}</div>}</div>}
               {(dzikir.fadhilah || dzikir.source) && <div className="bg-gray-50 rounded-2xl p-4 text-sm mt-6">{dzikir.fadhilah && <p className="text-gray-700 mb-2"><strong className="font-semibold text-amber-600">💡 Keutamaan: </strong>{dzikir.fadhilah}</p>}{dzikir.source && <div className="text-gray-500 text-xs leading-relaxed"><button type="button" onClick={() => setActiveDalil({ title: dzikir.title, source: dzikir.source, dalil: dalilByTitle[dzikir.title] || 'Dalil lengkap belum tersedia untuk dzikir ini.' })} className="text-left hover:text-gray-700"><strong className="font-semibold">📚 Sumber: </strong><span className="underline underline-offset-2 decoration-dotted">{dzikir.source}</span></button></div>}</div>}
+              {dzikir.title === 'Tahlil 100x (Atau 10x)' && (
+                <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700 mb-2">Pilihan jumlah bacaan</p>
+                  <div className="flex gap-2">
+                    {[10, 100].map((option) => (
+                      <button
+                        type="button"
+                        key={option}
+                        onClick={() => setTahlilTarget(option)}
+                        className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors ${tahlilTarget === option ? 'bg-indigo-600 text-white' : 'bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-100'}`}
+                      >
+                        {option}x
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
             <div className="p-4 bg-gray-50/50 flex flex-col gap-3"><button onClick={() => handleIncrement(dzikir.id, dzikir.target, index)} disabled={isCompleted} className={`relative w-full py-4 rounded-2xl font-bold text-lg transition-all transform active:scale-[0.98] flex justify-center items-center gap-2 overflow-hidden group ${isCompleted ? 'bg-emerald-500 text-white cursor-default' : 'bg-gray-900 text-white shadow-md hover:bg-gray-800 active:bg-gray-700'}`}>{isCompleted ? <><Check className="w-6 h-6 animate-scale-in" /> Selesai</> : <>Hitung ({currentCount}/{dzikir.target})</>}{!isCompleted && <div className="absolute inset-0 bg-white/20 opacity-0 active:opacity-100 transition-opacity" />}</button></div>
           </div>
