@@ -5,7 +5,7 @@ import AppLogo from './components/AppLogo';
 import HomeTab from './components/HomeTab';
 import SettingsTab from './components/SettingsTab';
 import ReadingTab from './components/ReadingTab';
-import { STORAGE_KEYS, isStandaloneDisplay, dalilByTitle, dzikirData, ISTIGHFAR_LINK, readStoredCounts } from './data/dzikirContent';
+import { STORAGE_KEYS, isStandaloneDisplay, dalilByTitle, dzikirData, ISTIGHFAR_LINK, readStoredCounts, writeStoredCounts } from './data/dzikirContent';
 
 const getLocalDateKey = () => new Date().toLocaleDateString('en-CA');
 const getMsUntilNextTrigger = (hour, minute) => {
@@ -14,6 +14,13 @@ const getMsUntilNextTrigger = (hour, minute) => {
   next.setHours(hour, minute, 0, 0);
   if (next <= now) next.setDate(next.getDate() + 1);
   return next.getTime() - now.getTime();
+};
+
+const getMsUntilNextMidnight = () => {
+  const now = new Date();
+  const nextMidnight = new Date(now);
+  nextMidnight.setHours(24, 0, 0, 0);
+  return nextMidnight.getTime() - now.getTime();
 };
 
 export default function App() {
@@ -35,6 +42,7 @@ export default function App() {
   const [isStandaloneMode, setIsStandaloneMode] = useState(() => isStandaloneDisplay());
   const [showInstallBanner, setShowInstallBanner] = useState(() => window.innerWidth < 768 && !isStandaloneDisplay());
   const [activeDalil, setActiveDalil] = useState(null);
+  const [notificationPermission, setNotificationPermission] = useState(() => ('Notification' in window ? Notification.permission : 'default'));
   const [tahlilTargetByTime, setTahlilTargetByTime] = useState(() => ({
     pagi: Number(localStorage.getItem('dzikir_tahlil_target_pagi') || 10),
     petang: Number(localStorage.getItem('dzikir_tahlil_target_petang') || 10),
@@ -64,26 +72,26 @@ export default function App() {
   const fontSizeClasses = ['text-2xl', 'text-3xl', 'text-4xl', 'text-5xl'];
 
   useEffect(() => {
-    const savedCounts = readStoredCounts(activeTime);
+    const savedCounts = readStoredCounts(activeTime, currentDateKey);
     const initialCounts = {};
     currentDzikirList.forEach((d) => { initialCounts[d.id] = savedCounts[d.id] || 0; });
     const istighfarMeta = ISTIGHFAR_LINK[activeTime];
     if (istighfarMeta) {
-      const oppositeCounts = readStoredCounts(istighfarMeta.otherTime);
+      const oppositeCounts = readStoredCounts(istighfarMeta.otherTime, currentDateKey);
       initialCounts[istighfarMeta.id] = Math.max(initialCounts[istighfarMeta.id] || 0, oppositeCounts[istighfarMeta.otherId] || 0);
     }
     const syncCounts = window.setTimeout(() => setCounts(initialCounts), 0);
     return () => window.clearTimeout(syncCounts);
-  }, [activeTime, currentDzikirList]);
+  }, [activeTime, currentDzikirList, currentDateKey]);
 
   useEffect(() => {
     if (Object.keys(counts).length === 0) return;
     const persistCounts = setTimeout(() => {
-      localStorage.setItem(`dzikir_counts_${activeTime}`, JSON.stringify(counts));
+      writeStoredCounts(activeTime, counts, currentDateKey);
       const istighfarMeta = ISTIGHFAR_LINK[activeTime];
       if (istighfarMeta) {
-        const oppositeCounts = readStoredCounts(istighfarMeta.otherTime);
-        localStorage.setItem(`dzikir_counts_${istighfarMeta.otherTime}`, JSON.stringify({ ...oppositeCounts, [istighfarMeta.otherId]: counts[istighfarMeta.id] || 0 }));
+        const oppositeCounts = readStoredCounts(istighfarMeta.otherTime, currentDateKey);
+        writeStoredCounts(istighfarMeta.otherTime, { ...oppositeCounts, [istighfarMeta.otherId]: counts[istighfarMeta.id] || 0 }, currentDateKey);
       }
     }, 80);
     return () => clearTimeout(persistCounts);
@@ -101,14 +109,48 @@ export default function App() {
   }, [tahlilTargetByTime]);
 
   useEffect(() => {
-    const interval = window.setInterval(() => setCurrentDateKey(getLocalDateKey()), 30 * 1000);
-    return () => window.clearInterval(interval);
+    let midnightTimeout;
+    let backupInterval;
+
+    const syncDate = () => setCurrentDateKey(getLocalDateKey());
+    const scheduleMidnightSync = () => {
+      window.clearTimeout(midnightTimeout);
+      midnightTimeout = window.setTimeout(() => {
+        syncDate();
+        scheduleMidnightSync();
+      }, getMsUntilNextMidnight() + 50);
+    };
+
+    scheduleMidnightSync();
+    backupInterval = window.setInterval(syncDate, 60 * 1000);
+    document.addEventListener('visibilitychange', syncDate);
+    window.addEventListener('focus', syncDate);
+
+    return () => {
+      window.clearTimeout(midnightTimeout);
+      window.clearInterval(backupInterval);
+      document.removeEventListener('visibilitychange', syncDate);
+      window.removeEventListener('focus', syncDate);
+    };
   }, []);
 
   useEffect(() => {
     if (!('Notification' in window) || !('serviceWorker' in navigator) || !remindersEnabled) return;
-    if (Notification.permission === 'default') Notification.requestPermission();
+    if (Notification.permission === 'default') {
+      Notification.requestPermission().then((result) => setNotificationPermission(result));
+    }
   }, [remindersEnabled]);
+
+  useEffect(() => {
+    if (!('Notification' in window)) return;
+    const syncPermission = () => setNotificationPermission(Notification.permission);
+    document.addEventListener('visibilitychange', syncPermission);
+    window.addEventListener('focus', syncPermission);
+    return () => {
+      document.removeEventListener('visibilitychange', syncPermission);
+      window.removeEventListener('focus', syncPermission);
+    };
+  }, []);
 
   useEffect(() => {
     if (!('Notification' in window) || !('serviceWorker' in navigator) || !remindersEnabled) return;
@@ -127,7 +169,7 @@ export default function App() {
     (async () => {
       try {
         await navigator.serviceWorker.register('/sw.js');
-        if (Notification.permission === 'granted') {
+        if (notificationPermission === 'granted') {
           await scheduleReminder(5, 30, 'Dzikir Pagi', 'Waktunya dzikir pagi. Tenangkan hati, awali hari dengan mengingat Allah.', (t) => { morningTimeout = t; });
           await scheduleReminder(17, 0, 'Dzikir Petang', 'Waktunya dzikir petang. Tutup sore dengan dzikir dan doa.', (t) => { eveningTimeout = t; });
         }
@@ -136,7 +178,7 @@ export default function App() {
       }
     })();
     return () => { mounted = false; window.clearTimeout(morningTimeout); window.clearTimeout(eveningTimeout); };
-  }, [remindersEnabled]);
+  }, [remindersEnabled, notificationPermission]);
 
   useEffect(() => {
     const syncInstallState = () => {
@@ -199,8 +241,8 @@ export default function App() {
     setCounts(initialCounts);
     const istighfarMeta = ISTIGHFAR_LINK[activeTime];
     if (istighfarMeta) {
-      const oppositeCounts = readStoredCounts(istighfarMeta.otherTime);
-      localStorage.setItem(`dzikir_counts_${istighfarMeta.otherTime}`, JSON.stringify({ ...oppositeCounts, [istighfarMeta.otherId]: 0 }));
+      const oppositeCounts = readStoredCounts(istighfarMeta.otherTime, currentDateKey);
+      writeStoredCounts(istighfarMeta.otherTime, { ...oppositeCounts, [istighfarMeta.otherId]: 0 }, currentDateKey);
     }
     if (isReadingMode && scrollRef.current) scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -219,7 +261,7 @@ export default function App() {
 
   const getProgressForTime = (time) => {
     const list = dzikirData[time];
-    const savedCounts = time === activeTime ? counts : readStoredCounts(time);
+    const savedCounts = time === activeTime ? counts : readStoredCounts(time, currentDateKey);
     let totalTarget = 0; let totalCompleted = 0;
     list.forEach((item) => { totalTarget += item.target; totalCompleted += Math.min(savedCounts[item.id] || 0, item.target); });
     return totalTarget === 0 ? 0 : Math.round((totalCompleted / totalTarget) * 100);

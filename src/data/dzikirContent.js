@@ -476,7 +476,22 @@ export const ISTIGHFAR_LINK = {
   petang: { id: 'pt16', otherTime: 'pagi', otherId: 'p17' },
 };
 
-export const readStoredCounts = (time) => {
+export const readStoredCounts = (time, dateKey) => {
   const saved = localStorage.getItem(`dzikir_counts_${time}`);
-  return saved ? JSON.parse(saved) : {};
+  if (!saved) return {};
+
+  try {
+    const parsed = JSON.parse(saved);
+    if (parsed && typeof parsed === 'object' && 'counts' in parsed) {
+      if (dateKey && parsed.dateKey !== dateKey) return {};
+      return parsed.counts && typeof parsed.counts === 'object' ? parsed.counts : {};
+    }
+    return dateKey ? {} : (parsed || {});
+  } catch {
+    return {};
+  }
+};
+
+export const writeStoredCounts = (time, counts, dateKey) => {
+  localStorage.setItem(`dzikir_counts_${time}`, JSON.stringify({ dateKey, counts }));
 };
