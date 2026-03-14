@@ -24,8 +24,7 @@ export const dalilByTitle = {
   'Doa Mempersaksikan Allah (4x)': 'Nabi ﷺ bersabda: "Barangsiapa ketika pagi membaca: Allahumma inni asbahtu usyhiduka... sebanyak empat kali, maka Allah membebaskannya dari neraka." (juga berlaku saat petang).',
   'Doa Keselamatan (Al-\'Afiyah)': 'Al-\'Abbas radhiyallahu anhu bertanya kepada Nabi ﷺ tentang doa yang diminta. Nabi ﷺ menjawab: "Mintalah kepada Allah al-\'afiyah (keselamatan) di dunia dan akhirat."',
   'Doa Berlindung dari Godaan Setan': 'Nabi ﷺ mengajarkan doa perlindungan: "Ya Allah, Yang mengetahui yang gaib dan nyata... aku berlindung kepada-Mu dari kejahatan diriku, setan, dan pasukannya."',
-  'Doa Memohon Kesehatan (3x)': 'Nabi ﷺ bersabda: "Siapa yang membaca di pagi hari dan petang hari: Bismillahil ladzi la yadurru ma\'asmihi syai\'... sebanyak tiga kali, maka tidak ada sesuatu pun yang membahayakannya."',
-  'Doa Kecukupan (7x)': 'Nabi ﷺ bersabda: "Barangsiapa membaca: Hasbiyallahu la ilaha illa huwa... sebanyak tujuh kali di pagi dan petang, Allah akan mencukupinya dari urusan dunia dan akhirat."',
+  'Doa Memohon Kesehatan (3x)': 'Doa ini dibaca tiga kali pada pagi dan petang untuk memohon penjagaan badan, pendengaran, penglihatan, serta perlindungan dari kekufuran, kefakiran, dan azab kubur.',
   'Membaca Bismillahilladzi (3x)': 'Nabi ﷺ bersabda: "Tidaklah seorang hamba membaca pada pagi setiap hari dan petang setiap malam: Bismillahil ladzi la yadurru ma\'asmihi syai\'... sebanyak tiga kali, kecuali tidak ada sesuatu pun yang membahayakannya."',
   'Doa Ridha Kepada Allah (3x)': 'Nabi ﷺ bersabda: "Siapa yang membaca saat pagi dan petang: Radhitu billahi rabba... sebanyak tiga kali, Allah akan meridhainya pada hari kiamat."',
   'Memohon Perbaikan Urusan': 'Nabi ﷺ mengajarkan Fatimah radhiyallahu anha: "Wahai Dzat Yang Maha Hidup, dengan rahmat-Mu aku memohon pertolongan, perbaikilah seluruh urusanku dan jangan serahkan aku kepada diriku walau sekejap mata."',
@@ -75,7 +74,7 @@ export const dzikirData = {
       arabic: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ ۝ قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ ۝١ مِن شَرِّ مَا خَلَقَ ۝٢ وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ ۝٣ وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ ۝٤ وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ ۝٥',
       latin: 'Bismillāhir-raḥmānir-raḥīm. Qul a‘ūżu birabbil-falaq. Min syarri mā khalaq. Wa min syarri gāsiqin iżā waqab. Wa min syarrin-naffāṡāti fil-‘uqad. Wa min syarri ḥāsidin iżā ḥasad.',
       translation: 'Katakanlah: "Aku berlindung kepada Tuhan Yang Menguasai subuh, dari kejahatan makhluk-Nya, dan dari kejahatan malam apabila telah gelap gulita, dan dari kejahatan wanita-wanita tukang sihir yang menghembus pada buhul-buhul, dan dari kejahatan pendengki bila ia dengki."',
-      fadhilah: 'Termasuk Al-Mu\'awwidzat yang dibaca pagi-petang sebagai perlindungan dari berbagai keburukan makhluk.',
+      fadhilah: 'Membaca Al-Ikhlas, Al-Falaq, dan An-Naas pagi dan sore 3x cukuplah baginya (penjagaan) dari segala sesuatu.',
       source: 'HR. Abu Dawud no. 5082, Tirmidzi no. 3575, dan An-Nasa\'i no. 5428.',
       target: 3,
     },
@@ -85,7 +84,7 @@ export const dzikirData = {
       arabic: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ ۝ قُلْ أَعُوذُ بِرَبِّ النَّاسِ ۝١ مَلِكِ النَّاسِ ۝٢ إِلَٰهِ النَّاسِ ۝٣ مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ ۝٤ الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ ۝٥ مِنَ الْجِنَّةِ وَالنَّاسِ ۝٦',
       latin: 'Bismillāhir-raḥmānir-raḥīm. Qul a‘ūżu birabbin-nās. Malikin-nās. Ilāhin-nās. Min syarril-waswāsil-khannās. Allażī yuwaswisu fī ṣudūrin-nās. Minal-jinnati wan-nās.',
       translation: 'Katakanlah: "Aku berlindung kepada Tuhan (yang memelihara dan menguasai) manusia. Raja manusia. Sembahan manusia. Dari kejahatan (bisikan) syaitan yang biasa bersembunyi, yang membisikkan (kejahatan) ke dalam dada manusia, dari (golongan) jin dan manusia."',
-      fadhilah: 'Termasuk Al-Mu\'awwidzat yang dibaca pagi-petang untuk perlindungan dari was-was setan dari golongan jin dan manusia.',
+      fadhilah: 'Membaca Al-Ikhlas, Al-Falaq, dan An-Naas pagi dan sore 3x cukuplah baginya (penjagaan) dari segala sesuatu.',
       source: 'HR. Abu Dawud no. 5082, Tirmidzi no. 3575, dan An-Nasa\'i no. 5428.',
       target: 3,
     },
@@ -145,7 +144,7 @@ export const dzikirData = {
       arabic: 'اللَّهُمَّ عَالِمَ الْغَيْبِ وَالشَّهَادَةِ فَاطِرَ السَّمَاوَاتِ وَالْأَرْضِ، رَبَّ كُلِّ شَيْءٍ وَمَلِيكَهُ، أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا أَنْتَ، أَعُوذُ بِكَ مِنْ شَرِّ نَفْسِي، وَمِنْ شَرِّ الشَّيْطَانِ وَشِرْكِهِ، وَأَنْ أَقْتَرِفَ عَلَى نَفْسِي سُوءًا أَوْ أَجُرَّهُ إِلَى مُسْلِمٍ',
       latin: 'Allahumma \'aalimal ghoibi wasy-syahaadah faathiros samaawaati wal ardh. Robba kulli syai-in wa maliikah. Asyhadu alla ilaha illa anta. A\'udzu bika min syarri nafsii wa min syarrisy-syaithooni wa syirkihi, wa an aqtarifo \'alaa nafsii suu-an aw ajurrohu ilaa muslim.',
       translation: 'Ya Allah, Yang Maha Mengetahui yang ghaib dan yang nyata, wahai Pencipta langit dan bumi, Tuhan segala sesuatu dan yang merajainya. Aku bersaksi bahwa tidak ada ilah yang berhak disembah kecuali Engkau. Aku berlindung kepada-Mu dari kejahatan diriku, setan dan balatentaranya, dan aku (berlindung kepada-Mu) dari berbuat kejelekan terhadap diriku atau menyeretnya kepada seorang muslim.',
-      fadhilah: 'Doa perlindungan komprehensif dari keburukan diri sendiri dan godaan setan.',
+      fadhilah: 'Doa ini diajarkan Rasulullah ﷺ kepada Abu Bakr Ash-Shiddiq radhiyallahu anhu untuk dibaca pada pagi, petang, dan saat hendak tidur; isinya perlindungan dari keburukan diri dan setan.',
       source: 'HR. Tirmidzi no. 3392 dan Abu Dawud no. 5067.',
       target: 1,
     },
@@ -156,18 +155,8 @@ export const dzikirData = {
       latin: 'Allāhumma ‘āfinī fī badanī, Allāhumma ‘āfinī fī sam‘ī, Allāhumma ‘āfinī fī baṣarī, lā ilāha illā anta. Allāhumma innī a‘ūżubika minal-kufri wal-faqr, wa a‘ūżubika min ‘ażābil-qabr, lā ilāha illā anta.',
       translation: 'Ya Allah, selamatkanlah tubuhku (dari penyakit dan cacat). Ya Allah, selamatkanlah pendengaranku. Ya Allah, selamatkanlah penglihatanku. Tidak ada ilah (yang berhak disembah) kecuali Engkau. Ya Allah, sesungguhnya aku berlindung kepada-Mu dari kekufuran dan kefakiran. Aku berlindung kepada-Mu dari siksa kubur. Tidak ada ilah (yang berhak disembah) kecuali Engkau.',
       fadhilah: 'Dibaca tiga kali pada pagi/petang sebagai ikhtiar memohon kesehatan dan penjagaan dari gangguan yang membahayakan.',
-      source: 'HR. Abu Dawud no. 5090, Ahmad (5/42).',
+      source: 'HR. Al-Bukhari dalam Shahiih al-Adabil Mufrad no. 701, Abu Dawud no. 5090, Ahmad V/42, hasan. Lihat Shahiih Al-Adabil Mufrad no. 539.',
       target: 3,
-    },
-    {
-      id: 'p10',
-      title: 'Doa Kecukupan (7x)',
-      arabic: 'حَسْبِيَ اللَّهُ لَا إِلَهَ إِلَّا هُوَ عَلَيْهِ تَوَكَّلْتُ وَهُوَ رَبُّ الْعَرْشِ الْعَظِيمِ',
-      latin: 'Ḥasbiyallāhu lā ilāha illā huwa ‘alaihi tawakkaltu wa huwa rabbul-‘arsyil-‘aẓīm.',
-      translation: 'Cukuplah Allah bagiku; tidak ada ilah (yang berhak disembah) melainkan Dia. Hanya kepada-Nya aku bertawakkal dan Dia adalah Tuhan yang memiliki \'Arsy yang agung.',
-      fadhilah: 'Barangsiapa membacanya di pagi dan petang sebanyak 7 kali, maka Allah akan mencukupinya dari apa yang menyusahkannya dari urusan dunia dan akhirat.',
-      source: 'HR. Ibnu As-Sunni no. 71, Abu Dawud no. 5081.',
-      target: 7,
     },
     {
       id: 'p11',
@@ -205,7 +194,7 @@ export const dzikirData = {
       arabic: 'أَصْبَحْنَا عَلَى فِطْرَةِ اْلإِسْلاَمِ وَعَلَى كَلِمَةِ اْلإِخْلاَصِ، وَعَلَى دِيْنِ نَبِيِّنَا مُحَمَّدٍ صَلَّى اللهُ عَلَيْهِ وَسَلَّمَ، وَعَلَى مِلَّةِ أَبِيْنَا إِبْرَاهِيْمَ، حَنِيْفًا مُسْلِمًا وَمَا كَانَ مِنَ الْمُشْرِكِيْنَ',
       latin: "Aṣbaḥnā 'alā fiṭratil-islām, wa 'alā kalimatil-ikhlāṣ, wa 'alā dīni nabiyyinā Muḥammadin ṣallallāhu 'alaihi wa sallam, wa 'alā millati abīnā Ibrāhīma ḥanīfan musliman wa mā kāna minal-musyrikīn.",
       translation: 'Di waktu pagi kami memegang agama Islam, kalimat ikhlas (kalimat syahadat), agama Nabi kami Muhammad ﷺ, dan agama bapak kami Ibrahim, yang berdiri di atas jalan yang lurus, muslim dan tidak tergolong orang-orang musyrik.',
-      fadhilah: 'Pernyataan keteguhan di atas agama tauhid dan rasa syukur atas nikmat iman di pagi hari.',
+      fadhilah: 'Pernyataan keteguhan di atas agama tauhid.',
       source: 'HR. Ahmad (3: 406), shahih sesuai syarat Bukhari Muslim.',
       target: 1,
     },
@@ -230,6 +219,26 @@ export const dzikirData = {
       target: 3,
     },
     {
+      id: 'p16',
+      title: 'Tahlil 100x (Atau 10x)',
+      arabic: 'لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ',
+      latin: 'Lā ilāha illallāhu waḥdahū lā syarīka lah, lahul-mulku wa lahul-ḥamdu wa huwa ‘alā kulli syai’in qadīr.',
+      translation: 'Tidak ada ilah (yang berhak disembah) selain Allah semata, tidak ada sekutu bagi-Nya. Milik-Nya kerajaan dan milik-Nya segala pujian. Dan Dia Mahakuasa atas segala sesuatu.',
+      fadhilah: 'Dzikir tauhid dengan keutamaan besar: pahala berlipat, perlindungan dari setan, dan timbangan kebaikan.',
+      source: 'HR. Bukhari no. 3293 dan Muslim no. 2691.',
+      targetOptions: {
+        10: {
+          fadhilah: 'Jika dibaca 10x, ia mendapatkan pahala seperti memerdekakan 4 budak dari keturunan Ismail.',
+          source: 'HR. Bukhari no. 6403 dan Muslim no. 2693.',
+        },
+        100: {
+          fadhilah: 'Jika dibaca 100x dalam sehari, mendapat pahala besar, perlindungan dari setan hingga petang, dan tidak ada yang melebihi kecuali yang membaca lebih banyak.',
+          source: 'HR. Bukhari no. 3293 dan Muslim no. 2691.',
+        },
+      },
+      target: 10,
+    },
+    {
       id: 'p15',
       title: 'Tasbih 100x',
       arabic: 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',
@@ -238,16 +247,6 @@ export const dzikirData = {
       fadhilah: 'Barangsiapa membacanya 100x dalam sehari, maka diampuni dosa-dosanya sekalipun sebanyak buih di lautan.',
       source: 'HR. Bukhari no. 6405 dan Muslim no. 2691.',
       target: 100,
-    },
-    {
-      id: 'p16',
-      title: 'Tahlil 100x (Atau 10x)',
-      arabic: 'لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ',
-      latin: 'Lā ilāha illallāhu waḥdahū lā syarīka lah, lahul-mulku wa lahul-ḥamdu wa huwa ‘alā kulli syai’in qadīr.',
-      translation: 'Tidak ada ilah (yang berhak disembah) selain Allah semata, tidak ada sekutu bagi-Nya. Milik-Nya kerajaan dan milik-Nya segala pujian. Dan Dia Mahakuasa atas segala sesuatu.',
-      fadhilah: 'Dzikir tauhid dengan keutamaan besar: pahala berlipat, perlindungan dari setan, dan timbangan kebaikan.',
-      source: 'HR. Bukhari no. 3293 dan Muslim no. 2691.',
-      target: 10,
     },
     {
       id: 'p17',
@@ -285,7 +284,7 @@ export const dzikirData = {
       arabic: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ ۝ قُلْ هُوَ اللَّهُ أَحَدٌ ۝١ اللَّهُ الصَّمَدُ ۝٢ لَمْ يَلِدْ وَلَمْ يُولَدْ ۝٣ وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ ۝٤',
       latin: 'Bismillāhir-raḥmānir-raḥīm. Qul huwallāhu aḥad. Allāhuṣ-ṣamad. Lam yalid wa lam yūlad. Wa lam yakul lahū kufuwan aḥad.',
       translation: 'Katakanlah: "Dialah Allah, Yang Maha Esa. Allah adalah Tuhan yang bergantung kepada-Nya segala sesuatu. Dia tiada beranak dan tidak pula diperanakkan, dan tidak ada seorangpun yang setara dengan Dia."',
-      fadhilah: 'Membaca Al-Ikhlas bersama Al-Falaq dan An-Naas tiga kali pada petang menjadi penjagaan dari berbagai keburukan.',
+      fadhilah: 'Membaca Al-Ikhlas, Al-Falaq, dan An-Naas pagi dan sore 3x cukuplah baginya (penjagaan) dari segala sesuatu.',
       source: 'HR. Abu Dawud no. 5082, Tirmidzi no. 3575.',
       target: 3,
     },
@@ -295,7 +294,7 @@ export const dzikirData = {
       arabic: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ ۝ قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ ۝١ مِن شَرِّ مَا خَلَقَ ۝٢ وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ ۝٣ وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ ۝٤ وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ ۝٥',
       latin: 'Bismillāhir-raḥmānir-raḥīm. Qul a‘ūżu birabbil-falaq. Min syarri mā khalaq. Wa min syarri gāsiqin iżā waqab. Wa min syarrin-naffāṡāti fil-‘uqad. Wa min syarri ḥāsidin iżā ḥasad.',
       translation: 'Katakanlah: "Aku berlindung kepada Tuhan Yang Menguasai subuh, dari kejahatan makhluk-Nya, dan dari kejahatan malam apabila telah gelap gulita, dan dari kejahatan wanita-wanita tukang sihir yang menghembus pada buhul-buhul, dan dari kejahatan pendengki bila ia dengki."',
-      fadhilah: 'Termasuk Al-Mu\'awwidzat yang dibaca pagi-petang sebagai perlindungan dari berbagai keburukan makhluk.',
+      fadhilah: 'Membaca Al-Ikhlas, Al-Falaq, dan An-Naas pagi dan sore 3x cukuplah baginya (penjagaan) dari segala sesuatu.',
       source: 'HR. Abu Dawud no. 5082, Tirmidzi no. 3575.',
       target: 3,
     },
@@ -305,7 +304,7 @@ export const dzikirData = {
       arabic: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ ۝ قُلْ أَعُوذُ بِرَبِّ النَّاسِ ۝١ مَلِكِ النَّاسِ ۝٢ إِلَٰهِ النَّاسِ ۝٣ مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ ۝٤ الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ ۝٥ مِنَ الْجِنَّةِ وَالنَّاسِ ۝٦',
       latin: 'Bismillāhir-raḥmānir-raḥīm. Qul a‘ūżu birabbin-nās. Malikin-nās. Ilāhin-nās. Min syarril-waswāsil-khannās. Allażī yuwaswisu fī ṣudūrin-nās. Minal-jinnati wan-nās.',
       translation: 'Katakanlah: "Aku berlindung kepada Tuhan (yang memelihara dan menguasai) manusia. Raja manusia. Sembahan manusia. Dari kejahatan (bisikan) syaitan yang biasa bersembunyi, yang membisikkan (kejahatan) ke dalam dada manusia, dari (golongan) jin dan manusia."',
-      fadhilah: 'Termasuk Al-Mu\'awwidzat yang dibaca pagi-petang untuk perlindungan dari was-was setan dari golongan jin dan manusia.',
+      fadhilah: 'Membaca Al-Ikhlas, Al-Falaq, dan An-Naas pagi dan sore 3x cukuplah baginya (penjagaan) dari segala sesuatu.',
       source: 'HR. Abu Dawud no. 5082, Tirmidzi no. 3575.',
       target: 3,
     },
@@ -365,7 +364,7 @@ export const dzikirData = {
       arabic: 'اللَّهُمَّ عَالِمَ الْغَيْبِ وَالشَّهَادَةِ فَاطِرَ السَّمَاوَاتِ وَالْأَرْضِ، رَبَّ كُلِّ شَيْءٍ وَمَلِيكَهُ، أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا أَنْتَ، أَعُوذُ بِكَ مِنْ شَرِّ نَفْسِي، وَمِنْ شَرِّ الشَّيْطَانِ وَشِرْكِهِ، وَأَنْ أَقْتَرِفَ عَلَى نَفْسِي سُوءًا أَوْ أَجُرَّهُ إِلَى مُسْلِمٍ',
       latin: 'Allahumma \'aalimal ghoibi wasy-syahaadah faathiros samaawaati wal ardh. Robba kulli syai-in wa maliikah. Asyhadu alla ilaha illa anta. A\'udzu bika min syarri nafsii wa min syarrisy-syaithooni wa syirkihi, wa an aqtarifo \'alaa nafsii suu-an aw ajurrohu ilaa muslim.',
       translation: 'Ya Allah, Yang Maha Mengetahui yang ghaib dan yang nyata, wahai Pencipta langit dan bumi, Tuhan segala sesuatu dan yang merajainya. Aku bersaksi bahwa tidak ada ilah yang berhak disembah kecuali Engkau. Aku berlindung kepada-Mu dari kejahatan diriku, setan dan balatentaranya, dan aku (berlindung kepada-Mu) dari berbuat kejelekan terhadap diriku atau menyeretnya kepada seorang muslim.',
-      fadhilah: 'Doa perlindungan komprehensif dari keburukan diri sendiri dan godaan setan.',
+      fadhilah: 'Doa ini diajarkan Rasulullah ﷺ kepada Abu Bakr Ash-Shiddiq radhiyallahu anhu untuk dibaca pada pagi, petang, dan saat hendak tidur; isinya perlindungan dari keburukan diri dan setan.',
       source: 'HR. Tirmidzi no. 3392 dan Abu Dawud no. 5067.',
       target: 1,
     },
@@ -376,18 +375,8 @@ export const dzikirData = {
       latin: 'Allāhumma ‘āfinī fī badanī, Allāhumma ‘āfinī fī sam‘ī, Allāhumma ‘āfinī fī baṣarī, lā ilāha illā anta. Allāhumma innī a‘ūżu bika minal-kufri wal-faqri, wa a‘ūżu bika min ‘ażābil-qabri, lā ilāha illā anta.',
       translation: 'Ya Allah, selamatkanlah tubuhku (dari penyakit dan cacat). Ya Allah, selamatkanlah pendengaranku. Ya Allah, selamatkanlah penglihatanku. Tiada ilah yang berhak disembah selain Engkau. Ya Allah, sesungguhnya aku berlindung kepada-Mu dari kekafiran dan kemiskinan. Dan aku berlindung kepada-Mu dari azab kubur. Tiada ilah yang berhak disembah selain Engkau.',
       fadhilah: 'Dibaca tiga kali pada pagi/petang sebagai ikhtiar memohon kesehatan dan penjagaan dari gangguan yang membahayakan.',
-      source: 'HR. Abu Dawud no. 5090 dan Ahmad (5/42).',
+      source: 'HR. Al-Bukhari dalam Shahiih al-Adabil Mufrad no. 701, Abu Dawud no. 5090, Ahmad V/42, hasan. Lihat Shahiih Al-Adabil Mufrad no. 539.',
       target: 3,
-    },
-    {
-      id: 'pt10',
-      title: 'Doa Kecukupan (7x)',
-      arabic: 'حَسْبِيَ اللَّهُ لَا إِلَهَ إِلَّا هُوَ عَلَيْهِ تَوَكَّلْتُ وَهُوَ رَبُّ الْعَرْشِ الْعَظِيمِ',
-      latin: 'Ḥasbiyallāhu lā ilāha illā huwa ‘alaihi tawakkaltu wa huwa rabbul-‘arsyil-‘aẓīm.',
-      translation: 'Cukuplah Allah bagiku; tidak ada ilah (yang berhak disembah) melainkan Dia. Hanya kepada-Nya aku bertawakkal dan Dia adalah Tuhan yang memiliki \'Arsy yang agung.',
-      fadhilah: 'Siapa yang rutin membaca doa ini tujuh kali pada pagi/petang, Allah cukupkan urusan dunia dan akhiratnya.',
-      source: 'HR. Ibnu As-Sunni no. 71 dan Abu Dawud no. 5081.',
-      target: 7,
     },
     {
       id: 'pt11',
@@ -425,7 +414,7 @@ export const dzikirData = {
       arabic: 'أَمْسَيْنَا عَلَى فِطْرَةِ اْلإِسْلاَمِ وَعَلَى كَلِمَةِ اْلإِخْلاَصِ، وَعَلَى دِيْنِ نَبِيِّنَا مُحَمَّدٍ صَلَّى اللهُ عَلَيْهِ وَسَلَّمَ، وَعَلَى مِلَّةِ أَبِيْنَا إِبْرَاهِيْمَ، حَنِيْفًا مُسْلِمًا وَمَا كَانَ مِنَ الْمُشْرِكِيْنَ',
       latin: "Amsainā 'alā fiṭratil-islām, wa 'alā kalimatil-ikhlāṣ, wa 'alā dīni nabiyyinā Muḥammadin ṣallallāhu 'alaihi wa sallam, wa 'alā millati abīnā Ibrāhīma ḥanīfan musliman wa mā kāna minal-musyrikīn.",
       translation: 'Di waktu petang kami memegang agama Islam, kalimat ikhlas (kalimat syahadat), agama Nabi kami Muhammad ﷺ, dan agama bapak kami Ibrahim, yang berdiri di atas jalan yang lurus, muslim dan tidak tergolong orang-orang musyrik.',
-      fadhilah: 'Pernyataan keteguhan di atas agama tauhid dan rasa syukur atas nikmat iman di petang hari.',
+      fadhilah: 'Pernyataan keteguhan di atas agama tauhid.',
       source: 'HR. Ahmad (3: 406), shahih sesuai syarat Bukhari Muslim.',
       target: 1,
     },
@@ -440,16 +429,6 @@ export const dzikirData = {
       target: 3,
     },
     {
-      id: 'pt14',
-      title: 'Tasbih 100x',
-      arabic: 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',
-      latin: 'Subḥānallāhi wa biḥamdih.',
-      translation: 'Maha Suci Allah, aku memuji-Nya.',
-      fadhilah: 'Barangsiapa membaca tasbih ini seratus kali dalam sehari, diampuni dosanya meski sebanyak buih di lautan.',
-      source: 'HR. Bukhari no. 6405 dan Muslim no. 2691.',
-      target: 100,
-    },
-    {
       id: 'pt15',
       title: 'Tahlil 100x (Atau 10x)',
       arabic: 'لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ',
@@ -457,7 +436,27 @@ export const dzikirData = {
       translation: 'Tidak ada ilah (yang berhak disembah) selain Allah semata, tidak ada sekutu bagi-Nya. Milik-Nya kerajaan dan milik-Nya segala pujian. Dan Dia Mahakuasa atas segala sesuatu.',
       fadhilah: 'Dzikir tauhid dengan keutamaan besar: pahala berlipat, perlindungan dari setan, dan timbangan kebaikan.',
       source: 'HR. Bukhari no. 3293 dan Muslim no. 2691.',
+      targetOptions: {
+        10: {
+          fadhilah: 'Jika dibaca 10x, ia mendapatkan pahala seperti memerdekakan 4 budak dari keturunan Ismail.',
+          source: 'HR. Bukhari no. 6403 dan Muslim no. 2693.',
+        },
+        100: {
+          fadhilah: 'Jika dibaca 100x dalam sehari, mendapat pahala besar, perlindungan dari setan hingga petang, dan tidak ada yang melebihi kecuali yang membaca lebih banyak.',
+          source: 'HR. Bukhari no. 3293 dan Muslim no. 2691.',
+        },
+      },
       target: 10,
+    },
+    {
+      id: 'pt14',
+      title: 'Tasbih 100x',
+      arabic: 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',
+      latin: 'Subḥānallāhi wa biḥamdih.',
+      translation: 'Maha Suci Allah, aku memuji-Nya.',
+      fadhilah: 'Dianjurkan membaca “Subhanallahi wa bihamdih” 100x saat pagi dan 100x saat petang; ini dzikir paling utama pada waktunya.',
+      source: 'HR. Muslim no. 2692.',
+      target: 100,
     },
     {
       id: 'pt16',
@@ -477,7 +476,22 @@ export const ISTIGHFAR_LINK = {
   petang: { id: 'pt16', otherTime: 'pagi', otherId: 'p17' },
 };
 
-export const readStoredCounts = (time) => {
+export const readStoredCounts = (time, dateKey) => {
   const saved = localStorage.getItem(`dzikir_counts_${time}`);
-  return saved ? JSON.parse(saved) : {};
+  if (!saved) return {};
+
+  try {
+    const parsed = JSON.parse(saved);
+    if (parsed && typeof parsed === 'object' && 'counts' in parsed) {
+      if (dateKey && parsed.dateKey !== dateKey) return {};
+      return parsed.counts && typeof parsed.counts === 'object' ? parsed.counts : {};
+    }
+    return dateKey ? {} : (parsed || {});
+  } catch {
+    return {};
+  }
+};
+
+export const writeStoredCounts = (time, counts, dateKey) => {
+  localStorage.setItem(`dzikir_counts_${time}`, JSON.stringify({ dateKey, counts }));
 };
