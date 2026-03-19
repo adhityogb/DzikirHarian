@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sun, Moon, ChevronRight, RotateCcw, Download } from 'lucide-react';
+import { Sun, Moon, ChevronRight, RotateCcw, Download, Sparkles } from 'lucide-react';
 
 export default function HomeTab({
   isNightView,
@@ -46,33 +46,63 @@ export default function HomeTab({
       </button>
 
       {isMobileView && !isStandaloneMode && showInstallBanner && (
-        <div className="-mt-1">
-          <button
-            type="button"
-            onClick={() => setShowInstallInstructions((prev) => !prev)}
-            className="text-sm font-semibold text-emerald-700 hover:text-emerald-800 underline underline-offset-2"
-          >
-            Install aplikasi
-          </button>
+        <div className="install-card relative overflow-hidden rounded-[2rem] border border-emerald-200/80 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 p-[1px] shadow-[0_18px_40px_rgba(16,185,129,0.22)]">
+          <div className="relative rounded-[calc(2rem-1px)] bg-[linear-gradient(135deg,rgba(255,255,255,0.95),rgba(236,253,245,0.98))] p-5 sm:p-6">
+            <div className="install-card__blur" />
+            <div className="relative flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20 shrink-0">
+                <Download className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 text-emerald-700 mb-1">
+                  <Sparkles className="w-4 h-4" />
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em]">Install App</p>
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">Pasang Dzikir Harian ke layar utama</h3>
+                <p className="mt-2 text-sm text-gray-600 leading-relaxed">Akses lebih cepat, nuansa seperti aplikasi native, dan tetap selaras dengan warna hijau lembut aplikasi ini.</p>
 
-          {showInstallInstructions && (
-            <div className="mt-3 rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 p-4 shadow-sm animate-fade-in-up">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0"><Download className="w-5 h-5" /></div>
-                <div className="flex-1">
-                  <p className="font-semibold text-emerald-900 text-sm">Instruksi Install</p>
-                  <div className="mt-2 rounded-xl bg-white/80 p-3 border border-emerald-100">
-                    {installPlatform === 'ios' && <ol className="text-xs text-emerald-800 list-decimal pl-4 space-y-1"><li>Buka di Safari, lalu ketuk tombol <strong>Share</strong> (ikon kotak + panah).</li><li>Pilih <strong>Add to Home Screen</strong>.</li><li>Ketuk <strong>Add</strong> sampai ikon muncul di layar utama.</li></ol>}
-                    {installPlatform === 'android' && <ol className="text-xs text-emerald-800 list-decimal pl-4 space-y-1"><li>Ketuk tombol <strong>Install</strong> di bawah ini.</li><li>Jika tidak muncul, buka menu browser (⋮).</li><li>Pilih <strong>Install app</strong> atau <strong>Add to Home screen</strong>.</li></ol>}
-                    {installPlatform === 'other' && <p className="text-xs text-emerald-800">Gunakan menu browser lalu pilih <strong>Install app</strong> atau <strong>Add to Home Screen</strong>.</p>}
-                  </div>
-                  {installPlatform === 'android' && (
-                    <div className="flex gap-2 mt-3">{installPromptEvent ? <button onClick={handleInstallApp} className="px-3 py-2 text-xs font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors">Install</button> : <span className="px-3 py-2 text-xs font-semibold rounded-lg bg-white text-emerald-700 border border-emerald-200">Buka menu browser untuk install</span>}</div>
+                <div className="mt-4 flex flex-wrap gap-3">
+                  {installPlatform === 'android' && installPromptEvent ? (
+                    <button
+                      type="button"
+                      onClick={handleInstallApp}
+                      className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all duration-300 hover:scale-[1.01] hover:shadow-xl hover:shadow-emerald-500/30 active:scale-[0.98]"
+                    >
+                      <Download className="w-4 h-4" />
+                      Install aplikasi
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setShowInstallInstructions((prev) => !prev)}
+                      className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-sm font-semibold text-emerald-700 transition-all duration-300 hover:border-emerald-300 hover:bg-emerald-50 active:scale-[0.98]"
+                    >
+                      <Download className="w-4 h-4" />
+                      {showInstallInstructions ? 'Sembunyikan panduan' : 'Lihat cara install'}
+                    </button>
+                  )}
+
+                  {installPlatform === 'android' && !installPromptEvent && (
+                    <button
+                      type="button"
+                      onClick={() => setShowInstallInstructions((prev) => !prev)}
+                      className="inline-flex items-center gap-2 rounded-2xl border border-transparent bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 transition-all duration-300 hover:bg-emerald-100 active:scale-[0.98]"
+                    >
+                      {showInstallInstructions ? 'Tutup langkah manual' : 'Langkah manual'}
+                    </button>
                   )}
                 </div>
+
+                {(showInstallInstructions || installPlatform === 'ios' || installPlatform === 'other' || (installPlatform === 'android' && !installPromptEvent)) && (
+                  <div className="mt-4 rounded-2xl border border-emerald-100 bg-white/90 p-4 shadow-sm animate-fade-in-up">
+                    {installPlatform === 'ios' && <ol className="text-sm text-emerald-900 list-decimal pl-5 space-y-1.5"><li>Buka aplikasi ini lewat Safari.</li><li>Ketuk tombol <strong>Share</strong> (ikon kotak + panah).</li><li>Pilih <strong>Add to Home Screen</strong>, lalu tekan <strong>Add</strong>.</li></ol>}
+                    {installPlatform === 'android' && <ol className="text-sm text-emerald-900 list-decimal pl-5 space-y-1.5"><li>Tekan menu browser <strong>⋮</strong>.</li><li>Pilih <strong>Install app</strong> atau <strong>Add to Home screen</strong>.</li><li>Konfirmasi agar ikon muncul di layar utama.</li></ol>}
+                    {installPlatform === 'other' && <p className="text-sm text-emerald-900">Gunakan menu browser, lalu pilih <strong>Install app</strong> atau <strong>Add to Home Screen</strong> bila tersedia.</p>}
+                  </div>
+                )}
               </div>
             </div>
-          )}
+          </div>
         </div>
       )}
 
@@ -86,7 +116,6 @@ export default function HomeTab({
           <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden"><div className="bg-gradient-to-r from-emerald-400 to-teal-500 h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${dailyProgress}%` }} /></div>
           <p className="text-xs text-gray-500 mt-3">Progress realtime: Pagi {morningProgress}% • Petang {eveningProgress}%</p>
         </div>
-
       </div>
     </div>
   );

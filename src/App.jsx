@@ -43,6 +43,7 @@ export default function App() {
   const [showInstallBanner, setShowInstallBanner] = useState(() => window.innerWidth < 768 && !isStandaloneDisplay());
   const [activeDalil, setActiveDalil] = useState(null);
   const [notificationPermission, setNotificationPermission] = useState(() => ('Notification' in window ? Notification.permission : 'default'));
+  const [hasCollapsedHeader, setHasCollapsedHeader] = useState(false);
   const [tahlilTargetByTime, setTahlilTargetByTime] = useState(() => ({
     pagi: Number(localStorage.getItem('dzikir_tahlil_target_pagi') || 10),
     petang: Number(localStorage.getItem('dzikir_tahlil_target_petang') || 10),
@@ -218,6 +219,20 @@ export default function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const scrollElement = scrollRef.current;
+    if (!scrollElement || isReadingMode) return undefined;
+
+    const handleScroll = () => {
+      if (!hasCollapsedHeader && scrollElement.scrollTop > 48) {
+        setHasCollapsedHeader(true);
+      }
+    };
+
+    scrollElement.addEventListener('scroll', handleScroll, { passive: true });
+    return () => scrollElement.removeEventListener('scroll', handleScroll);
+  }, [hasCollapsedHeader, isReadingMode]);
+
   const handleIncrement = (id, target, index) => {
     setCounts((prev) => {
       const current = prev[id] || 0;
@@ -281,7 +296,41 @@ export default function App() {
   return (
     <div className={`min-h-screen bg-gray-50 font-sans text-gray-800 flex justify-center items-stretch lg:items-center overflow-x-hidden selection:bg-emerald-200 px-0 sm:px-4 lg:px-8 ${isNightView ? 'night-view' : ''}`}>
       <div className="app-shell w-full max-w-4xl h-[100dvh] lg:h-[92vh] bg-white relative flex flex-col overflow-hidden sm:rounded-[2rem] lg:shadow-2xl lg:border border-gray-200">
-        {!isReadingMode && <header className="px-6 py-5 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-b-3xl shadow-md z-10 relative shrink-0"><div className="flex justify-between items-center mb-6"><div className="flex items-center gap-4"><AppLogo /><div><h1 className="text-2xl font-bold tracking-tight">Dzikir Harian</h1><div className="mt-1 flex items-center gap-2 text-emerald-100"><p className="text-sm font-medium">Sesuai Sunnah Nabi</p><p className="text-lg sm:text-xl calligraphy-subtitle" dir="rtl" aria-label="Kaligrafi Muhammad">مُحَمَّد</p></div></div></div></div><div className="bg-white/20 backdrop-blur-md rounded-2xl p-4 border border-white/20 shadow-inner"><div className="flex gap-3"><Info className="w-5 h-5 text-emerald-100 shrink-0 mt-0.5" /><p className="text-sm leading-relaxed text-white">"Maka bertasbihlah kepada Allah di waktu petang dan waktu pagi." <span className="block text-emerald-100 text-xs mt-1">(QS. Ar-Rum: 17)</span></p></div></div></header>}
+        {!isReadingMode && (
+          <header className={`app-header px-5 sm:px-6 text-white shadow-md z-10 relative shrink-0 ${hasCollapsedHeader ? 'app-header--collapsed' : ''}`}>
+            <div className="app-header__glow" />
+            <div className="app-header__inner">
+              <div className="app-header__top flex items-start justify-between gap-4">
+                <div className="flex items-center gap-4 min-w-0">
+                  <AppLogo compact={hasCollapsedHeader} />
+                  <div className="min-w-0 app-header__brand-copy">
+                    <h1 className="text-2xl font-bold tracking-tight">Dzikir Harian</h1>
+                    <div className="mt-1 flex items-center gap-2 text-emerald-100 app-header__subtitle-row">
+                      <p className="text-sm font-medium">Sesuai Sunnah Nabi</p>
+                      <p className="text-lg sm:text-xl calligraphy-subtitle" dir="rtl" aria-label="Kaligrafi Muhammad">مُحَمَّد</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="app-header__compact-chip rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-right backdrop-blur-sm">
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-emerald-100/90">QS.</p>
+                  <p className="text-sm font-semibold text-white">Ar-Rum 17</p>
+                </div>
+              </div>
+
+              <div className="app-header__verse bg-white/14 backdrop-blur-md rounded-[1.7rem] p-4 sm:p-5 border border-white/15 shadow-inner">
+                <div className="flex gap-3 items-start">
+                  <div className="w-10 h-10 rounded-full bg-white/14 text-emerald-50 flex items-center justify-center shrink-0">
+                    <Info className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm leading-relaxed text-white font-medium">&quot;Maka bertasbihlah kepada Allah di waktu petang dan waktu pagi.&quot;</p>
+                    <p className="text-sm sm:text-[15px] font-semibold text-emerald-50 mt-2">QS. Ar-Rum: 17</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </header>
+        )}
 
         {isReadingMode && <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100 bg-white/95 backdrop-blur z-20 shrink-0 shadow-sm"><button onClick={() => setIsReadingMode(false)} className="p-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"><X className="w-6 h-6" /></button><div className="text-center flex-1"><h2 className="font-bold text-gray-800 text-sm">{activeTime === 'pagi' ? 'Dzikir Pagi' : 'Dzikir Petang'}</h2><p className="text-xs text-emerald-600 font-bold tracking-wide">{progress}% SELESAI</p></div><button onClick={() => { setActiveTab('settings'); setIsReadingMode(false); }} className="p-2 -mr-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"><Settings2 className="w-5 h-5" /></button></div>}
         {isReadingMode && <div className="w-full bg-gray-100 h-1 shrink-0"><div className="bg-emerald-500 h-1 transition-all duration-500 ease-out" style={{ width: `${progress}%` }} /></div>}
