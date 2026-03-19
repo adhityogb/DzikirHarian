@@ -43,7 +43,6 @@ export default function App() {
   const [showInstallBanner, setShowInstallBanner] = useState(() => window.innerWidth < 768 && !isStandaloneDisplay());
   const [activeDalil, setActiveDalil] = useState(null);
   const [notificationPermission, setNotificationPermission] = useState(() => ('Notification' in window ? Notification.permission : 'default'));
-  const [hasCollapsedHeader, setHasCollapsedHeader] = useState(false);
   const [tahlilTargetByTime, setTahlilTargetByTime] = useState(() => ({
     pagi: Number(localStorage.getItem('dzikir_tahlil_target_pagi') || 10),
     petang: Number(localStorage.getItem('dzikir_tahlil_target_petang') || 10),
@@ -219,20 +218,6 @@ export default function App() {
     };
   }, []);
 
-  useEffect(() => {
-    const scrollElement = scrollRef.current;
-    if (!scrollElement || isReadingMode) return undefined;
-
-    const handleScroll = () => {
-      if (!hasCollapsedHeader && scrollElement.scrollTop > 48) {
-        setHasCollapsedHeader(true);
-      }
-    };
-
-    scrollElement.addEventListener('scroll', handleScroll, { passive: true });
-    return () => scrollElement.removeEventListener('scroll', handleScroll);
-  }, [hasCollapsedHeader, isReadingMode]);
-
   const handleIncrement = (id, target, index) => {
     setCounts((prev) => {
       const current = prev[id] || 0;
@@ -297,7 +282,7 @@ export default function App() {
     <div className={`min-h-screen bg-gray-50 font-sans text-gray-800 flex justify-center items-stretch lg:items-center overflow-x-hidden selection:bg-emerald-200 px-0 sm:px-4 lg:px-8 ${isNightView ? 'night-view' : ''}`}>
       <div className="app-shell w-full max-w-4xl h-[100dvh] lg:h-[92vh] bg-white relative flex flex-col overflow-hidden sm:rounded-[2rem] lg:shadow-2xl lg:border border-gray-200">
         {!isReadingMode && (
-          <header className={`app-header px-5 sm:px-6 text-white shadow-md z-10 relative shrink-0 ${hasCollapsedHeader ? 'app-header--collapsed' : ''}`}>
+          <header className="app-header px-5 sm:px-6 text-white shadow-md z-10 relative shrink-0">
             <div className="app-header__glow" />
             <div className="app-header__inner">
               <div className="app-header__top flex items-start gap-4">
