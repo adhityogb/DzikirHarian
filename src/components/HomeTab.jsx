@@ -46,31 +46,32 @@ export default function HomeTab({
       </button>
 
       {isMobileView && !isStandaloneMode && showInstallBanner && (
-        <div className="-mt-1">
+        <div className="space-y-3">
           <button
             type="button"
-            onClick={() => setShowInstallInstructions((prev) => !prev)}
-            className="text-sm font-semibold text-emerald-700 hover:text-emerald-800 underline underline-offset-2"
+            onClick={installPlatform === 'android' && installPromptEvent ? handleInstallApp : () => setShowInstallInstructions((prev) => !prev)}
+            className="install-cta-button w-full"
           >
-            Install aplikasi
+            <span className="install-cta-button__icon"><Download className="w-5 h-5" /></span>
+            <span className="install-cta-button__label">Instal Aplikasi</span>
           </button>
 
+          <div className="flex items-center justify-between gap-3 px-1">
+            <p className="text-xs leading-relaxed text-gray-500">Tambahkan ke layar utama agar akses dzikir terasa seperti aplikasi native.</p>
+            <button
+              type="button"
+              onClick={() => setShowInstallInstructions((prev) => !prev)}
+              className="shrink-0 text-xs font-semibold text-emerald-700 hover:text-emerald-800"
+            >
+              {showInstallInstructions ? 'Tutup panduan' : 'Lihat panduan'}
+            </button>
+          </div>
+
           {showInstallInstructions && (
-            <div className="mt-3 rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 p-4 shadow-sm animate-fade-in-up">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0"><Download className="w-5 h-5" /></div>
-                <div className="flex-1">
-                  <p className="font-semibold text-emerald-900 text-sm">Instruksi Install</p>
-                  <div className="mt-2 rounded-xl bg-white/80 p-3 border border-emerald-100">
-                    {installPlatform === 'ios' && <ol className="text-xs text-emerald-800 list-decimal pl-4 space-y-1"><li>Buka di Safari, lalu ketuk tombol <strong>Share</strong> (ikon kotak + panah).</li><li>Pilih <strong>Add to Home Screen</strong>.</li><li>Ketuk <strong>Add</strong> sampai ikon muncul di layar utama.</li></ol>}
-                    {installPlatform === 'android' && <ol className="text-xs text-emerald-800 list-decimal pl-4 space-y-1"><li>Ketuk tombol <strong>Install</strong> di bawah ini.</li><li>Jika tidak muncul, buka menu browser (⋮).</li><li>Pilih <strong>Install app</strong> atau <strong>Add to Home screen</strong>.</li></ol>}
-                    {installPlatform === 'other' && <p className="text-xs text-emerald-800">Gunakan menu browser lalu pilih <strong>Install app</strong> atau <strong>Add to Home Screen</strong>.</p>}
-                  </div>
-                  {installPlatform === 'android' && (
-                    <div className="flex gap-2 mt-3">{installPromptEvent ? <button onClick={handleInstallApp} className="px-3 py-2 text-xs font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors">Install</button> : <span className="px-3 py-2 text-xs font-semibold rounded-lg bg-white text-emerald-700 border border-emerald-200">Buka menu browser untuk install</span>}</div>
-                  )}
-                </div>
-              </div>
+            <div className="rounded-2xl border border-emerald-100 bg-white p-4 shadow-sm animate-fade-in-up">
+              {installPlatform === 'ios' && <ol className="text-sm text-emerald-900 list-decimal pl-5 space-y-1.5"><li>Buka aplikasi ini lewat Safari.</li><li>Ketuk tombol <strong>Share</strong> (ikon kotak + panah).</li><li>Pilih <strong>Add to Home Screen</strong>, lalu tekan <strong>Add</strong>.</li></ol>}
+              {installPlatform === 'android' && <ol className="text-sm text-emerald-900 list-decimal pl-5 space-y-1.5"><li>Tekan tombol <strong>Instal Aplikasi</strong> di atas.</li><li>Kalau prompt belum muncul, buka menu browser <strong>⋮</strong>.</li><li>Pilih <strong>Install app</strong> atau <strong>Add to Home screen</strong>.</li></ol>}
+              {installPlatform === 'other' && <p className="text-sm text-emerald-900">Gunakan menu browser, lalu pilih <strong>Install app</strong> atau <strong>Add to Home Screen</strong> bila tersedia.</p>}
             </div>
           )}
         </div>
@@ -86,7 +87,6 @@ export default function HomeTab({
           <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden"><div className="bg-gradient-to-r from-emerald-400 to-teal-500 h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${dailyProgress}%` }} /></div>
           <p className="text-xs text-gray-500 mt-3">Progress realtime: Pagi {morningProgress}% • Petang {eveningProgress}%</p>
         </div>
-
       </div>
     </div>
   );
