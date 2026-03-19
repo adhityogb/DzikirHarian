@@ -300,31 +300,25 @@ export default function App() {
           <header className={`app-header px-5 sm:px-6 text-white shadow-md z-10 relative shrink-0 ${hasCollapsedHeader ? 'app-header--collapsed' : ''}`}>
             <div className="app-header__glow" />
             <div className="app-header__inner">
-              <div className="app-header__top flex items-start justify-between gap-4">
-                <div className="flex items-center gap-4 min-w-0">
-                  <AppLogo compact={hasCollapsedHeader} />
-                  <div className="min-w-0 app-header__brand-copy">
-                    <h1 className="text-2xl font-bold tracking-tight">Dzikir Harian</h1>
-                    <div className="mt-1 flex items-center gap-2 text-emerald-100 app-header__subtitle-row">
-                      <p className="text-sm font-medium">Sesuai Sunnah Nabi</p>
-                      <p className="text-lg sm:text-xl calligraphy-subtitle" dir="rtl" aria-label="Kaligrafi Muhammad">مُحَمَّد</p>
-                    </div>
+              <div className="app-header__top flex items-start gap-4">
+                <AppLogo />
+                <div className="min-w-0 app-header__brand-copy">
+                  <h1 className="text-2xl font-bold tracking-tight">Dzikir Harian</h1>
+                  <div className="mt-1 flex items-center gap-2 text-emerald-100 app-header__subtitle-row">
+                    <p className="text-sm font-medium">Sesuai Sunnah Nabi</p>
+                    <p className="text-lg sm:text-xl calligraphy-subtitle" dir="rtl" aria-label="Kaligrafi Muhammad">مُحَمَّد</p>
                   </div>
-                </div>
-                <div className="app-header__compact-chip rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-right backdrop-blur-sm">
-                  <p className="text-[10px] uppercase tracking-[0.24em] text-emerald-100/90">QS.</p>
-                  <p className="text-sm font-semibold text-white">Ar-Rum 17</p>
                 </div>
               </div>
 
               <div className="app-header__verse bg-white/14 backdrop-blur-md rounded-[1.7rem] p-4 sm:p-5 border border-white/15 shadow-inner">
-                <div className="flex gap-3 items-start">
-                  <div className="w-10 h-10 rounded-full bg-white/14 text-emerald-50 flex items-center justify-center shrink-0">
+                <div className="app-header__verse-content flex gap-3 items-start">
+                  <div className="app-header__verse-icon w-10 h-10 rounded-full bg-white/14 text-emerald-50 flex items-center justify-center shrink-0">
                     <Info className="w-5 h-5" />
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-sm leading-relaxed text-white font-medium">&quot;Maka bertasbihlah kepada Allah di waktu petang dan waktu pagi.&quot;</p>
-                    <p className="text-sm sm:text-[15px] font-semibold text-emerald-50 mt-2">QS. Ar-Rum: 17</p>
+                  <div className="min-w-0 app-header__verse-copy">
+                    <p className="app-header__verse-quote text-sm leading-relaxed text-white font-medium">&quot;Maka bertasbihlah kepada Allah di waktu petang dan waktu pagi.&quot;</p>
+                    <p className="app-header__verse-reference text-sm sm:text-[15px] font-semibold text-emerald-50 mt-2">QS. Ar-Rum: 17</p>
                   </div>
                 </div>
               </div>
