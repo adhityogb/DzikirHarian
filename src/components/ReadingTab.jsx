@@ -23,7 +23,6 @@ export default function ReadingTab({ currentDzikirList, counts, showArabic, font
               {dzikir.targetOptions && (
                 <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-4">
                   <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700 mb-2">Pilihan jumlah bacaan</p>
-                  <p className="text-xs text-indigo-700/80 mb-3 leading-relaxed">Mengganti pilihan akan menyesuaikan target dan progress tanpa menghapus hitungan yang sudah Anda selesaikan.</p>
                   <div className="flex gap-2">
                     {[10, 100].map((option) => (
                       <button
