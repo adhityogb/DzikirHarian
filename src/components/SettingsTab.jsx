@@ -1,7 +1,13 @@
 import React from 'react';
 import { BellRing, Type, Languages, AlignLeft, ChevronLeft } from 'lucide-react';
 
-export default function SettingsTab({ remindersEnabled, setRemindersEnabled, fontSize, setFontSize, showArabic, setShowArabic, showLatin, setShowLatin, showTranslation, setShowTranslation, showBackToReading, onBackToReading }) {
+export default function SettingsTab({ remindersEnabled, onRemindersToggle, notificationPermission, installPlatform, isStandaloneMode, fontSize, setFontSize, showArabic, setShowArabic, showLatin, setShowLatin, showTranslation, setShowTranslation, showBackToReading, onBackToReading }) {
+  const notificationHint = installPlatform === 'ios'
+    ? (isStandaloneMode
+      ? 'Pastikan izin notifikasi sudah diizinkan agar pengingat tetap bisa muncul dari app yang dipasang di Home Screen.'
+      : 'Untuk iPhone/iPad, pasang app ke Home Screen terlebih dahulu sebelum mengaktifkan notifikasi.')
+    : 'Aktifkan izin notifikasi browser agar pengingat dzikir dapat berjalan dengan lebih andal.';
+
   return (
     <div className="p-6 space-y-8 animate-fade-in-up pb-[calc(env(safe-area-inset-bottom,16px)+8.5rem)]">
       <div className="space-y-4">
@@ -18,8 +24,9 @@ export default function SettingsTab({ remindersEnabled, setRemindersEnabled, fon
         <h2 className="font-bold text-gray-800 text-xl">Pengaturan Tampilan</h2>
       </div>
       <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
-        <div className="flex items-center justify-between gap-4"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-500"><BellRing className="w-5 h-5" /></div><div><h4 className="font-semibold text-gray-800">Notifikasi Pengingat</h4><p className="text-xs text-gray-500">Pagi 05.30 & Petang 17.00 (default aktif)</p></div></div><label className="relative inline-flex items-center cursor-pointer"><input type="checkbox" checked={remindersEnabled} onChange={(e) => setRemindersEnabled(e.target.checked)} className="sr-only peer" /><div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div></label></div>
-        <p className="text-xs text-gray-500 mt-3 leading-relaxed">Pesan notifikasi: “Waktunya dzikir pagi. Tenangkan hati, awali hari dengan mengingat Allah.” dan “Waktunya dzikir petang. Tutup sore dengan dzikir dan doa.”</p>
+        <div className="flex items-center justify-between gap-4"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-500"><BellRing className="w-5 h-5" /></div><div><h4 className="font-semibold text-gray-800">Notifikasi Pengingat</h4><p className="text-xs text-gray-500">Pagi 05.30 & Petang 17.00</p></div></div><label className="relative inline-flex items-center cursor-pointer"><input type="checkbox" checked={remindersEnabled} onChange={(e) => { void onRemindersToggle(e.target.checked); }} className="sr-only peer" /><div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div></label></div>
+        <p className="text-xs text-gray-500 mt-3 leading-relaxed">{notificationHint}</p>
+        {notificationPermission === 'denied' && <p className="text-xs text-rose-500 mt-2 leading-relaxed">Izin notifikasi sedang diblokir. Ubah izin di pengaturan browser/perangkat jika ingin menyalakannya kembali.</p>}
       </div>
 
       <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">

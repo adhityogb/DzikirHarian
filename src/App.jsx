@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Settings2, BookOpen, X, Info, Download } from 'lucide-react';
 import './App.css';
 import AppLogo from './components/AppLogo';
@@ -24,7 +24,7 @@ const getMsUntilNextMidnight = () => {
 };
 
 const getDzikirListForTime = (time, tahlilTargetByTime) => dzikirData[time].map((item) => {
-  if (item.title !== 'Tahlil 100x (Atau 10x)' || !item.targetOptions) return item;
+  if (!item.targetOptions) return item;
 
   const selectedTarget = tahlilTargetByTime[time] === 100 ? 100 : 10;
   const selectedOption = item.targetOptions[selectedTarget];
@@ -71,11 +71,22 @@ export default function App() {
     return 'other';
   }, []);
 
+  const registerServiceWorker = useCallback(async () => {
+    if (!('serviceWorker' in navigator)) return null;
+    return navigator.serviceWorker.register('/sw.js');
+  }, []);
+
   const currentDzikirList = useMemo(
     () => getDzikirListForTime(activeTime, tahlilTargetByTime),
     [activeTime, tahlilTargetByTime],
   );
   const fontSizeClasses = ['text-2xl', 'text-3xl', 'text-4xl', 'text-5xl'];
+
+  useEffect(() => {
+    registerServiceWorker().catch(() => {
+      // no-op
+    });
+  }, [registerServiceWorker]);
 
   useEffect(() => {
     const savedCounts = readStoredCounts(activeTime, currentDateKey);
@@ -141,13 +152,6 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!('Notification' in window) || !('serviceWorker' in navigator) || !remindersEnabled) return;
-    if (Notification.permission === 'default') {
-      Notification.requestPermission().then((result) => setNotificationPermission(result));
-    }
-  }, [remindersEnabled]);
-
-  useEffect(() => {
     if (!('Notification' in window)) return;
     const syncPermission = () => setNotificationPermission(Notification.permission);
     document.addEventListener('visibilitychange', syncPermission);
@@ -159,7 +163,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!('Notification' in window) || !('serviceWorker' in navigator) || !remindersEnabled) return;
+    if (!('Notification' in window) || !('serviceWorker' in navigator) || !remindersEnabled || notificationPermission !== 'granted') return;
     let mounted = true; let morningTimeout; let eveningTimeout;
     const scheduleReminder = async (hour, minute, title, body, assignTimeout) => {
       const registration = await navigator.serviceWorker.ready;
@@ -174,17 +178,15 @@ export default function App() {
     };
     (async () => {
       try {
-        await navigator.serviceWorker.register('/sw.js');
-        if (notificationPermission === 'granted') {
-          await scheduleReminder(5, 30, 'Dzikir Pagi', 'Waktunya dzikir pagi. Tenangkan hati, awali hari dengan mengingat Allah.', (t) => { morningTimeout = t; });
-          await scheduleReminder(17, 0, 'Dzikir Petang', 'Waktunya dzikir petang. Tutup sore dengan dzikir dan doa.', (t) => { eveningTimeout = t; });
-        }
+        await registerServiceWorker();
+        await scheduleReminder(5, 30, 'Dzikir Pagi', 'Waktunya dzikir pagi. Tenangkan hati, awali hari dengan mengingat Allah.', (t) => { morningTimeout = t; });
+        await scheduleReminder(17, 0, 'Dzikir Petang', 'Waktunya dzikir petang. Tutup sore dengan dzikir dan doa.', (t) => { eveningTimeout = t; });
       } catch {
         // no-op
       }
     })();
     return () => { mounted = false; window.clearTimeout(morningTimeout); window.clearTimeout(eveningTimeout); };
-  }, [remindersEnabled, notificationPermission]);
+  }, [registerServiceWorker, remindersEnabled, notificationPermission]);
 
   useEffect(() => {
     const syncInstallState = () => {
@@ -223,6 +225,41 @@ export default function App() {
       document.removeEventListener('gesturechange', preventGesture);
     };
   }, []);
+
+  const handleReminderToggle = async (enabled) => {
+    if (!enabled) {
+      setRemindersEnabled(false);
+      return;
+    }
+
+    if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+      window.alert('Perangkat atau browser ini belum mendukung notifikasi aplikasi web.');
+      setRemindersEnabled(false);
+      return;
+    }
+
+    if (installPlatform === 'ios' && !isStandaloneMode) {
+      window.alert('Di iPhone/iPad, tambahkan aplikasi ke Home Screen terlebih dahulu agar notifikasi web dapat diaktifkan.');
+      setRemindersEnabled(false);
+      return;
+    }
+
+    try {
+      await registerServiceWorker();
+      let permission = Notification.permission;
+      if (permission !== 'granted') {
+        permission = await Notification.requestPermission();
+      }
+      setNotificationPermission(permission);
+      setRemindersEnabled(permission === 'granted');
+      if (permission !== 'granted') {
+        window.alert('Izin notifikasi belum diberikan, jadi pengingat belum bisa diaktifkan.');
+      }
+    } catch {
+      setRemindersEnabled(false);
+      window.alert('Terjadi kendala saat mengaktifkan notifikasi. Silakan coba lagi.');
+    }
+  };
 
   const handleIncrement = (id, target, index) => {
     setCounts((prev) => {
@@ -354,7 +391,10 @@ export default function App() {
             {activeTab === 'settings' && !isReadingMode && (
               <SettingsTab
                 remindersEnabled={remindersEnabled}
-                setRemindersEnabled={setRemindersEnabled}
+                onRemindersToggle={handleReminderToggle}
+                notificationPermission={notificationPermission}
+                installPlatform={installPlatform}
+                isStandaloneMode={isStandaloneMode}
                 fontSize={fontSize}
                 setFontSize={setFontSize}
                 showArabic={showArabic}

@@ -21,20 +21,20 @@ export const dalilByTitle = {
   'Doa Perlindungan Pagi': 'Rasulullah ﷺ tidak pernah meninggalkan doa ini di pagi dan petang: "Allahumma inni as\'alukal `afwa wal `afiyah fid-dunya wal akhirah..."',
   'Doa Perlindungan Petang': 'Rasulullah ﷺ tidak pernah meninggalkan doa ini di pagi dan petang: "Allahumma inni as\'alukal `afwa wal `afiyah fid-dunya wal akhirah..."',
   'Sayyidul Istighfar': 'Nabi ﷺ bersabda: "Barangsiapa mengucapkan sayyidul istighfar di siang hari dengan yakin, lalu ia meninggal sebelum petang, maka ia termasuk penghuni surga. Dan barangsiapa mengucapkannya di malam hari dengan yakin, lalu meninggal sebelum pagi, maka ia termasuk penghuni surga."',
-  'Doa Mempersaksikan Allah (4x)': 'Nabi ﷺ bersabda: "Barangsiapa ketika pagi membaca: Allahumma inni asbahtu usyhiduka... sebanyak empat kali, maka Allah membebaskannya dari neraka." (juga berlaku saat petang).',
+  'Doa Mempersaksikan Allah': 'Nabi ﷺ bersabda: "Barangsiapa ketika pagi membaca: Allahumma inni asbahtu usyhiduka... sebanyak empat kali, maka Allah membebaskannya dari neraka." (juga berlaku saat petang).',
   'Doa Keselamatan (Al-\'Afiyah)': 'Al-\'Abbas radhiyallahu anhu bertanya kepada Nabi ﷺ tentang doa yang diminta. Nabi ﷺ menjawab: "Mintalah kepada Allah al-\'afiyah (keselamatan) di dunia dan akhirat."',
   'Doa Berlindung dari Godaan Setan': 'Nabi ﷺ mengajarkan doa perlindungan: "Ya Allah, Yang mengetahui yang gaib dan nyata... aku berlindung kepada-Mu dari kejahatan diriku, setan, dan pasukannya."',
-  'Doa Memohon Kesehatan (3x)': 'Doa ini dibaca tiga kali pada pagi dan petang untuk memohon penjagaan badan, pendengaran, penglihatan, serta perlindungan dari kekufuran, kefakiran, dan azab kubur.',
-  'Membaca Bismillahilladzi (3x)': 'Nabi ﷺ bersabda: "Tidaklah seorang hamba membaca pada pagi setiap hari dan petang setiap malam: Bismillahil ladzi la yadurru ma\'asmihi syai\'... sebanyak tiga kali, kecuali tidak ada sesuatu pun yang membahayakannya."',
-  'Doa Ridha Kepada Allah (3x)': 'Nabi ﷺ bersabda: "Siapa yang membaca saat pagi dan petang: Radhitu billahi rabba... sebanyak tiga kali, Allah akan meridhainya pada hari kiamat."',
+  'Doa Memohon Kesehatan': 'Doa ini dibaca tiga kali pada pagi dan petang untuk memohon penjagaan badan, pendengaran, penglihatan, serta perlindungan dari kekufuran, kefakiran, dan azab kubur.',
+  'Membaca Bismillahilladzi': 'Nabi ﷺ bersabda: "Tidaklah seorang hamba membaca pada pagi setiap hari dan petang setiap malam: Bismillahil ladzi la yadurru ma\'asmihi syai\'... sebanyak tiga kali, kecuali tidak ada sesuatu pun yang membahayakannya."',
+  'Doa Ridha Kepada Allah': 'Nabi ﷺ bersabda: "Siapa yang membaca saat pagi dan petang: Radhitu billahi rabba... sebanyak tiga kali, Allah akan meridhainya pada hari kiamat."',
   'Memohon Perbaikan Urusan': 'Nabi ﷺ mengajarkan Fatimah radhiyallahu anha: "Wahai Dzat Yang Maha Hidup, dengan rahmat-Mu aku memohon pertolongan, perbaikilah seluruh urusanku dan jangan serahkan aku kepada diriku walau sekejap mata."',
   'Syukur Atas Nikmat Islam': 'Nabi ﷺ mengajarkan doa syukur pagi/petang: "Kami memasuki pagi di atas fitrah Islam, kalimat ikhlas, agama Nabi Muhammad ﷺ, dan millah Ibrahim hanif."',
   'Dzikir Khusus Pagi (1): Ilmu & Rezeki': 'Ummu Salamah radhiyallahu anha meriwayatkan bahwa Nabi ﷺ ketika selesai salam subuh membaca: "Allahumma inni as\'aluka `ilman nafi\'an, rizqan thayyiban, wa `amalan mutaqabbalan."',
-  'Dzikir Khusus Pagi (2): Tasbih (3x)': 'Juwairiyah radhiyallahu anha meriwayatkan Nabi ﷺ bersabda bahwa dzikir "Subhanallahi wa bihamdih..." tiga kali setara dengan dzikir panjang sejak pagi.',
-  'Dzikir Khusus Petang: A\'udzu bikalimatillah (3x)': 'Nabi ﷺ bersabda: "Barangsiapa singgah di suatu tempat lalu membaca: A\'udzu bikalimatillahit-tammati min syarri ma khalaq, maka tidak ada sesuatu yang membahayakannya sampai ia pergi dari tempat itu."',
-  'Tasbih 100x': 'Nabi ﷺ bersabda: "Barangsiapa membaca Subhanallahi wa bihamdih seratus kali dalam sehari, dosa-dosanya dihapus walaupun sebanyak buih di lautan."',
-  'Tahlil 100x (Atau 10x)': 'Nabi ﷺ bersabda: "Siapa yang mengucapkan La ilaha illallahu wahdahu la syarika lah... dalam sehari seratus kali, baginya pahala besar, perlindungan dari setan, dan kebaikan yang banyak."',
-  'Istighfar 100x': 'Nabi ﷺ bersabda: "Wahai manusia, bertaubatlah kepada Allah. Sesungguhnya aku beristighfar kepada-Nya dalam sehari seratus kali."',
+  'Dzikir Khusus Pagi: Tasbih': 'Juwairiyah radhiyallahu anha meriwayatkan Nabi ﷺ bersabda bahwa dzikir "Subhanallahi wa bihamdih..." tiga kali setara dengan dzikir panjang sejak pagi.',
+  'Dzikir Khusus Petang: A\'udzu bikalimatillah': 'Nabi ﷺ bersabda: "Barangsiapa singgah di suatu tempat lalu membaca: A\'udzu bikalimatillahit-tammati min syarri ma khalaq, maka tidak ada sesuatu yang membahayakannya sampai ia pergi dari tempat itu."',
+  'Tasbih': 'Nabi ﷺ bersabda: "Barangsiapa membaca Subhanallahi wa bihamdih seratus kali dalam sehari, dosa-dosanya dihapus walaupun sebanyak buih di lautan."',
+  'Tahlil': 'Nabi ﷺ bersabda: "Siapa yang mengucapkan La ilaha illallahu wahdahu la syarika lah... dalam sehari seratus kali, baginya pahala besar, perlindungan dari setan, dan kebaikan yang banyak."',
+  'Istighfar': 'Nabi ﷺ bersabda: "Wahai manusia, bertaubatlah kepada Allah. Sesungguhnya aku beristighfar kepada-Nya dalam sehari seratus kali."',
 };
 
 // --- DATA DZIKIR (Super Lengkap) ---
@@ -120,7 +120,7 @@ export const dzikirData = {
     },
     {
       id: 'p_new1',
-      title: 'Doa Mempersaksikan Allah (4x)',
+      title: 'Doa Mempersaksikan Allah',
       arabic: 'اَللَّهُمَّ إِنِّيْ أَصْبَحْتُ أُشْهِدُكَ وَأُشْهِدُ حَمَلَةَ عَرْشِكَ، وَمَلاَئِكَتَكَ وَجَمِيْعَ خَلْقِكَ، أَنَّكَ أَنْتَ اللهُ لاَ إِلَـهَ إِلاَّ أَنْتَ وَحْدَكَ لاَ شَرِيْكَ لَكَ، وَأَنَّ مُحَمَّدًا عَبْدُكَ وَرَسُوْلُكَ',
       latin: 'Allahumma inni ash-bahtu usy-hiduka wa usy-hidu hamalata \'arsyika wa malaa-ikatak wa jami\'a kholqik, annaka antallahu laa ilaha illa anta wahdaka laa syariika lak, wa anna Muhammadan \'abduka wa rosuuluk.',
       translation: 'Ya Allah, sesungguhnya aku di waktu pagi ini mempersaksikan Engkau, malaikat yang memikul \'Arys-Mu, malaikat-malaikat dan seluruh makhluk-Mu, bahwa sesungguhnya Engkau adalah Allah, tiada ilah yang berhak disembah kecuali Engkau semata, tiada sekutu bagi-Mu dan sesungguhnya Muhammad adalah hamba dan utusan-Mu.',
@@ -150,7 +150,7 @@ export const dzikirData = {
     },
     {
       id: 'p9',
-      title: 'Doa Memohon Kesehatan (3x)',
+      title: 'Doa Memohon Kesehatan',
       arabic: 'اللَّهُمَّ عَافِنِي فِي بَدَنِي، اللَّهُمَّ عَافِنِي فِي سَمْعِي، اللَّهُمَّ عَافِنِي فِي بَصَرِي، لَا إِلَهَ إِلَّا أَنْتَ. اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْكُفْرِ وَالْفَقْرِ، وَأَعُوذُ بِكَ مِنْ عَذَابِ الْقَبْرِ، لَا إِلَهَ إِلَّا أَنْتَ',
       latin: 'Allāhumma ‘āfinī fī badanī, Allāhumma ‘āfinī fī sam‘ī, Allāhumma ‘āfinī fī baṣarī, lā ilāha illā anta. Allāhumma innī a‘ūżubika minal-kufri wal-faqr, wa a‘ūżubika min ‘ażābil-qabr, lā ilāha illā anta.',
       translation: 'Ya Allah, selamatkanlah tubuhku (dari penyakit dan cacat). Ya Allah, selamatkanlah pendengaranku. Ya Allah, selamatkanlah penglihatanku. Tidak ada ilah (yang berhak disembah) kecuali Engkau. Ya Allah, sesungguhnya aku berlindung kepada-Mu dari kekufuran dan kefakiran. Aku berlindung kepada-Mu dari siksa kubur. Tidak ada ilah (yang berhak disembah) kecuali Engkau.',
@@ -160,7 +160,7 @@ export const dzikirData = {
     },
     {
       id: 'p11',
-      title: 'Membaca Bismillahilladzi (3x)',
+      title: 'Membaca Bismillahilladzi',
       arabic: 'بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ',
       latin: 'Bismillāhillażī lā yaḍurru ma‘asmihī syai\'un fil-arḍi wa lā fis-samā\'i wa huwas-samī‘ul-‘alīm.',
       translation: 'Dengan nama Allah yang bila disebut, segala sesuatu di bumi dan langit tidak akan berbahaya, Dia-lah Yang Maha Mendengar lagi Maha Mengetahui.',
@@ -170,7 +170,7 @@ export const dzikirData = {
     },
     {
       id: 'p12',
-      title: 'Doa Ridha Kepada Allah (3x)',
+      title: 'Doa Ridha Kepada Allah',
       arabic: 'رَضِيتُ بِاللَّهِ رَبًّا، وَبِالْإِسْلَامِ دِينًا، وَبِمُحَمَّدٍ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ نَبِيًّا',
       latin: 'Raḍītu billāhi rabbā, wa bil-islāmi dīnā, wa bimuḥammadin ṣallallāhu ‘alaihi wa sallama nabiyyā.',
       translation: 'Aku rela Allah sebagai Tuhan, Islam sebagai agama, dan Muhammad shallallahu ‘alaihi wa sallam sebagai Nabi.',
@@ -210,7 +210,7 @@ export const dzikirData = {
     },
     {
       id: 'p14',
-      title: 'Dzikir Khusus Pagi (2): Tasbih (3x)',
+      title: 'Dzikir Khusus Pagi: Tasbih',
       arabic: 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ: عَدَدَ خَلْقِهِ، وَرِضَا نَفْسِهِ، وَزِنَةَ عَرْشِهِ، وَمِدَادَ كَلِمَاتِهِ',
       latin: 'Subḥānallāhi wa biḥamdih: ‘Adada khalqih, wa riḍā nafsih, wa zinata ‘arsyih, wa midāda kalimātih.',
       translation: 'Maha Suci Allah dan segala puji bagi-Nya, sebanyak bilangan makhluk-Nya, sejauh kerelaan Diri-Nya, seberat timbangan \'Arsy-Nya, dan sebanyak tinta (untuk menulis) kalimat-Nya.',
@@ -220,7 +220,7 @@ export const dzikirData = {
     },
     {
       id: 'p16',
-      title: 'Tahlil 100x (Atau 10x)',
+      title: 'Tahlil',
       arabic: 'لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ',
       latin: 'Lā ilāha illallāhu waḥdahū lā syarīka lah, lahul-mulku wa lahul-ḥamdu wa huwa ‘alā kulli syai’in qadīr.',
       translation: 'Tidak ada ilah (yang berhak disembah) selain Allah semata, tidak ada sekutu bagi-Nya. Milik-Nya kerajaan dan milik-Nya segala pujian. Dan Dia Mahakuasa atas segala sesuatu.',
@@ -240,7 +240,7 @@ export const dzikirData = {
     },
     {
       id: 'p15',
-      title: 'Tasbih 100x',
+      title: 'Tasbih',
       arabic: 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',
       latin: 'Subḥānallāhi wa biḥamdih.',
       translation: 'Maha Suci Allah, aku memuji-Nya.',
@@ -250,7 +250,7 @@ export const dzikirData = {
     },
     {
       id: 'p17',
-      title: 'Istighfar 100x',
+      title: 'Istighfar',
       arabic: 'أَسْتَغْفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ',
       latin: 'Astaghfirullāha wa atūbu ilaih.',
       translation: 'Aku memohon ampun kepada Allah dan bertaubat kepada-Nya.',
@@ -340,7 +340,7 @@ export const dzikirData = {
     },
     {
       id: 'pt_new1',
-      title: 'Doa Mempersaksikan Allah (4x)',
+      title: 'Doa Mempersaksikan Allah',
       arabic: 'اَللَّهُمَّ إِنِّيْ أَمْسَيْتُ أُشْهِدُكَ وَأُشْهِدُ حَمَلَةَ عَرْشِكَ، وَمَلاَئِكَتَكَ وَجَمِيْعَ خَلْقِكَ، أَنَّكَ أَنْتَ اللهُ لاَ إِلَـهَ إِلاَّ أَنْتَ وَحْدَكَ لاَ شَرِيْكَ لَكَ، وَأَنَّ مُحَمَّدًا عَبْدُكَ وَرَسُوْلُكَ',
       latin: 'Allahumma inni amsaytu usy-hiduka wa usy-hidu hamalata \'arsyika wa malaa-ikatak wa jami\'a kholqik, annaka antallahu laa ilaha illa anta wahdaka laa syariika lak, wa anna Muhammadan \'abduka wa rosuuluk.',
       translation: 'Ya Allah, sesungguhnya aku di waktu petang ini mempersaksikan Engkau, malaikat yang memikul \'Arys-Mu, malaikat-malaikat dan seluruh makhluk-Mu, bahwa sesungguhnya Engkau adalah Allah, tiada ilah yang berhak disembah kecuali Engkau semata, tiada sekutu bagi-Mu dan sesungguhnya Muhammad adalah hamba dan utusan-Mu.',
@@ -370,7 +370,7 @@ export const dzikirData = {
     },
     {
       id: 'pt9',
-      title: 'Doa Memohon Kesehatan (3x)',
+      title: 'Doa Memohon Kesehatan',
       arabic: 'اللَّهُمَّ عَافِنِي فِي بَدَنِي، اللَّهُمَّ عَافِنِي فِي سَمْعِي، اللَّهُمَّ عَافِنِي فِي بَصَرِي، لَا إِلَهَ إِلَّا أَنْتَ. اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْكُفْرِ وَالْفَقْرِ، وَأَعُوذُ بِكَ مِنْ عَذَابِ الْقَبْرِ، لَا إِلَهَ إِلَّا أَنْتَ',
       latin: 'Allāhumma ‘āfinī fī badanī, Allāhumma ‘āfinī fī sam‘ī, Allāhumma ‘āfinī fī baṣarī, lā ilāha illā anta. Allāhumma innī a‘ūżu bika minal-kufri wal-faqri, wa a‘ūżu bika min ‘ażābil-qabri, lā ilāha illā anta.',
       translation: 'Ya Allah, selamatkanlah tubuhku (dari penyakit dan cacat). Ya Allah, selamatkanlah pendengaranku. Ya Allah, selamatkanlah penglihatanku. Tiada ilah yang berhak disembah selain Engkau. Ya Allah, sesungguhnya aku berlindung kepada-Mu dari kekafiran dan kemiskinan. Dan aku berlindung kepada-Mu dari azab kubur. Tiada ilah yang berhak disembah selain Engkau.',
@@ -380,7 +380,7 @@ export const dzikirData = {
     },
     {
       id: 'pt11',
-      title: 'Membaca Bismillahilladzi (3x)',
+      title: 'Membaca Bismillahilladzi',
       arabic: 'بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ',
       latin: 'Bismillāhillażī lā yaḍurru ma‘asmihī syai\'un fil-arḍi wa lā fis-samā\'i wa huwas-samī‘ul-‘alīm.',
       translation: 'Dengan nama Allah yang bila disebut, segala sesuatu di bumi dan langit tidak akan berbahaya, Dia-lah Yang Maha Mendengar lagi Maha Mengetahui.',
@@ -390,7 +390,7 @@ export const dzikirData = {
     },
     {
       id: 'pt12',
-      title: 'Doa Ridha Kepada Allah (3x)',
+      title: 'Doa Ridha Kepada Allah',
       arabic: 'رَضِيتُ بِاللَّهِ رَبًّا، وَبِالْإِسْلَامِ دِينًا، وَبِمُحَمَّدٍ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ نَبِيًّا',
       latin: 'Raḍītu billāhi rabbā, wa bil-islāmi dīnā, wa bimuḥammadin ṣallallāhu ‘alaihi wa sallama nabiyyā.',
       translation: 'Aku rela Allah sebagai Tuhan, Islam sebagai agama, dan Muhammad shallallahu ‘alaihi wa sallam sebagai Nabi.',
@@ -420,7 +420,7 @@ export const dzikirData = {
     },
     {
       id: 'pt13',
-      title: 'Dzikir Khusus Petang: A\'udzu bikalimatillah (3x)',
+      title: 'Dzikir Khusus Petang: A\'udzu bikalimatillah',
       arabic: 'أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ',
       latin: 'A‘ūżu bikalimātillāhit-tāmmāti min syarri mā khalaq.',
       translation: 'Aku berlindung dengan kalimat-kalimat Allah yang sempurna dari kejahatan makhluk yang diciptakan-Nya.',
@@ -430,7 +430,7 @@ export const dzikirData = {
     },
     {
       id: 'pt15',
-      title: 'Tahlil 100x (Atau 10x)',
+      title: 'Tahlil',
       arabic: 'لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ',
       latin: 'Lā ilāha illallāhu waḥdahū lā syarīka lah, lahul-mulku wa lahul-ḥamdu wa huwa ‘alā kulli syai’in qadīr.',
       translation: 'Tidak ada ilah (yang berhak disembah) selain Allah semata, tidak ada sekutu bagi-Nya. Milik-Nya kerajaan dan milik-Nya segala pujian. Dan Dia Mahakuasa atas segala sesuatu.',
@@ -450,7 +450,7 @@ export const dzikirData = {
     },
     {
       id: 'pt14',
-      title: 'Tasbih 100x',
+      title: 'Tasbih',
       arabic: 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',
       latin: 'Subḥānallāhi wa biḥamdih.',
       translation: 'Maha Suci Allah, aku memuji-Nya.',
@@ -460,7 +460,7 @@ export const dzikirData = {
     },
     {
       id: 'pt16',
-      title: 'Istighfar 100x',
+      title: 'Istighfar',
       arabic: 'أَسْتَغْفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ',
       latin: 'Astaghfirullāha wa atūbu ilaih.',
       translation: 'Aku memohon ampun kepada Allah dan bertaubat kepada-Nya.',
