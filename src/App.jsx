@@ -23,11 +23,26 @@ const getMsUntilNextMidnight = () => {
   return nextMidnight.getTime() - now.getTime();
 };
 
+const getDzikirListForTime = (time, tahlilTargetByTime) => dzikirData[time].map((item) => {
+  if (item.title !== 'Tahlil 100x (Atau 10x)' || !item.targetOptions) return item;
+
+  const selectedTarget = tahlilTargetByTime[time] === 100 ? 100 : 10;
+  const selectedOption = item.targetOptions[selectedTarget];
+
+  return {
+    ...item,
+    target: selectedTarget,
+    fadhilah: selectedOption?.fadhilah || item.fadhilah,
+    source: selectedOption?.source || item.source,
+  };
+});
+
 export default function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [activeTime, setActiveTime] = useState('pagi');
   const [counts, setCounts] = useState({});
   const [isReadingMode, setIsReadingMode] = useState(false);
+  const [settingsOrigin, setSettingsOrigin] = useState('home');
   const scrollRef = useRef(null);
 
   const [fontSize, setFontSize] = useState(() => Number(localStorage.getItem(STORAGE_KEYS.fontSize) ?? 2));
@@ -57,17 +72,7 @@ export default function App() {
   }, []);
 
   const currentDzikirList = useMemo(
-    () => dzikirData[activeTime].map((item) => {
-      if (item.title !== 'Tahlil 100x (Atau 10x)' || !item.targetOptions) return item;
-      const selectedTarget = tahlilTargetByTime[activeTime] === 100 ? 100 : 10;
-      const selectedOption = item.targetOptions[selectedTarget];
-      return {
-        ...item,
-        target: selectedTarget,
-        fadhilah: selectedOption?.fadhilah || item.fadhilah,
-        source: selectedOption?.source || item.source,
-      };
-    }),
+    () => getDzikirListForTime(activeTime, tahlilTargetByTime),
     [activeTime, tahlilTargetByTime],
   );
   const fontSizeClasses = ['text-2xl', 'text-3xl', 'text-4xl', 'text-5xl'];
@@ -249,7 +254,21 @@ export default function App() {
   };
 
   const startReading = (time) => {
-    setActiveTime(time); setIsReadingMode(true);
+    setActiveTime(time);
+    setSettingsOrigin('home');
+    setIsReadingMode(true);
+    requestAnimationFrame(() => scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' }));
+  };
+
+  const openSettingsFromReading = () => {
+    setSettingsOrigin('reading');
+    setActiveTab('settings');
+    setIsReadingMode(false);
+    requestAnimationFrame(() => scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' }));
+  };
+
+  const handleBackToReading = () => {
+    setIsReadingMode(true);
     requestAnimationFrame(() => scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' }));
   };
 
@@ -261,7 +280,7 @@ export default function App() {
   }, [counts, currentDzikirList]);
 
   const getProgressForTime = (time) => {
-    const list = dzikirData[time];
+    const list = getDzikirListForTime(time, tahlilTargetByTime);
     const savedCounts = time === activeTime ? counts : readStoredCounts(time, currentDateKey);
     let totalTarget = 0; let totalCompleted = 0;
     list.forEach((item) => { totalTarget += item.target; totalCompleted += Math.min(savedCounts[item.id] || 0, item.target); });
@@ -284,46 +303,74 @@ export default function App() {
     <div className={`min-h-screen bg-gray-50 font-sans text-gray-800 flex justify-center items-stretch lg:items-center overflow-x-hidden selection:bg-emerald-200 px-0 sm:px-4 lg:px-8 ${isNightView ? 'night-view' : ''}`}>
       <div className="app-shell w-full max-w-4xl h-[100dvh] lg:h-[92vh] bg-white relative flex flex-col overflow-hidden sm:rounded-[2rem] lg:shadow-2xl lg:border border-gray-200">
         <div className={`flex min-h-0 flex-1 flex-col transition-all duration-300 ${isInstallModalOpen ? 'app-shell__backdrop is-blurred' : ''}`}>
-        {!isReadingMode && (
-          <header className="app-header px-5 sm:px-6 text-white shadow-md z-10 relative shrink-0">
-            <div className="app-header__glow" />
-            <div className="app-header__inner">
-              <div className="app-header__top flex items-start gap-4">
-                <AppLogo />
-                <div className="min-w-0 app-header__brand-copy">
-                  <h1 className="text-2xl font-bold tracking-tight">Dzikir Harian</h1>
-                  <div className="mt-1 flex items-center gap-2 text-emerald-100 app-header__subtitle-row">
-                    <p className="text-sm font-medium">Sesuai Sunnah Nabi</p>
-                    <p className="text-lg sm:text-xl calligraphy-subtitle" dir="rtl" aria-label="Kaligrafi Muhammad">مُحَمَّد</p>
+          {!isReadingMode && (
+            <header className="app-header px-5 sm:px-6 text-white shadow-md z-10 relative shrink-0">
+              <div className="app-header__glow" />
+              <div className="app-header__inner">
+                <div className="app-header__top flex items-start gap-4">
+                  <AppLogo />
+                  <div className="min-w-0 app-header__brand-copy">
+                    <h1 className="text-2xl font-bold tracking-tight">Dzikir Harian</h1>
+                    <div className="mt-1 flex items-center gap-2 text-emerald-100 app-header__subtitle-row">
+                      <p className="text-sm font-medium">Sesuai Sunnah Nabi</p>
+                      <p className="text-lg sm:text-xl calligraphy-subtitle" dir="rtl" aria-label="Kaligrafi Muhammad">مُحَمَّد</p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="app-header__verse bg-white/14 backdrop-blur-md rounded-[1.7rem] p-4 sm:p-5 border border-white/15 shadow-inner">
-                <div className="app-header__verse-content flex gap-3 items-start">
-                  <div className="app-header__verse-icon w-10 h-10 rounded-full bg-white/14 text-emerald-50 flex items-center justify-center shrink-0">
-                    <Info className="w-5 h-5" />
-                  </div>
-                  <div className="min-w-0 app-header__verse-copy">
-                    <p className="app-header__verse-quote text-sm leading-relaxed text-white font-medium">&quot;Maka bertasbihlah kepada Allah di waktu petang dan waktu pagi.&quot;</p>
-                    <p className="app-header__verse-reference text-sm sm:text-[15px] font-semibold text-emerald-50 mt-2">QS. Ar-Rum: 17</p>
+                <div className="app-header__verse bg-white/14 backdrop-blur-md rounded-[1.7rem] p-4 sm:p-5 border border-white/15 shadow-inner">
+                  <div className="app-header__verse-content flex gap-3 items-start">
+                    <div className="app-header__verse-icon w-10 h-10 rounded-full bg-white/14 text-emerald-50 flex items-center justify-center shrink-0">
+                      <Info className="w-5 h-5" />
+                    </div>
+                    <div className="min-w-0 app-header__verse-copy">
+                      <p className="app-header__verse-quote text-sm leading-relaxed text-white font-medium">&quot;Maka bertasbihlah kepada Allah di waktu petang dan waktu pagi.&quot;</p>
+                      <p className="app-header__verse-reference text-sm sm:text-[15px] font-semibold text-emerald-50 mt-2">QS. Ar-Rum: 17</p>
+                    </div>
                   </div>
                 </div>
               </div>
+            </header>
+          )}
+
+          {isReadingMode && (
+            <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100 bg-white/95 backdrop-blur z-20 shrink-0 shadow-sm">
+              <button onClick={() => setIsReadingMode(false)} className="p-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
+                <X className="w-6 h-6" />
+              </button>
+              <div className="text-center flex-1">
+                <h2 className="font-bold text-gray-800 text-sm">{activeTime === 'pagi' ? 'Dzikir Pagi' : 'Dzikir Petang'}</h2>
+                <p className="text-xs text-emerald-600 font-bold tracking-wide">{progress}% SELESAI</p>
+              </div>
+              <button onClick={openSettingsFromReading} className="p-2 -mr-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
+                <Settings2 className="w-5 h-5" />
+              </button>
             </div>
-          </header>
-        )}
+          )}
+          {isReadingMode && <div className="w-full bg-gray-100 h-1 shrink-0"><div className="bg-emerald-500 h-1 transition-all duration-500 ease-out" style={{ width: `${progress}%` }} /></div>}
 
-        {isReadingMode && <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100 bg-white/95 backdrop-blur z-20 shrink-0 shadow-sm"><button onClick={() => setIsReadingMode(false)} className="p-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"><X className="w-6 h-6" /></button><div className="text-center flex-1"><h2 className="font-bold text-gray-800 text-sm">{activeTime === 'pagi' ? 'Dzikir Pagi' : 'Dzikir Petang'}</h2><p className="text-xs text-emerald-600 font-bold tracking-wide">{progress}% SELESAI</p></div><button onClick={() => { setActiveTab('settings'); setIsReadingMode(false); }} className="p-2 -mr-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"><Settings2 className="w-5 h-5" /></button></div>}
-        {isReadingMode && <div className="w-full bg-gray-100 h-1 shrink-0"><div className="bg-emerald-500 h-1 transition-all duration-500 ease-out" style={{ width: `${progress}%` }} /></div>}
+          <div ref={scrollRef} className="content-scroll flex-1 overflow-y-auto no-scrollbar relative bg-gray-50 pb-safe">
+            {activeTab === 'home' && !isReadingMode && <HomeTab isNightView={isNightView} setIsNightView={setIsNightView} startReading={startReading} handleReset={handleReset} dailyProgress={dailyProgress} morningProgress={morningProgress} eveningProgress={eveningProgress} isMobileView={isMobileView} isStandaloneMode={isStandaloneMode} showInstallBanner={showInstallBanner} setIsInstallModalOpen={setIsInstallModalOpen} />}
+            {activeTab === 'settings' && !isReadingMode && (
+              <SettingsTab
+                remindersEnabled={remindersEnabled}
+                setRemindersEnabled={setRemindersEnabled}
+                fontSize={fontSize}
+                setFontSize={setFontSize}
+                showArabic={showArabic}
+                setShowArabic={setShowArabic}
+                showLatin={showLatin}
+                setShowLatin={setShowLatin}
+                showTranslation={showTranslation}
+                setShowTranslation={setShowTranslation}
+                showBackToReading={settingsOrigin === 'reading'}
+                onBackToReading={handleBackToReading}
+              />
+            )}
+            {isReadingMode && <ReadingTab currentDzikirList={currentDzikirList} counts={counts} showArabic={showArabic} fontSize={fontSize} fontSizeClasses={fontSizeClasses} showLatin={showLatin} showTranslation={showTranslation} handleIncrement={handleIncrement} setActiveDalil={setActiveDalil} dalilByTitle={dalilByTitle} progress={progress} activeTime={activeTime} setIsReadingMode={setIsReadingMode} setActiveTab={setActiveTab} tahlilTarget={tahlilTargetByTime[activeTime]} setTahlilTarget={(value) => setTahlilTargetByTime((prev) => ({ ...prev, [activeTime]: value }))} />}
+          </div>
 
-        <div ref={scrollRef} className="content-scroll flex-1 overflow-y-auto no-scrollbar relative bg-gray-50 pb-safe">
-          {activeTab === 'home' && !isReadingMode && <HomeTab isNightView={isNightView} setIsNightView={setIsNightView} startReading={startReading} handleReset={handleReset} dailyProgress={dailyProgress} morningProgress={morningProgress} eveningProgress={eveningProgress} isMobileView={isMobileView} isStandaloneMode={isStandaloneMode} showInstallBanner={showInstallBanner} setIsInstallModalOpen={setIsInstallModalOpen} />}
-          {activeTab === 'settings' && !isReadingMode && <SettingsTab remindersEnabled={remindersEnabled} setRemindersEnabled={setRemindersEnabled} fontSize={fontSize} setFontSize={setFontSize} showArabic={showArabic} setShowArabic={setShowArabic} showLatin={showLatin} setShowLatin={setShowLatin} showTranslation={showTranslation} setShowTranslation={setShowTranslation} />}
-          {isReadingMode && <ReadingTab currentDzikirList={currentDzikirList} counts={counts} showArabic={showArabic} fontSize={fontSize} fontSizeClasses={fontSizeClasses} showLatin={showLatin} showTranslation={showTranslation} handleIncrement={handleIncrement} setActiveDalil={setActiveDalil} dalilByTitle={dalilByTitle} progress={progress} activeTime={activeTime} setIsReadingMode={setIsReadingMode} setActiveTab={setActiveTab} tahlilTarget={tahlilTargetByTime[activeTime]} setTahlilTarget={(value) => setTahlilTargetByTime((prev) => ({ ...prev, [activeTime]: value }))} />}
-        </div>
-
-        {!isReadingMode && <nav className="absolute bottom-0 w-full bg-white border-t border-gray-100 px-4 sm:px-6 py-3 sm:py-4 flex justify-around items-center z-20 pb-safe shrink-0"><button onClick={() => setActiveTab('home')} className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'home' ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}><div className={`p-2 rounded-xl transition-colors ${activeTab === 'home' ? 'bg-emerald-50' : 'bg-transparent'}`}><BookOpen className="w-6 h-6" /></div><span className="text-[10px] font-semibold">Dzikir</span></button><button onClick={() => setActiveTab('settings')} className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'settings' ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}><div className={`p-2 rounded-xl transition-colors ${activeTab === 'settings' ? 'bg-emerald-50' : 'bg-transparent'}`}><Settings2 className="w-6 h-6" /></div><span className="text-[10px] font-semibold">Pengaturan</span></button></nav>}
+          {!isReadingMode && <nav className="absolute bottom-0 w-full bg-white border-t border-gray-100 px-4 sm:px-6 py-3 sm:py-4 flex justify-around items-center z-20 pb-safe shrink-0"><button onClick={() => { setSettingsOrigin('home'); setActiveTab('home'); }} className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'home' ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}><div className={`p-2 rounded-xl transition-colors ${activeTab === 'home' ? 'bg-emerald-50' : 'bg-transparent'}`}><BookOpen className="w-6 h-6" /></div><span className="text-[10px] font-semibold">Dzikir</span></button><button onClick={() => { setSettingsOrigin('home'); setActiveTab('settings'); }} className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'settings' ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}><div className={`p-2 rounded-xl transition-colors ${activeTab === 'settings' ? 'bg-emerald-50' : 'bg-transparent'}`}><Settings2 className="w-6 h-6" /></div><span className="text-[10px] font-semibold">Pengaturan</span></button></nav>}
         </div>
 
         {isInstallModalOpen && !isReadingMode && (

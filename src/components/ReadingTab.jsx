@@ -3,20 +3,27 @@ import { Check } from 'lucide-react';
 
 export default function ReadingTab({ currentDzikirList, counts, showArabic, fontSize, fontSizeClasses, showLatin, showTranslation, handleIncrement, setActiveDalil, dalilByTitle, progress, activeTime, setIsReadingMode, setActiveTab, tahlilTarget, setTahlilTarget }) {
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-6 space-y-8 animate-fade-in-up">
+    <div className="px-4 sm:px-6 lg:px-8 py-6 space-y-8 animate-fade-in-up pb-[calc(env(safe-area-inset-bottom,16px)+2rem)]">
       {currentDzikirList.map((dzikir, index) => {
         const currentCount = counts[dzikir.id] || 0;
         const isCompleted = currentCount >= dzikir.target;
         return (
           <div key={dzikir.id} id={`dzikir-${dzikir.id}`} className={`bg-white rounded-[2rem] shadow-sm border overflow-hidden relative transition-all duration-500 ${isCompleted ? 'border-emerald-200 ring-1 ring-emerald-50 opacity-70' : 'border-gray-100'}`}>
-            <div className="px-5 py-4 border-b border-gray-50 flex items-center justify-between bg-gray-50/50"><div className="flex items-center gap-3"><span className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${isCompleted ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-600'}`}>{index + 1}</span><h3 className="font-bold text-gray-800 line-clamp-1">{dzikir.title}</h3></div><div className="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700">{dzikir.target}x</div></div>
+            <div className="px-5 py-4 border-b border-gray-50 flex items-start justify-between gap-3 bg-gray-50/50">
+              <div className="flex min-w-0 items-start gap-3 flex-1">
+                <span className={`mt-0.5 w-8 h-8 rounded-full flex shrink-0 items-center justify-center text-xs font-bold ${isCompleted ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-600'}`}>{index + 1}</span>
+                <h3 className="min-w-0 flex-1 font-bold text-gray-800 leading-snug whitespace-normal break-words text-[15px] sm:text-base">{dzikir.title}</h3>
+              </div>
+              <div className="shrink-0 text-xs font-semibold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700">{dzikir.target}x</div>
+            </div>
             <div className="p-6 space-y-6">
               {showArabic && <div dir="rtl" className={`text-right text-gray-900 leading-[2.5] ${fontSizeClasses[fontSize]}`} style={{ fontFamily: "'Scheherazade New', 'Amiri', 'Traditional Arabic', serif" }}>{dzikir.arabic}</div>}
               {(showLatin || showTranslation) && <div className={`space-y-4 ${showArabic ? 'pt-4 border-t border-dashed border-gray-200' : ''}`}>{showLatin && <div className="text-emerald-800/90 italic font-medium leading-relaxed text-[15px]">{dzikir.latin}</div>}{showTranslation && <div className="text-gray-600 leading-relaxed text-[15px]">{dzikir.translation}</div>}</div>}
-              {(dzikir.fadhilah || dzikir.source) && <div className="bg-gray-50 rounded-2xl p-4 text-sm mt-6">{dzikir.fadhilah && <p className="text-gray-700 mb-2"><strong className="font-semibold text-amber-600">💡 Keutamaan: </strong>{dzikir.fadhilah}</p>}{dzikir.source && <div className="text-gray-500 text-xs leading-relaxed"><button type="button" onClick={() => setActiveDalil({ title: dzikir.title, source: dzikir.source, dalil: dalilByTitle[dzikir.title] || 'Dalil lengkap belum tersedia untuk dzikir ini.' })} className="text-left hover:text-gray-700"><strong className="font-semibold">📚 Sumber: </strong><span className="underline underline-offset-2 decoration-dotted">{dzikir.source}</span></button></div>}</div>}
+              {(dzikir.fadhilah || dzikir.source) && <div className="bg-gray-50 rounded-2xl p-4 text-sm mt-6"><div className="space-y-3 break-words"><div>{dzikir.fadhilah && <p className="text-gray-700"><strong className="font-semibold text-amber-600">💡 Keutamaan: </strong>{dzikir.fadhilah}</p>}</div>{dzikir.source && <div className="text-gray-500 text-xs leading-relaxed"><button type="button" onClick={() => setActiveDalil({ title: dzikir.title, source: dzikir.source, dalil: dalilByTitle[dzikir.title] || 'Dalil lengkap belum tersedia untuk dzikir ini.' })} className="text-left hover:text-gray-700 break-words"><strong className="font-semibold">📚 Sumber: </strong><span className="underline underline-offset-2 decoration-dotted break-words">{dzikir.source}</span></button></div>}</div></div>}
               {dzikir.title === 'Tahlil 100x (Atau 10x)' && (
                 <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-4">
                   <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700 mb-2">Pilihan jumlah bacaan</p>
+                  <p className="text-xs text-indigo-700/80 mb-3 leading-relaxed">Mengganti pilihan akan menyesuaikan target dan progress tanpa menghapus hitungan yang sudah Anda selesaikan.</p>
                   <div className="flex gap-2">
                     {[10, 100].map((option) => (
                       <button
