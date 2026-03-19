@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Sun, Moon, ChevronRight, RotateCcw, Download } from 'lucide-react';
 
 export default function HomeTab({
@@ -12,11 +12,8 @@ export default function HomeTab({
   isMobileView,
   isStandaloneMode,
   showInstallBanner,
-  installPlatform,
-  installPromptEvent,
-  handleInstallApp,
+  setIsInstallModalOpen,
 }) {
-  const [showInstallInstructions, setShowInstallInstructions] = useState(false);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 pb-32 animate-fade-in-up">
@@ -49,31 +46,14 @@ export default function HomeTab({
         <div className="space-y-3">
           <button
             type="button"
-            onClick={installPlatform === 'android' && installPromptEvent ? handleInstallApp : () => setShowInstallInstructions((prev) => !prev)}
+            onClick={() => setIsInstallModalOpen(true)}
             className="install-cta-button w-full"
           >
             <span className="install-cta-button__icon"><Download className="w-5 h-5" /></span>
             <span className="install-cta-button__label">Instal Aplikasi</span>
           </button>
 
-          <div className="flex items-center justify-between gap-3 px-1">
-            <p className="text-xs leading-relaxed text-gray-500">Tambahkan ke layar utama agar akses dzikir terasa seperti aplikasi native.</p>
-            <button
-              type="button"
-              onClick={() => setShowInstallInstructions((prev) => !prev)}
-              className="shrink-0 text-xs font-semibold text-emerald-700 hover:text-emerald-800"
-            >
-              {showInstallInstructions ? 'Tutup panduan' : 'Lihat panduan'}
-            </button>
-          </div>
-
-          {showInstallInstructions && (
-            <div className="rounded-2xl border border-emerald-100 bg-white p-4 shadow-sm animate-fade-in-up">
-              {installPlatform === 'ios' && <ol className="text-sm text-emerald-900 list-decimal pl-5 space-y-1.5"><li>Buka aplikasi ini lewat Safari.</li><li>Ketuk tombol <strong>Share</strong> (ikon kotak + panah).</li><li>Pilih <strong>Add to Home Screen</strong>, lalu tekan <strong>Add</strong>.</li></ol>}
-              {installPlatform === 'android' && <ol className="text-sm text-emerald-900 list-decimal pl-5 space-y-1.5"><li>Tekan tombol <strong>Instal Aplikasi</strong> di atas.</li><li>Kalau prompt belum muncul, buka menu browser <strong>⋮</strong>.</li><li>Pilih <strong>Install app</strong> atau <strong>Add to Home screen</strong>.</li></ol>}
-              {installPlatform === 'other' && <p className="text-sm text-emerald-900">Gunakan menu browser, lalu pilih <strong>Install app</strong> atau <strong>Add to Home Screen</strong> bila tersedia.</p>}
-            </div>
-          )}
+          <p className="px-1 text-xs leading-relaxed text-gray-500">Tambahkan ke layar utama agar akses dzikir terasa seperti aplikasi native.</p>
         </div>
       )}
 

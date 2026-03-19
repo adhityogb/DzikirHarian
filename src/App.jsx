@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Settings2, BookOpen, X, Info } from 'lucide-react';
+import { Settings2, BookOpen, X, Info, Download } from 'lucide-react';
 import './App.css';
 import AppLogo from './components/AppLogo';
 import HomeTab from './components/HomeTab';
@@ -42,6 +42,7 @@ export default function App() {
   const [isStandaloneMode, setIsStandaloneMode] = useState(() => isStandaloneDisplay());
   const [showInstallBanner, setShowInstallBanner] = useState(() => window.innerWidth < 768 && !isStandaloneDisplay());
   const [activeDalil, setActiveDalil] = useState(null);
+  const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
   const [notificationPermission, setNotificationPermission] = useState(() => ('Notification' in window ? Notification.permission : 'default'));
   const [tahlilTargetByTime, setTahlilTargetByTime] = useState(() => ({
     pagi: Number(localStorage.getItem('dzikir_tahlil_target_pagi') || 10),
@@ -276,11 +277,13 @@ export default function App() {
     await installPromptEvent.prompt();
     await installPromptEvent.userChoice;
     setInstallPromptEvent(null);
+    setIsInstallModalOpen(false);
   };
 
   return (
     <div className={`min-h-screen bg-gray-50 font-sans text-gray-800 flex justify-center items-stretch lg:items-center overflow-x-hidden selection:bg-emerald-200 px-0 sm:px-4 lg:px-8 ${isNightView ? 'night-view' : ''}`}>
       <div className="app-shell w-full max-w-4xl h-[100dvh] lg:h-[92vh] bg-white relative flex flex-col overflow-hidden sm:rounded-[2rem] lg:shadow-2xl lg:border border-gray-200">
+        <div className={`flex min-h-0 flex-1 flex-col transition-all duration-300 ${isInstallModalOpen ? 'app-shell__backdrop is-blurred' : ''}`}>
         {!isReadingMode && (
           <header className="app-header px-5 sm:px-6 text-white shadow-md z-10 relative shrink-0">
             <div className="app-header__glow" />
@@ -315,14 +318,64 @@ export default function App() {
         {isReadingMode && <div className="w-full bg-gray-100 h-1 shrink-0"><div className="bg-emerald-500 h-1 transition-all duration-500 ease-out" style={{ width: `${progress}%` }} /></div>}
 
         <div ref={scrollRef} className="content-scroll flex-1 overflow-y-auto no-scrollbar relative bg-gray-50 pb-safe">
-          {activeTab === 'home' && !isReadingMode && <HomeTab isNightView={isNightView} setIsNightView={setIsNightView} startReading={startReading} handleReset={handleReset} dailyProgress={dailyProgress} morningProgress={morningProgress} eveningProgress={eveningProgress} isMobileView={isMobileView} isStandaloneMode={isStandaloneMode} showInstallBanner={showInstallBanner} installPlatform={installPlatform} installPromptEvent={installPromptEvent} handleInstallApp={handleInstallApp} />}
+          {activeTab === 'home' && !isReadingMode && <HomeTab isNightView={isNightView} setIsNightView={setIsNightView} startReading={startReading} handleReset={handleReset} dailyProgress={dailyProgress} morningProgress={morningProgress} eveningProgress={eveningProgress} isMobileView={isMobileView} isStandaloneMode={isStandaloneMode} showInstallBanner={showInstallBanner} setIsInstallModalOpen={setIsInstallModalOpen} />}
           {activeTab === 'settings' && !isReadingMode && <SettingsTab remindersEnabled={remindersEnabled} setRemindersEnabled={setRemindersEnabled} fontSize={fontSize} setFontSize={setFontSize} showArabic={showArabic} setShowArabic={setShowArabic} showLatin={showLatin} setShowLatin={setShowLatin} showTranslation={showTranslation} setShowTranslation={setShowTranslation} />}
           {isReadingMode && <ReadingTab currentDzikirList={currentDzikirList} counts={counts} showArabic={showArabic} fontSize={fontSize} fontSizeClasses={fontSizeClasses} showLatin={showLatin} showTranslation={showTranslation} handleIncrement={handleIncrement} setActiveDalil={setActiveDalil} dalilByTitle={dalilByTitle} progress={progress} activeTime={activeTime} setIsReadingMode={setIsReadingMode} setActiveTab={setActiveTab} tahlilTarget={tahlilTargetByTime[activeTime]} setTahlilTarget={(value) => setTahlilTargetByTime((prev) => ({ ...prev, [activeTime]: value }))} />}
         </div>
 
-        {activeDalil && <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setActiveDalil(null)}><div className="w-full max-w-lg bg-white rounded-3xl shadow-xl border border-gray-100 p-5 sm:p-6" onClick={(e) => e.stopPropagation()}><div className="flex items-start justify-between gap-3 mb-4"><div><p className="text-xs font-semibold text-emerald-600 uppercase tracking-wide">Dalil dari sumber</p><h3 className="text-lg font-bold text-gray-900">{activeDalil.title}</h3></div><button type="button" onClick={() => setActiveDalil(null)} className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center" aria-label="Tutup popup dalil"><X className="w-5 h-5" /></button></div><div className="bg-gray-50 rounded-2xl p-4 space-y-3"><p className="text-sm text-gray-700 leading-relaxed">{activeDalil.dalil}</p><p className="text-xs text-gray-500"><span className="font-semibold">Referensi:</span> {activeDalil.source}</p></div></div></div>}
-
         {!isReadingMode && <nav className="absolute bottom-0 w-full bg-white border-t border-gray-100 px-4 sm:px-6 py-3 sm:py-4 flex justify-around items-center z-20 pb-safe shrink-0"><button onClick={() => setActiveTab('home')} className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'home' ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}><div className={`p-2 rounded-xl transition-colors ${activeTab === 'home' ? 'bg-emerald-50' : 'bg-transparent'}`}><BookOpen className="w-6 h-6" /></div><span className="text-[10px] font-semibold">Dzikir</span></button><button onClick={() => setActiveTab('settings')} className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'settings' ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}><div className={`p-2 rounded-xl transition-colors ${activeTab === 'settings' ? 'bg-emerald-50' : 'bg-transparent'}`}><Settings2 className="w-6 h-6" /></div><span className="text-[10px] font-semibold">Pengaturan</span></button></nav>}
+        </div>
+
+        {isInstallModalOpen && !isReadingMode && (
+          <div className="absolute inset-0 z-40 flex items-center justify-center bg-slate-950/38 p-4" onClick={() => setIsInstallModalOpen(false)}>
+            <div className="w-full max-w-md rounded-[2rem] border border-emerald-100 bg-white p-5 shadow-xl animate-fade-in-up" onClick={(event) => event.stopPropagation()}>
+              <div className="mb-4 flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-600">Install App</p>
+                  <h3 className="mt-1 text-lg font-bold text-gray-900">Panduan instal aplikasi</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-gray-500">Ikuti langkah berikut supaya Dzikir Harian bisa dibuka seperti aplikasi.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsInstallModalOpen(false)}
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-700"
+                  aria-label="Tutup panduan instal aplikasi"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <div className="rounded-3xl bg-emerald-50/70 p-4">
+                {installPlatform === 'ios' && <ol className="list-decimal space-y-2 pl-5 text-sm text-emerald-900"><li>Buka aplikasi ini lewat Safari.</li><li>Ketuk tombol <strong>Share</strong> (ikon kotak + panah).</li><li>Pilih <strong>Add to Home Screen</strong>, lalu tekan <strong>Add</strong>.</li></ol>}
+                {installPlatform === 'android' && <ol className="list-decimal space-y-2 pl-5 text-sm text-emerald-900"><li>Tekan tombol <strong>Install sekarang</strong> di bawah untuk memunculkan prompt instal.</li><li>Kalau prompt belum muncul, buka menu browser <strong>⋮</strong>.</li><li>Pilih <strong>Install app</strong> atau <strong>Add to Home screen</strong>.</li></ol>}
+                {installPlatform === 'other' && <p className="text-sm text-emerald-900">Gunakan menu browser, lalu pilih <strong>Install app</strong> atau <strong>Add to Home Screen</strong> bila tersedia di perangkat Anda.</p>}
+              </div>
+
+              <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  onClick={() => setIsInstallModalOpen(false)}
+                  className="inline-flex items-center justify-center rounded-2xl border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-600 transition-colors hover:border-gray-300 hover:bg-gray-50"
+                >
+                  Tutup
+                </button>
+
+                {installPlatform === 'android' && installPromptEvent ? (
+                  <button
+                    type="button"
+                    onClick={handleInstallApp}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-600"
+                  >
+                    <Download className="h-4 w-4" />
+                    Install sekarang
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeDalil && <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setActiveDalil(null)}><div className="w-full max-w-lg bg-white rounded-3xl shadow-xl border border-gray-100 p-5 sm:p-6" onClick={(e) => e.stopPropagation()}><div className="flex items-start justify-between gap-3 mb-4"><div><p className="text-xs font-semibold text-emerald-600 uppercase tracking-wide">Dalil dari sumber</p><h3 className="text-lg font-bold text-gray-900">{activeDalil.title}</h3></div><button type="button" onClick={() => setActiveDalil(null)} className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center" aria-label="Tutup popup dalil"><X className="w-5 h-5" /></button></div><div className="bg-gray-50 rounded-2xl p-4 space-y-3"><p className="text-sm text-gray-700 leading-relaxed">{activeDalil.dalil}</p><p className="text-xs text-gray-500"><span className="font-semibold">Referensi:</span> {activeDalil.source}</p></div></div></div>}
       </div>
     </div>
   );
