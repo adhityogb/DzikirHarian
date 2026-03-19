@@ -36,6 +36,17 @@
 .app-header__verse {
   background: rgba(255, 255, 255, 0.14);
 }
+
+.app-shell__backdrop {
+  min-height: 0;
+}
+.app-shell__backdrop.is-blurred {
+  filter: blur(10px);
+  transform: scale(0.985);
+  transform-origin: center;
+  pointer-events: none;
+  user-select: none;
+}
 .install-cta-button {
   display: inline-flex;
   align-items: center;
