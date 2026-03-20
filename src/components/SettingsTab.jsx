@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
-import { CalendarDays, Clock3, Download, ChevronLeft, Type, Languages, AlignLeft, Repeat2, Sparkles } from 'lucide-react';
+import { CalendarDays, Clock3, Download, ChevronLeft, Type, Languages, AlignLeft, Sparkles, Sunrise, Sunset } from 'lucide-react';
 
-function SettingsTab({ fontSize, setFontSize, showArabic, setShowArabic, showLatin, setShowLatin, showTranslation, setShowTranslation, showBackToReading, onBackToReading, reminderTime, setReminderTime, reminderFrequency, setReminderFrequency, reminderDuration, setReminderDuration, reminderSummary, onExportReminderCalendar }) {
+function SettingsTab({ fontSize, setFontSize, showArabic, setShowArabic, showLatin, setShowLatin, showTranslation, setShowTranslation, showBackToReading, onBackToReading, morningReminderTime, setMorningReminderTime, eveningReminderTime, setEveningReminderTime, reminderDuration, setReminderDuration, reminderSummary, onExportReminderCalendar }) {
   return (
     <div className="p-6 space-y-8 animate-fade-in-up pb-[calc(env(safe-area-inset-bottom,16px)+8.5rem)]">
       <div className="space-y-4">
@@ -23,21 +23,18 @@ function SettingsTab({ fontSize, setFontSize, showArabic, setShowArabic, showLat
           <div className="w-11 h-11 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 shrink-0"><CalendarDays className="w-5 h-5" /></div>
           <div>
             <h4 className="font-semibold text-gray-800">Kalender Pengingat Dzikir</h4>
-            <p className="text-xs text-gray-500 mt-1 leading-relaxed">Sistem notifikasi cloud disembunyikan sementara. Sebagai gantinya, Anda bisa membuat file kalender pengingat (.ics) dan mengimpornya ke Google Calendar, Apple Calendar, atau kalender lain.</p>
           </div>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="space-y-2 text-sm font-medium text-gray-700">
-            <span className="inline-flex items-center gap-2"><Clock3 className="w-4 h-4 text-emerald-600" /> Jam mulai</span>
-            <input type="time" value={reminderTime} onChange={(e) => setReminderTime(e.target.value)} className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-800 outline-none transition-colors focus:border-emerald-400 focus:bg-white" />
+            <span className="inline-flex items-center gap-2"><Sunrise className="w-4 h-4 text-amber-500" /> Pengingat dzikir pagi</span>
+            <input type="time" value={morningReminderTime} onChange={(e) => setMorningReminderTime(e.target.value)} className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-800 outline-none transition-colors focus:border-emerald-400 focus:bg-white" />
           </label>
 
           <label className="space-y-2 text-sm font-medium text-gray-700">
-            <span className="inline-flex items-center gap-2"><Repeat2 className="w-4 h-4 text-emerald-600" /> Frekuensi per hari</span>
-            <select value={reminderFrequency} onChange={(e) => setReminderFrequency(Number(e.target.value))} className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-800 outline-none transition-colors focus:border-emerald-400 focus:bg-white">
-              {[1, 2, 3, 4, 5].map((value) => <option key={value} value={value}>{value} kali</option>)}
-            </select>
+            <span className="inline-flex items-center gap-2"><Sunset className="w-4 h-4 text-indigo-500" /> Pengingat dzikir petang</span>
+            <input type="time" value={eveningReminderTime} onChange={(e) => setEveningReminderTime(e.target.value)} className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-800 outline-none transition-colors focus:border-emerald-400 focus:bg-white" />
           </label>
         </div>
 

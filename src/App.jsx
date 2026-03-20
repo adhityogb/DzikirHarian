@@ -64,8 +64,8 @@ export default function App() {
   const [showInstallBanner, setShowInstallBanner] = useState(() => window.innerWidth < 768 && !isStandaloneDisplay());
   const [activeDalil, setActiveDalil] = useState(null);
   const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
-  const [reminderTime, setReminderTime] = useState(() => localStorage.getItem('dzikir_calendar_reminder_time') || '05:30');
-  const [reminderFrequency, setReminderFrequency] = useState(() => Number(localStorage.getItem('dzikir_calendar_reminder_frequency') || 2));
+  const [morningReminderTime, setMorningReminderTime] = useState(() => localStorage.getItem('dzikir_calendar_morning_reminder_time') || '05:30');
+  const [eveningReminderTime, setEveningReminderTime] = useState(() => localStorage.getItem('dzikir_calendar_evening_reminder_time') || '17:00');
   const [reminderDuration, setReminderDuration] = useState(() => localStorage.getItem('dzikir_calendar_reminder_duration') || 'week');
   const [tahlilTargetByTime, setTahlilTargetByTime] = useState(() => ({
     pagi: Number(localStorage.getItem('dzikir_tahlil_target_pagi') || 10),
@@ -83,7 +83,7 @@ export default function App() {
   }), [tahlilTargetByTime]);
 
   const currentDzikirList = dzikirListByTime[activeTime];
-  const reminderSummary = useMemo(() => getReminderSummary({ time: reminderTime, frequencyPerDay: reminderFrequency, durationKey: reminderDuration }), [reminderTime, reminderFrequency, reminderDuration]);
+  const reminderSummary = useMemo(() => getReminderSummary({ morningTime: morningReminderTime, eveningTime: eveningReminderTime, durationKey: reminderDuration }), [morningReminderTime, eveningReminderTime, reminderDuration]);
 
   useEffect(() => {
     registerServiceWorker().catch(() => {
@@ -126,8 +126,8 @@ export default function App() {
   useEffect(() => { localStorage.setItem(STORAGE_KEYS.showArabic, String(showArabic)); }, [showArabic]);
   useEffect(() => { localStorage.setItem(STORAGE_KEYS.showLatin, String(showLatin)); }, [showLatin]);
   useEffect(() => { localStorage.setItem(STORAGE_KEYS.showTranslation, String(showTranslation)); }, [showTranslation]);
-  useEffect(() => { localStorage.setItem('dzikir_calendar_reminder_time', reminderTime); }, [reminderTime]);
-  useEffect(() => { localStorage.setItem('dzikir_calendar_reminder_frequency', String(reminderFrequency)); }, [reminderFrequency]);
+  useEffect(() => { localStorage.setItem('dzikir_calendar_morning_reminder_time', morningReminderTime); }, [morningReminderTime]);
+  useEffect(() => { localStorage.setItem('dzikir_calendar_evening_reminder_time', eveningReminderTime); }, [eveningReminderTime]);
   useEffect(() => { localStorage.setItem('dzikir_calendar_reminder_duration', reminderDuration); }, [reminderDuration]);
   useEffect(() => {
     localStorage.setItem('dzikir_tahlil_target_pagi', String(tahlilTargetByTime.pagi));
@@ -213,8 +213,8 @@ export default function App() {
   }, []);
 
   const handleExportReminderCalendar = useCallback(() => {
-    downloadReminderCalendar({ time: reminderTime, frequencyPerDay: reminderFrequency, durationKey: reminderDuration });
-  }, [reminderDuration, reminderFrequency, reminderTime]);
+    downloadReminderCalendar({ morningTime: morningReminderTime, eveningTime: eveningReminderTime, durationKey: reminderDuration });
+  }, [eveningReminderTime, morningReminderTime, reminderDuration]);
 
   const handleIncrement = useCallback((id, target, index) => {
     setCounts((prev) => {
@@ -364,10 +364,10 @@ export default function App() {
                 setShowTranslation={setShowTranslation}
                 showBackToReading={settingsOrigin === 'reading'}
                 onBackToReading={handleBackToReading}
-                reminderTime={reminderTime}
-                setReminderTime={setReminderTime}
-                reminderFrequency={reminderFrequency}
-                setReminderFrequency={setReminderFrequency}
+                morningReminderTime={morningReminderTime}
+                setMorningReminderTime={setMorningReminderTime}
+                eveningReminderTime={eveningReminderTime}
+                setEveningReminderTime={setEveningReminderTime}
                 reminderDuration={reminderDuration}
                 setReminderDuration={setReminderDuration}
                 reminderSummary={reminderSummary}

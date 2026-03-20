@@ -4,13 +4,18 @@ const DURATION_PRESETS = {
   month: { label: '1 bulan', days: 30 },
 };
 
-const MOTIVATION_LINES = [
-  'Luangkan sejenak untuk berdzikir, karena hati yang mengingat Allah akan terasa lebih tenang.',
-  'Dzikir hari ini adalah jeda yang menenangkan jiwa di tengah kesibukan.',
-  'Satu dzikir yang rutin lebih baik daripada niat baik yang terus ditunda.',
-  'Tenangkan hati, lembutkan lisan, dan isi hari dengan mengingat Allah.',
-  'Mulai kembali dengan dzikir; sedikit tapi istiqamah akan terasa besar nilainya.',
-];
+const MOTIVATION_LINES = {
+  pagi: [
+    'Awali pagi dengan dzikir agar hati lebih tenang dan langkah hari ini lebih berkah.',
+    'Dzikir pagi adalah penguat hati sebelum memulai aktivitas.',
+    'Mulailah hari dengan mengingat Allah, agar jiwa terasa ringan dan lapang.',
+  ],
+  petang: [
+    'Tutup sore dengan dzikir agar hati lebih damai dan lelah terasa menenangkan.',
+    'Dzikir petang membantu menutup hari dengan syukur dan ketenangan.',
+    'Luangkan sejenak di petang hari untuk dzikir dan menenangkan jiwa.',
+  ],
+};
 
 const pad = (value) => String(value).padStart(2, '0');
 
@@ -24,28 +29,15 @@ const formatDateForIcs = (date) => `${date.getFullYear()}${pad(date.getMonth() +
 
 const getDurationLabel = (durationKey) => DURATION_PRESETS[durationKey]?.label || DURATION_PRESETS.week.label;
 
-const distributeTimes = (baseHour, baseMinute, frequencyPerDay) => {
-  const baseTotalMinutes = (baseHour * 60) + baseMinute;
-  const latestTotalMinutes = 21 * 60;
-
-  if (frequencyPerDay <= 1 || baseTotalMinutes >= latestTotalMinutes) {
-    return [baseTotalMinutes];
-  }
-
-  const step = Math.max(90, Math.floor((latestTotalMinutes - baseTotalMinutes) / Math.max(1, frequencyPerDay - 1)));
-
-  return Array.from({ length: frequencyPerDay }, (_, index) => {
-    const totalMinutes = Math.min(latestTotalMinutes, baseTotalMinutes + (step * index));
-    return totalMinutes;
-  });
+const createEventTime = (baseDate, time) => {
+  const [hourString, minuteString] = time.split(':');
+  const date = new Date(baseDate);
+  date.setHours(Number(hourString || 0), Number(minuteString || 0), 0, 0);
+  return date;
 };
 
-const getReminderOccurrences = ({ time, frequencyPerDay, durationKey }) => {
-  const [hourString, minuteString] = time.split(':');
-  const baseHour = Number(hourString || 5);
-  const baseMinute = Number(minuteString || 30);
+const getReminderOccurrences = ({ morningTime, eveningTime, durationKey }) => {
   const totalDays = DURATION_PRESETS[durationKey]?.days || DURATION_PRESETS.week.days;
-  const timesPerDay = distributeTimes(baseHour, baseMinute, frequencyPerDay);
   const startDate = new Date();
   startDate.setDate(startDate.getDate() + 1);
   startDate.setHours(0, 0, 0, 0);
@@ -54,50 +46,53 @@ const getReminderOccurrences = ({ time, frequencyPerDay, durationKey }) => {
     const currentDate = new Date(startDate);
     currentDate.setDate(startDate.getDate() + dayIndex);
 
-    return timesPerDay.map((totalMinutes, reminderIndex) => {
-      const date = new Date(currentDate);
-      date.setHours(Math.floor(totalMinutes / 60), totalMinutes % 60, 0, 0);
-
-      return {
-        date,
-        reminderIndex,
-      };
-    });
+    return [
+      {
+        date: createEventTime(currentDate, morningTime),
+        type: 'pagi',
+      },
+      {
+        date: createEventTime(currentDate, eveningTime),
+        type: 'petang',
+      },
+    ];
   }).flat();
 };
 
-const buildEventDescription = ({ durationKey, frequencyPerDay, reminderIndex }) => {
-  const motivation = MOTIVATION_LINES[reminderIndex % MOTIVATION_LINES.length];
+const buildEventDescription = ({ durationKey, type, occurrenceIndex }) => {
+  const motivationList = MOTIVATION_LINES[type];
+  const motivation = motivationList[occurrenceIndex % motivationList.length];
+  const title = type === 'pagi' ? 'Dzikir pagi' : 'Dzikir petang';
 
   return [
-    'Pengingat dzikir harian.',
+    `Pengingat ${title}.`,
     `Durasi pengingat: ${getDurationLabel(durationKey)}.`,
-    `Frekuensi: ${frequencyPerDay} kali per hari.`,
     motivation,
   ].join('\n');
 };
 
-export const getReminderSummary = ({ time, frequencyPerDay, durationKey }) => {
-  const occurrences = getReminderOccurrences({ time, frequencyPerDay, durationKey });
+export const getReminderSummary = ({ morningTime, eveningTime, durationKey }) => {
+  const occurrences = getReminderOccurrences({ morningTime, eveningTime, durationKey });
   const durationLabel = getDurationLabel(durationKey);
 
-  return `Kalender akan dibuat untuk ${occurrences.length} pengingat, dimulai besok pukul ${time}, sebanyak ${frequencyPerDay} kali per hari selama ${durationLabel.toLowerCase()}.`;
+  return `Kalender akan dibuat untuk ${occurrences.length} pengingat: dzikir pagi pukul ${morningTime} dan dzikir petang pukul ${eveningTime}, dimulai besok selama ${durationLabel.toLowerCase()}.`;
 };
 
-export const downloadReminderCalendar = ({ time, frequencyPerDay, durationKey }) => {
-  const occurrences = getReminderOccurrences({ time, frequencyPerDay, durationKey });
+export const downloadReminderCalendar = ({ morningTime, eveningTime, durationKey }) => {
+  const occurrences = getReminderOccurrences({ morningTime, eveningTime, durationKey });
   const createdAt = formatDateForIcs(new Date());
-  const events = occurrences.map(({ date, reminderIndex }, index) => {
+  const events = occurrences.map(({ date, type }, index) => {
     const endDate = new Date(date.getTime() + (15 * 60 * 1000));
-    const description = buildEventDescription({ durationKey, frequencyPerDay, reminderIndex: index + reminderIndex });
+    const description = buildEventDescription({ durationKey, type, occurrenceIndex: index });
+    const title = type === 'pagi' ? 'Pengingat Dzikir Pagi' : 'Pengingat Dzikir Petang';
 
     return [
       'BEGIN:VEVENT',
-      `UID:dzikir-${date.getTime()}-${index}@dzikirharian.app`,
+      `UID:dzikir-${type}-${date.getTime()}-${index}@dzikirharian.app`,
       `DTSTAMP:${createdAt}`,
       `DTSTART:${formatDateForIcs(date)}`,
       `DTEND:${formatDateForIcs(endDate)}`,
-      `SUMMARY:${escapeIcsText('Pengingat Dzikir Harian')}`,
+      `SUMMARY:${escapeIcsText(title)}`,
       `DESCRIPTION:${escapeIcsText(description)}`,
       `LOCATION:${escapeIcsText('Dzikir Harian')}`,
       'END:VEVENT',
