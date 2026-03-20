@@ -11,6 +11,12 @@
 .calligraphy-subtitle { font-family: 'Scheherazade New', 'Amiri', serif; font-weight: 700; letter-spacing: 0.01em; text-shadow: 0 1px 8px rgba(0,0,0,.18); }
 .pb-safe { padding-bottom: env(safe-area-inset-bottom, 16px); }
 
+.dzikir-card {
+  content-visibility: auto;
+  contain-intrinsic-size: 720px;
+}
+
+
 .app-header {
   background: linear-gradient(135deg, #059669 0%, #0f766e 52%, #0f766e 100%);
   border-bottom-left-radius: 1.7rem;
@@ -41,8 +47,8 @@
   min-height: 0;
 }
 .app-shell__backdrop.is-blurred {
-  filter: blur(10px);
-  transform: scale(0.985);
+  filter: blur(6px);
+  transform: scale(0.992);
   transform-origin: center;
   pointer-events: none;
   user-select: none;
@@ -113,4 +119,25 @@
   .app-shell header { padding-top: 1rem !important; padding-bottom: 1rem !important; }
   .app-shell .pb-safe { padding-bottom: env(safe-area-inset-bottom, 8px); }
   .app-shell nav { padding-top: .45rem !important; padding-bottom: .45rem !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .content-scroll { scroll-behavior: auto; }
+  .animate-fade-in-down,
+  .animate-fade-in-up,
+  .animate-scale-in,
+  .install-cta-button,
+  .app-shell__backdrop.is-blurred,
+  .dzikir-card,
+  .dzikir-card *,
+  .app-shell * {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  .app-shell__backdrop.is-blurred {
+    filter: none;
+    transform: none;
+  }
 }

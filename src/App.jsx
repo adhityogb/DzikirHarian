@@ -8,6 +8,8 @@ import ReadingTab from './components/ReadingTab';
 import { STORAGE_KEYS, isStandaloneDisplay, dalilByTitle, dzikirData, ISTIGHFAR_LINK, readStoredCounts, writeStoredCounts } from './data/dzikirContent';
 
 const getLocalDateKey = () => new Date().toLocaleDateString('en-CA');
+const fontSizeClasses = ['text-2xl', 'text-3xl', 'text-4xl', 'text-5xl'];
+
 const getMsUntilNextTrigger = (hour, minute) => {
   const now = new Date();
   const next = new Date(now);
@@ -36,6 +38,18 @@ const getDzikirListForTime = (time, tahlilTargetByTime) => dzikirData[time].map(
     source: selectedOption?.source || item.source,
   };
 });
+
+const getProgressFromCounts = (list, savedCounts) => {
+  let totalTarget = 0;
+  let totalCompleted = 0;
+
+  list.forEach((item) => {
+    totalTarget += item.target;
+    totalCompleted += Math.min(savedCounts[item.id] || 0, item.target);
+  });
+
+  return totalTarget === 0 ? 0 : Math.round((totalCompleted / totalTarget) * 100);
+};
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('home');
@@ -76,11 +90,12 @@ export default function App() {
     return navigator.serviceWorker.register('/sw.js');
   }, []);
 
-  const currentDzikirList = useMemo(
-    () => getDzikirListForTime(activeTime, tahlilTargetByTime),
-    [activeTime, tahlilTargetByTime],
-  );
-  const fontSizeClasses = ['text-2xl', 'text-3xl', 'text-4xl', 'text-5xl'];
+  const dzikirListByTime = useMemo(() => ({
+    pagi: getDzikirListForTime('pagi', tahlilTargetByTime),
+    petang: getDzikirListForTime('petang', tahlilTargetByTime),
+  }), [tahlilTargetByTime]);
+
+  const currentDzikirList = dzikirListByTime[activeTime];
 
   useEffect(() => {
     registerServiceWorker().catch(() => {
@@ -97,7 +112,11 @@ export default function App() {
       const oppositeCounts = readStoredCounts(istighfarMeta.otherTime, currentDateKey);
       initialCounts[istighfarMeta.id] = Math.max(initialCounts[istighfarMeta.id] || 0, oppositeCounts[istighfarMeta.otherId] || 0);
     }
-    const syncCounts = window.setTimeout(() => setCounts(initialCounts), 0);
+
+    const syncCounts = window.setTimeout(() => {
+      setCounts(initialCounts);
+    }, 0);
+
     return () => window.clearTimeout(syncCounts);
   }, [activeTime, currentDzikirList, currentDateKey]);
 
@@ -164,7 +183,10 @@ export default function App() {
 
   useEffect(() => {
     if (!('Notification' in window) || !('serviceWorker' in navigator) || !remindersEnabled || notificationPermission !== 'granted') return;
-    let mounted = true; let morningTimeout; let eveningTimeout;
+    let mounted = true;
+    let morningTimeout;
+    let eveningTimeout;
+
     const scheduleReminder = async (hour, minute, title, body, assignTimeout) => {
       const registration = await navigator.serviceWorker.ready;
       const run = async () => {
@@ -176,6 +198,7 @@ export default function App() {
       };
       assignTimeout(window.setTimeout(run, getMsUntilNextTrigger(hour, minute)));
     };
+
     (async () => {
       try {
         await registerServiceWorker();
@@ -185,23 +208,42 @@ export default function App() {
         // no-op
       }
     })();
-    return () => { mounted = false; window.clearTimeout(morningTimeout); window.clearTimeout(eveningTimeout); };
+
+    return () => {
+      mounted = false;
+      window.clearTimeout(morningTimeout);
+      window.clearTimeout(eveningTimeout);
+    };
   }, [registerServiceWorker, remindersEnabled, notificationPermission]);
 
   useEffect(() => {
     const syncInstallState = () => {
       const mobile = window.innerWidth < 768;
       const standalone = isStandaloneDisplay();
-      setIsMobileView(mobile); setIsStandaloneMode(standalone); setShowInstallBanner(mobile && !standalone);
+      setIsMobileView(mobile);
+      setIsStandaloneMode(standalone);
+      setShowInstallBanner(mobile && !standalone);
     };
-    const handleBeforeInstallPrompt = (event) => { event.preventDefault(); setInstallPromptEvent(event); syncInstallState(); };
-    const handleAppInstalled = () => { setShowInstallBanner(false); setInstallPromptEvent(null); syncInstallState(); };
+
+    const handleBeforeInstallPrompt = (event) => {
+      event.preventDefault();
+      setInstallPromptEvent(event);
+      syncInstallState();
+    };
+
+    const handleAppInstalled = () => {
+      setShowInstallBanner(false);
+      setInstallPromptEvent(null);
+      syncInstallState();
+    };
+
     const displayModeMediaQuery = window.matchMedia('(display-mode: standalone)');
     syncInstallState();
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
     window.addEventListener('resize', syncInstallState);
     displayModeMediaQuery.addEventListener('change', syncInstallState);
+
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
@@ -226,7 +268,7 @@ export default function App() {
     };
   }, []);
 
-  const handleReminderToggle = async (enabled) => {
+  const handleReminderToggle = useCallback(async (enabled) => {
     if (!enabled) {
       setRemindersEnabled(false);
       return;
@@ -259,25 +301,25 @@ export default function App() {
       setRemindersEnabled(false);
       window.alert('Terjadi kendala saat mengaktifkan notifikasi. Silakan coba lagi.');
     }
-  };
+  }, [installPlatform, isStandaloneMode, registerServiceWorker]);
 
-  const handleIncrement = (id, target, index) => {
+  const handleIncrement = useCallback((id, target, index) => {
     setCounts((prev) => {
       const current = prev[id] || 0;
       if (current >= target) return prev;
       if (window.navigator?.vibrate) window.navigator.vibrate(50);
       const newCount = current + 1;
       if (newCount === target && index < currentDzikirList.length - 1) {
-        setTimeout(() => {
+        window.setTimeout(() => {
           const nextElement = document.getElementById(`dzikir-${currentDzikirList[index + 1].id}`);
           if (nextElement && scrollRef.current) nextElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 600);
       }
       return { ...prev, [id]: newCount };
     });
-  };
+  }, [currentDzikirList]);
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     if (!window.confirm('Apakah Anda yakin ingin mengulang hitungan dzikir ini dari awal?')) return;
     const initialCounts = {};
     currentDzikirList.forEach((d) => { initialCounts[d.id] = 0; });
@@ -288,53 +330,62 @@ export default function App() {
       writeStoredCounts(istighfarMeta.otherTime, { ...oppositeCounts, [istighfarMeta.otherId]: 0 }, currentDateKey);
     }
     if (isReadingMode && scrollRef.current) scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  }, [activeTime, currentDateKey, currentDzikirList, isReadingMode]);
 
-  const startReading = (time) => {
+  const startReading = useCallback((time) => {
     setActiveTime(time);
     setSettingsOrigin('home');
     setIsReadingMode(true);
     requestAnimationFrame(() => scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' }));
-  };
+  }, []);
 
-  const openSettingsFromReading = () => {
+  const openSettingsFromReading = useCallback(() => {
     setSettingsOrigin('reading');
     setActiveTab('settings');
     setIsReadingMode(false);
     requestAnimationFrame(() => scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' }));
-  };
+  }, []);
 
-  const handleBackToReading = () => {
+  const handleBackToReading = useCallback(() => {
     setIsReadingMode(true);
     requestAnimationFrame(() => scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' }));
-  };
+  }, []);
 
   const progress = useMemo(() => {
     if (Object.keys(counts).length === 0) return 0;
-    let totalTarget = 0; let totalCompleted = 0;
-    currentDzikirList.forEach((d) => { totalTarget += d.target; totalCompleted += Math.min(counts[d.id] || 0, d.target); });
-    return totalTarget === 0 ? 0 : Math.round((totalCompleted / totalTarget) * 100);
+    return getProgressFromCounts(currentDzikirList, counts);
   }, [counts, currentDzikirList]);
 
-  const getProgressForTime = (time) => {
-    const list = getDzikirListForTime(time, tahlilTargetByTime);
-    const savedCounts = time === activeTime ? counts : readStoredCounts(time, currentDateKey);
-    let totalTarget = 0; let totalCompleted = 0;
-    list.forEach((item) => { totalTarget += item.target; totalCompleted += Math.min(savedCounts[item.id] || 0, item.target); });
-    return totalTarget === 0 ? 0 : Math.round((totalCompleted / totalTarget) * 100);
-  };
+  const progressByTime = useMemo(() => ({
+    pagi: activeTime === 'pagi' ? getProgressFromCounts(dzikirListByTime.pagi, counts) : getProgressFromCounts(dzikirListByTime.pagi, readStoredCounts('pagi', currentDateKey)),
+    petang: activeTime === 'petang' ? getProgressFromCounts(dzikirListByTime.petang, counts) : getProgressFromCounts(dzikirListByTime.petang, readStoredCounts('petang', currentDateKey)),
+  }), [activeTime, counts, currentDateKey, dzikirListByTime]);
 
-  const morningProgress = getProgressForTime('pagi');
-  const eveningProgress = getProgressForTime('petang');
+  const morningProgress = progressByTime.pagi;
+  const eveningProgress = progressByTime.petang;
   const dailyProgress = Math.round((morningProgress + eveningProgress) / 2);
 
-  const handleInstallApp = async () => {
+  const handleInstallApp = useCallback(async () => {
     if (!installPromptEvent) return;
     await installPromptEvent.prompt();
     await installPromptEvent.userChoice;
     setInstallPromptEvent(null);
     setIsInstallModalOpen(false);
-  };
+  }, [installPromptEvent]);
+
+  const handleOpenHome = useCallback(() => {
+    setSettingsOrigin('home');
+    setActiveTab('home');
+  }, []);
+
+  const handleOpenSettings = useCallback(() => {
+    setSettingsOrigin('home');
+    setActiveTab('settings');
+  }, []);
+
+  const setActiveTimeTahlilTarget = useCallback((value) => {
+    setTahlilTargetByTime((prev) => ({ ...prev, [activeTime]: value }));
+  }, [activeTime]);
 
   return (
     <div className={`min-h-screen bg-gray-50 font-sans text-gray-800 flex justify-center items-stretch lg:items-center overflow-x-hidden selection:bg-emerald-200 px-0 sm:px-4 lg:px-8 ${isNightView ? 'night-view' : ''}`}>
@@ -407,10 +458,10 @@ export default function App() {
                 onBackToReading={handleBackToReading}
               />
             )}
-            {isReadingMode && <ReadingTab currentDzikirList={currentDzikirList} counts={counts} showArabic={showArabic} fontSize={fontSize} fontSizeClasses={fontSizeClasses} showLatin={showLatin} showTranslation={showTranslation} handleIncrement={handleIncrement} setActiveDalil={setActiveDalil} dalilByTitle={dalilByTitle} progress={progress} activeTime={activeTime} setIsReadingMode={setIsReadingMode} setActiveTab={setActiveTab} tahlilTarget={tahlilTargetByTime[activeTime]} setTahlilTarget={(value) => setTahlilTargetByTime((prev) => ({ ...prev, [activeTime]: value }))} />}
+            {isReadingMode && <ReadingTab currentDzikirList={currentDzikirList} counts={counts} showArabic={showArabic} fontSize={fontSize} fontSizeClasses={fontSizeClasses} showLatin={showLatin} showTranslation={showTranslation} handleIncrement={handleIncrement} setActiveDalil={setActiveDalil} dalilByTitle={dalilByTitle} progress={progress} activeTime={activeTime} setIsReadingMode={setIsReadingMode} setActiveTab={setActiveTab} tahlilTarget={tahlilTargetByTime[activeTime]} setTahlilTarget={setActiveTimeTahlilTarget} />}
           </div>
 
-          {!isReadingMode && <nav className="absolute bottom-0 w-full bg-white border-t border-gray-100 px-4 sm:px-6 py-3 sm:py-4 flex justify-around items-center z-20 pb-safe shrink-0"><button onClick={() => { setSettingsOrigin('home'); setActiveTab('home'); }} className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'home' ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}><div className={`p-2 rounded-xl transition-colors ${activeTab === 'home' ? 'bg-emerald-50' : 'bg-transparent'}`}><BookOpen className="w-6 h-6" /></div><span className="text-[10px] font-semibold">Dzikir</span></button><button onClick={() => { setSettingsOrigin('home'); setActiveTab('settings'); }} className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'settings' ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}><div className={`p-2 rounded-xl transition-colors ${activeTab === 'settings' ? 'bg-emerald-50' : 'bg-transparent'}`}><Settings2 className="w-6 h-6" /></div><span className="text-[10px] font-semibold">Pengaturan</span></button></nav>}
+          {!isReadingMode && <nav className="absolute bottom-0 w-full bg-white border-t border-gray-100 px-4 sm:px-6 py-3 sm:py-4 flex justify-around items-center z-20 pb-safe shrink-0"><button onClick={handleOpenHome} className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'home' ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}><div className={`p-2 rounded-xl transition-colors ${activeTab === 'home' ? 'bg-emerald-50' : 'bg-transparent'}`}><BookOpen className="w-6 h-6" /></div><span className="text-[10px] font-semibold">Dzikir</span></button><button onClick={handleOpenSettings} className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'settings' ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}><div className={`p-2 rounded-xl transition-colors ${activeTab === 'settings' ? 'bg-emerald-50' : 'bg-transparent'}`}><Settings2 className="w-6 h-6" /></div><span className="text-[10px] font-semibold">Pengaturan</span></button></nav>}
         </div>
 
         {isInstallModalOpen && !isReadingMode && (

@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { BellRing, Type, Languages, AlignLeft, ChevronLeft } from 'lucide-react';
 
-export default function SettingsTab({ remindersEnabled, onRemindersToggle, notificationPermission, installPlatform, isStandaloneMode, fontSize, setFontSize, showArabic, setShowArabic, showLatin, setShowLatin, showTranslation, setShowTranslation, showBackToReading, onBackToReading }) {
+function SettingsTab({ remindersEnabled, onRemindersToggle, notificationPermission, installPlatform, isStandaloneMode, fontSize, setFontSize, showArabic, setShowArabic, showLatin, setShowLatin, showTranslation, setShowTranslation, showBackToReading, onBackToReading }) {
   const notificationHint = installPlatform === 'ios'
     ? (isStandaloneMode
       ? 'Pastikan izin notifikasi sudah diizinkan agar pengingat tetap bisa muncul dari app yang dipasang di Home Screen.'
@@ -46,3 +46,4 @@ export default function SettingsTab({ remindersEnabled, onRemindersToggle, notif
     </div>
   );
 }
+export default memo(SettingsTab);
