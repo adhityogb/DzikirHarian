@@ -59,14 +59,13 @@ const getReminderOccurrences = ({ morningTime, eveningTime, durationKey }) => {
   }).flat();
 };
 
-const buildEventDescription = ({ durationKey, type, occurrenceIndex }) => {
+const buildEventDescription = ({ type, occurrenceIndex }) => {
   const motivationList = MOTIVATION_LINES[type];
   const motivation = motivationList[occurrenceIndex % motivationList.length];
   const title = type === 'pagi' ? 'Dzikir pagi' : 'Dzikir petang';
 
   return [
     `Pengingat ${title}.`,
-    `Durasi pengingat: ${getDurationLabel(durationKey)}.`,
     motivation,
   ].join('\n');
 };
@@ -83,7 +82,7 @@ export const downloadReminderCalendar = ({ morningTime, eveningTime, durationKey
   const createdAt = formatDateForIcs(new Date());
   const events = occurrences.map(({ date, type }, index) => {
     const endDate = new Date(date.getTime() + (15 * 60 * 1000));
-    const description = buildEventDescription({ durationKey, type, occurrenceIndex: index });
+    const description = buildEventDescription({ type, occurrenceIndex: index });
     const title = type === 'pagi' ? 'Pengingat Dzikir Pagi' : 'Pengingat Dzikir Petang';
 
     return [

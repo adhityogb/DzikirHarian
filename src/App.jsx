@@ -64,6 +64,7 @@ export default function App() {
   const [showInstallBanner, setShowInstallBanner] = useState(() => window.innerWidth < 768 && !isStandaloneDisplay());
   const [activeDalil, setActiveDalil] = useState(null);
   const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
+  const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
   const [morningReminderTime, setMorningReminderTime] = useState(() => localStorage.getItem('dzikir_calendar_morning_reminder_time') || '05:30');
   const [eveningReminderTime, setEveningReminderTime] = useState(() => localStorage.getItem('dzikir_calendar_evening_reminder_time') || '17:00');
   const [reminderDuration, setReminderDuration] = useState(() => localStorage.getItem('dzikir_calendar_reminder_duration') || 'week');
@@ -214,7 +215,12 @@ export default function App() {
 
   const handleExportReminderCalendar = useCallback(() => {
     downloadReminderCalendar({ morningTime: morningReminderTime, eveningTime: eveningReminderTime, durationKey: reminderDuration });
+    setIsReminderModalOpen(false);
   }, [eveningReminderTime, morningReminderTime, reminderDuration]);
+
+  const handleOpenReminderModal = useCallback(() => {
+    setIsReminderModalOpen(true);
+  }, []);
 
   const handleIncrement = useCallback((id, target, index) => {
     setCounts((prev) => {
@@ -303,7 +309,7 @@ export default function App() {
   return (
     <div className={`min-h-screen bg-gray-50 font-sans text-gray-800 flex justify-center items-stretch lg:items-center overflow-x-hidden selection:bg-emerald-200 px-0 sm:px-4 lg:px-8 ${isNightView ? 'night-view' : ''}`}>
       <div className="app-shell w-full max-w-4xl h-[100dvh] lg:h-[92vh] bg-white relative flex flex-col overflow-hidden sm:rounded-[2rem] lg:shadow-2xl lg:border border-gray-200">
-        <div className={`flex min-h-0 flex-1 flex-col transition-all duration-300 ${isInstallModalOpen ? 'app-shell__backdrop is-blurred' : ''}`}>
+        <div className={`flex min-h-0 flex-1 flex-col transition-all duration-300 ${(isInstallModalOpen || isReminderModalOpen) ? 'app-shell__backdrop is-blurred' : ''}`}>
           {!isReadingMode && (
             <header className="app-header px-5 sm:px-6 text-white shadow-md z-10 relative shrink-0">
               <div className="app-header__glow" />
@@ -371,7 +377,7 @@ export default function App() {
                 reminderDuration={reminderDuration}
                 setReminderDuration={setReminderDuration}
                 reminderSummary={reminderSummary}
-                onExportReminderCalendar={handleExportReminderCalendar}
+                onOpenReminderModal={handleOpenReminderModal}
               />
             )}
             {isReadingMode && <ReadingTab currentDzikirList={currentDzikirList} counts={counts} showArabic={showArabic} fontSize={fontSize} fontSizeClasses={fontSizeClasses} showLatin={showLatin} showTranslation={showTranslation} handleIncrement={handleIncrement} setActiveDalil={setActiveDalil} dalilByTitle={dalilByTitle} progress={progress} activeTime={activeTime} setIsReadingMode={setIsReadingMode} setActiveTab={setActiveTab} tahlilTarget={tahlilTargetByTime[activeTime]} setTahlilTarget={setActiveTimeTahlilTarget} />}
@@ -423,6 +429,84 @@ export default function App() {
                     Install sekarang
                   </button>
                 ) : null}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isReminderModalOpen && !isReadingMode && (
+          <div className="absolute inset-0 z-40 flex items-center justify-center bg-slate-950/38 p-4" onClick={() => setIsReminderModalOpen(false)}>
+            <div className="w-full max-w-md rounded-[2rem] border border-emerald-100 bg-white p-5 shadow-xl animate-fade-in-up" onClick={(event) => event.stopPropagation()}>
+              <div className="mb-4 flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-600">Reminder Dzikir</p>
+                  <h3 className="mt-1 text-lg font-bold text-gray-900">Buat Pengingat Dzikir</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-gray-500">Atur waktu dzikir pagi dan petang, lalu export menjadi kalender pengingat yang siap diimpor.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsReminderModalOpen(false)}
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-700"
+                  aria-label="Tutup popup pengingat dzikir"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <label className="space-y-2 text-sm font-medium text-gray-700">
+                    <span>Dzikir pagi</span>
+                    <input type="time" value={morningReminderTime} onChange={(e) => setMorningReminderTime(e.target.value)} className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-800 outline-none transition-colors focus:border-emerald-400 focus:bg-white" />
+                  </label>
+                  <label className="space-y-2 text-sm font-medium text-gray-700">
+                    <span>Dzikir petang</span>
+                    <input type="time" value={eveningReminderTime} onChange={(e) => setEveningReminderTime(e.target.value)} className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-800 outline-none transition-colors focus:border-emerald-400 focus:bg-white" />
+                  </label>
+                </div>
+
+                <div className="space-y-2 text-sm font-medium text-gray-700">
+                  <span>Durasi pengingat</span>
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    {[
+                      ['day', '1 hari'],
+                      ['week', '1 minggu'],
+                      ['month', '1 bulan'],
+                    ].map(([value, title]) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setReminderDuration(value)}
+                        className={`rounded-2xl border px-4 py-4 text-left transition-all ${reminderDuration === value ? 'border-emerald-500 bg-emerald-50 shadow-sm shadow-emerald-100' : 'border-gray-200 bg-gray-50 hover:bg-white'}`}
+                      >
+                        <div className="font-semibold text-gray-800">{title}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl bg-emerald-50/70 p-4">
+                  <p className="text-sm font-semibold text-emerald-900">Ringkasan export</p>
+                  <p className="mt-1 text-xs leading-relaxed text-emerald-700">{reminderSummary}</p>
+                </div>
+              </div>
+
+              <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  onClick={() => setIsReminderModalOpen(false)}
+                  className="inline-flex items-center justify-center rounded-2xl border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-600 transition-colors hover:border-gray-300 hover:bg-gray-50"
+                >
+                  Tutup
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExportReminderCalendar}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-600"
+                >
+                  <Download className="h-4 w-4" />
+                  Buat Pengingat Dzikir
+                </button>
               </div>
             </div>
           </div>

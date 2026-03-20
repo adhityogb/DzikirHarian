@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
-import { CalendarDays, Clock3, Download, ChevronLeft, Type, Languages, AlignLeft, Sparkles, Sunrise, Sunset } from 'lucide-react';
+import { CalendarDays, ChevronLeft, Type, Languages, AlignLeft, Sunrise, Sunset } from 'lucide-react';
 
-function SettingsTab({ fontSize, setFontSize, showArabic, setShowArabic, showLatin, setShowLatin, showTranslation, setShowTranslation, showBackToReading, onBackToReading, morningReminderTime, setMorningReminderTime, eveningReminderTime, setEveningReminderTime, reminderDuration, setReminderDuration, reminderSummary, onExportReminderCalendar }) {
+function SettingsTab({ fontSize, setFontSize, showArabic, setShowArabic, showLatin, setShowLatin, showTranslation, setShowTranslation, showBackToReading, onBackToReading, morningReminderTime, eveningReminderTime, reminderSummary, onOpenReminderModal }) {
   return (
     <div className="p-6 space-y-8 animate-fade-in-up pb-[calc(env(safe-area-inset-bottom,16px)+8.5rem)]">
       <div className="space-y-4">
@@ -18,54 +18,33 @@ function SettingsTab({ fontSize, setFontSize, showArabic, setShowArabic, showLat
         <h2 className="font-bold text-gray-800 text-xl">Pengaturan Tampilan</h2>
       </div>
 
-      <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 space-y-5">
+      <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 space-y-4">
         <div className="flex items-start gap-3">
           <div className="w-11 h-11 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 shrink-0"><CalendarDays className="w-5 h-5" /></div>
-          <div>
+          <div className="min-w-0">
             <h4 className="font-semibold text-gray-800">Kalender Pengingat Dzikir</h4>
+            <p className="mt-1 text-xs leading-relaxed text-gray-500">Atur jadwal dzikir pagi dan petang, lalu export ke kalender perangkat Anda.</p>
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className="space-y-2 text-sm font-medium text-gray-700">
-            <span className="inline-flex items-center gap-2"><Sunrise className="w-4 h-4 text-amber-500" /> Pengingat dzikir pagi</span>
-            <input type="time" value={morningReminderTime} onChange={(e) => setMorningReminderTime(e.target.value)} className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-800 outline-none transition-colors focus:border-emerald-400 focus:bg-white" />
-          </label>
-
-          <label className="space-y-2 text-sm font-medium text-gray-700">
-            <span className="inline-flex items-center gap-2"><Sunset className="w-4 h-4 text-indigo-500" /> Pengingat dzikir petang</span>
-            <input type="time" value={eveningReminderTime} onChange={(e) => setEveningReminderTime(e.target.value)} className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-800 outline-none transition-colors focus:border-emerald-400 focus:bg-white" />
-          </label>
-        </div>
-
-        <div className="space-y-2 text-sm font-medium text-gray-700">
-          <span className="inline-flex items-center gap-2"><Sparkles className="w-4 h-4 text-emerald-600" /> Durasi pengingat</span>
-          <div className="grid gap-3 sm:grid-cols-3">
-            {[
-              ['day', '1 hari', 'Mulai besok saja'],
-              ['week', '1 minggu', 'Rutinitas pekanan'],
-              ['month', '1 bulan', 'Bangun kebiasaan'],
-            ].map(([value, title, caption]) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => setReminderDuration(value)}
-                className={`rounded-2xl border px-4 py-4 text-left transition-all ${reminderDuration === value ? 'border-emerald-500 bg-emerald-50 shadow-sm shadow-emerald-100' : 'border-gray-200 bg-gray-50 hover:bg-white'}`}
-              >
-                <div className="font-semibold text-gray-800">{title}</div>
-                <div className="mt-1 text-xs text-gray-500">{caption}</div>
-              </button>
-            ))}
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
+            <div className="inline-flex items-center gap-2 text-xs font-semibold text-gray-500"><Sunrise className="w-4 h-4 text-amber-500" /> Dzikir pagi</div>
+            <div className="mt-2 text-base font-bold text-gray-800">{morningReminderTime}</div>
+          </div>
+          <div className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
+            <div className="inline-flex items-center gap-2 text-xs font-semibold text-gray-500"><Sunset className="w-4 h-4 text-indigo-500" /> Dzikir petang</div>
+            <div className="mt-2 text-base font-bold text-gray-800">{eveningReminderTime}</div>
           </div>
         </div>
 
         <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3">
-          <p className="text-sm font-medium text-emerald-900">Ringkasan export</p>
+          <p className="text-sm font-medium text-emerald-900">Ringkasan</p>
           <p className="mt-1 text-xs leading-relaxed text-emerald-700">{reminderSummary}</p>
         </div>
 
-        <button type="button" onClick={onExportReminderCalendar} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-600">
-          <Download className="h-4 w-4" /> Export kalender pengingat
+        <button type="button" onClick={onOpenReminderModal} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-600">
+          <CalendarDays className="h-4 w-4" /> Buat Pengingat Dzikir
         </button>
       </div>
 
