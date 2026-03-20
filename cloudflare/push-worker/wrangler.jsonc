@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "dzikir-push-worker",
+  "main": "src/index.js",
+  "compatibility_date": "2026-03-20",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "vars": {
+    "APP_ORIGIN": "http://localhost:5173",
+    "VAPID_SUBJECT": "mailto:admin@example.com"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "dzikir_push",
+      "database_id": "REPLACE_WITH_D1_DATABASE_ID"
+    }
+  ],
+  "triggers": {
+    "crons": ["* * * * *"]
+  }
+}

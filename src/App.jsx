@@ -6,15 +6,10 @@ import HomeTab from './components/HomeTab';
 import SettingsTab from './components/SettingsTab';
 import ReadingTab from './components/ReadingTab';
 import { STORAGE_KEYS, isStandaloneDisplay, dalilByTitle, dzikirData, ISTIGHFAR_LINK, readStoredCounts, writeStoredCounts } from './data/dzikirContent';
+import { downloadReminderCalendar, getReminderSummary } from './lib/calendarReminders';
 
 const getLocalDateKey = () => new Date().toLocaleDateString('en-CA');
-const getMsUntilNextTrigger = (hour, minute) => {
-  const now = new Date();
-  const next = new Date(now);
-  next.setHours(hour, minute, 0, 0);
-  if (next <= now) next.setDate(next.getDate() + 1);
-  return next.getTime() - now.getTime();
-};
+const fontSizeClasses = ['text-2xl', 'text-3xl', 'text-4xl', 'text-5xl'];
 
 const getMsUntilNextMidnight = () => {
   const now = new Date();
@@ -37,6 +32,18 @@ const getDzikirListForTime = (time, tahlilTargetByTime) => dzikirData[time].map(
   };
 });
 
+const getProgressFromCounts = (list, savedCounts) => {
+  let totalTarget = 0;
+  let totalCompleted = 0;
+
+  list.forEach((item) => {
+    totalTarget += item.target;
+    totalCompleted += Math.min(savedCounts[item.id] || 0, item.target);
+  });
+
+  return totalTarget === 0 ? 0 : Math.round((totalCompleted / totalTarget) * 100);
+};
+
 export default function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [activeTime, setActiveTime] = useState('pagi');
@@ -50,7 +57,6 @@ export default function App() {
   const [showLatin, setShowLatin] = useState(() => localStorage.getItem(STORAGE_KEYS.showLatin) !== 'false');
   const [showTranslation, setShowTranslation] = useState(() => localStorage.getItem(STORAGE_KEYS.showTranslation) !== 'false');
   const [isNightView, setIsNightView] = useState(() => localStorage.getItem(STORAGE_KEYS.nightView) === 'true');
-  const [remindersEnabled, setRemindersEnabled] = useState(() => localStorage.getItem(STORAGE_KEYS.remindersEnabled) !== 'false');
   const [currentDateKey, setCurrentDateKey] = useState(getLocalDateKey());
   const [installPromptEvent, setInstallPromptEvent] = useState(null);
   const [isMobileView, setIsMobileView] = useState(() => window.innerWidth < 768);
@@ -58,29 +64,27 @@ export default function App() {
   const [showInstallBanner, setShowInstallBanner] = useState(() => window.innerWidth < 768 && !isStandaloneDisplay());
   const [activeDalil, setActiveDalil] = useState(null);
   const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
-  const [notificationPermission, setNotificationPermission] = useState(() => ('Notification' in window ? Notification.permission : 'default'));
+  const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
+  const [morningReminderTime, setMorningReminderTime] = useState(() => localStorage.getItem('dzikir_calendar_morning_reminder_time') || '05:30');
+  const [eveningReminderTime, setEveningReminderTime] = useState(() => localStorage.getItem('dzikir_calendar_evening_reminder_time') || '17:00');
+  const [reminderDuration, setReminderDuration] = useState(() => localStorage.getItem('dzikir_calendar_reminder_duration') || 'week');
   const [tahlilTargetByTime, setTahlilTargetByTime] = useState(() => ({
     pagi: Number(localStorage.getItem('dzikir_tahlil_target_pagi') || 10),
     petang: Number(localStorage.getItem('dzikir_tahlil_target_petang') || 10),
   }));
-
-  const installPlatform = useMemo(() => {
-    const ua = window.navigator.userAgent.toLowerCase();
-    if (/iphone|ipad|ipod/.test(ua)) return 'ios';
-    if (/android/.test(ua)) return 'android';
-    return 'other';
-  }, []);
 
   const registerServiceWorker = useCallback(async () => {
     if (!('serviceWorker' in navigator)) return null;
     return navigator.serviceWorker.register('/sw.js');
   }, []);
 
-  const currentDzikirList = useMemo(
-    () => getDzikirListForTime(activeTime, tahlilTargetByTime),
-    [activeTime, tahlilTargetByTime],
-  );
-  const fontSizeClasses = ['text-2xl', 'text-3xl', 'text-4xl', 'text-5xl'];
+  const dzikirListByTime = useMemo(() => ({
+    pagi: getDzikirListForTime('pagi', tahlilTargetByTime),
+    petang: getDzikirListForTime('petang', tahlilTargetByTime),
+  }), [tahlilTargetByTime]);
+
+  const currentDzikirList = dzikirListByTime[activeTime];
+  const reminderSummary = useMemo(() => getReminderSummary({ morningTime: morningReminderTime, eveningTime: eveningReminderTime, durationKey: reminderDuration }), [morningReminderTime, eveningReminderTime, reminderDuration]);
 
   useEffect(() => {
     registerServiceWorker().catch(() => {
@@ -97,7 +101,11 @@ export default function App() {
       const oppositeCounts = readStoredCounts(istighfarMeta.otherTime, currentDateKey);
       initialCounts[istighfarMeta.id] = Math.max(initialCounts[istighfarMeta.id] || 0, oppositeCounts[istighfarMeta.otherId] || 0);
     }
-    const syncCounts = window.setTimeout(() => setCounts(initialCounts), 0);
+
+    const syncCounts = window.setTimeout(() => {
+      setCounts(initialCounts);
+    }, 0);
+
     return () => window.clearTimeout(syncCounts);
   }, [activeTime, currentDzikirList, currentDateKey]);
 
@@ -119,7 +127,9 @@ export default function App() {
   useEffect(() => { localStorage.setItem(STORAGE_KEYS.showArabic, String(showArabic)); }, [showArabic]);
   useEffect(() => { localStorage.setItem(STORAGE_KEYS.showLatin, String(showLatin)); }, [showLatin]);
   useEffect(() => { localStorage.setItem(STORAGE_KEYS.showTranslation, String(showTranslation)); }, [showTranslation]);
-  useEffect(() => { localStorage.setItem(STORAGE_KEYS.remindersEnabled, String(remindersEnabled)); }, [remindersEnabled]);
+  useEffect(() => { localStorage.setItem('dzikir_calendar_morning_reminder_time', morningReminderTime); }, [morningReminderTime]);
+  useEffect(() => { localStorage.setItem('dzikir_calendar_evening_reminder_time', eveningReminderTime); }, [eveningReminderTime]);
+  useEffect(() => { localStorage.setItem('dzikir_calendar_reminder_duration', reminderDuration); }, [reminderDuration]);
   useEffect(() => {
     localStorage.setItem('dzikir_tahlil_target_pagi', String(tahlilTargetByTime.pagi));
     localStorage.setItem('dzikir_tahlil_target_petang', String(tahlilTargetByTime.petang));
@@ -152,56 +162,33 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!('Notification' in window)) return;
-    const syncPermission = () => setNotificationPermission(Notification.permission);
-    document.addEventListener('visibilitychange', syncPermission);
-    window.addEventListener('focus', syncPermission);
-    return () => {
-      document.removeEventListener('visibilitychange', syncPermission);
-      window.removeEventListener('focus', syncPermission);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!('Notification' in window) || !('serviceWorker' in navigator) || !remindersEnabled || notificationPermission !== 'granted') return;
-    let mounted = true; let morningTimeout; let eveningTimeout;
-    const scheduleReminder = async (hour, minute, title, body, assignTimeout) => {
-      const registration = await navigator.serviceWorker.ready;
-      const run = async () => {
-        if (!mounted) return;
-        if (Notification.permission === 'granted') {
-          await registration.showNotification(title, { body, tag: title, renotify: true, icon: '/icons/android-chrome-192x192.png', badge: '/icons/favicon-48x48.png' });
-        }
-        assignTimeout(window.setTimeout(run, getMsUntilNextTrigger(hour, minute)));
-      };
-      assignTimeout(window.setTimeout(run, getMsUntilNextTrigger(hour, minute)));
-    };
-    (async () => {
-      try {
-        await registerServiceWorker();
-        await scheduleReminder(5, 30, 'Dzikir Pagi', 'Waktunya dzikir pagi. Tenangkan hati, awali hari dengan mengingat Allah.', (t) => { morningTimeout = t; });
-        await scheduleReminder(17, 0, 'Dzikir Petang', 'Waktunya dzikir petang. Tutup sore dengan dzikir dan doa.', (t) => { eveningTimeout = t; });
-      } catch {
-        // no-op
-      }
-    })();
-    return () => { mounted = false; window.clearTimeout(morningTimeout); window.clearTimeout(eveningTimeout); };
-  }, [registerServiceWorker, remindersEnabled, notificationPermission]);
-
-  useEffect(() => {
     const syncInstallState = () => {
       const mobile = window.innerWidth < 768;
       const standalone = isStandaloneDisplay();
-      setIsMobileView(mobile); setIsStandaloneMode(standalone); setShowInstallBanner(mobile && !standalone);
+      setIsMobileView(mobile);
+      setIsStandaloneMode(standalone);
+      setShowInstallBanner(mobile && !standalone);
     };
-    const handleBeforeInstallPrompt = (event) => { event.preventDefault(); setInstallPromptEvent(event); syncInstallState(); };
-    const handleAppInstalled = () => { setShowInstallBanner(false); setInstallPromptEvent(null); syncInstallState(); };
+
+    const handleBeforeInstallPrompt = (event) => {
+      event.preventDefault();
+      setInstallPromptEvent(event);
+      syncInstallState();
+    };
+
+    const handleAppInstalled = () => {
+      setShowInstallBanner(false);
+      setInstallPromptEvent(null);
+      syncInstallState();
+    };
+
     const displayModeMediaQuery = window.matchMedia('(display-mode: standalone)');
     syncInstallState();
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
     window.addEventListener('resize', syncInstallState);
     displayModeMediaQuery.addEventListener('change', syncInstallState);
+
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
@@ -226,58 +213,32 @@ export default function App() {
     };
   }, []);
 
-  const handleReminderToggle = async (enabled) => {
-    if (!enabled) {
-      setRemindersEnabled(false);
-      return;
-    }
+  const handleExportReminderCalendar = useCallback(() => {
+    downloadReminderCalendar({ morningTime: morningReminderTime, eveningTime: eveningReminderTime, durationKey: reminderDuration });
+    setIsReminderModalOpen(false);
+  }, [eveningReminderTime, morningReminderTime, reminderDuration]);
 
-    if (!('Notification' in window) || !('serviceWorker' in navigator)) {
-      window.alert('Perangkat atau browser ini belum mendukung notifikasi aplikasi web.');
-      setRemindersEnabled(false);
-      return;
-    }
+  const handleOpenReminderModal = useCallback(() => {
+    setIsReminderModalOpen(true);
+  }, []);
 
-    if (installPlatform === 'ios' && !isStandaloneMode) {
-      window.alert('Di iPhone/iPad, tambahkan aplikasi ke Home Screen terlebih dahulu agar notifikasi web dapat diaktifkan.');
-      setRemindersEnabled(false);
-      return;
-    }
-
-    try {
-      await registerServiceWorker();
-      let permission = Notification.permission;
-      if (permission !== 'granted') {
-        permission = await Notification.requestPermission();
-      }
-      setNotificationPermission(permission);
-      setRemindersEnabled(permission === 'granted');
-      if (permission !== 'granted') {
-        window.alert('Izin notifikasi belum diberikan, jadi pengingat belum bisa diaktifkan.');
-      }
-    } catch {
-      setRemindersEnabled(false);
-      window.alert('Terjadi kendala saat mengaktifkan notifikasi. Silakan coba lagi.');
-    }
-  };
-
-  const handleIncrement = (id, target, index) => {
+  const handleIncrement = useCallback((id, target, index) => {
     setCounts((prev) => {
       const current = prev[id] || 0;
       if (current >= target) return prev;
       if (window.navigator?.vibrate) window.navigator.vibrate(50);
       const newCount = current + 1;
       if (newCount === target && index < currentDzikirList.length - 1) {
-        setTimeout(() => {
+        window.setTimeout(() => {
           const nextElement = document.getElementById(`dzikir-${currentDzikirList[index + 1].id}`);
           if (nextElement && scrollRef.current) nextElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 600);
       }
       return { ...prev, [id]: newCount };
     });
-  };
+  }, [currentDzikirList]);
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     if (!window.confirm('Apakah Anda yakin ingin mengulang hitungan dzikir ini dari awal?')) return;
     const initialCounts = {};
     currentDzikirList.forEach((d) => { initialCounts[d.id] = 0; });
@@ -288,58 +249,67 @@ export default function App() {
       writeStoredCounts(istighfarMeta.otherTime, { ...oppositeCounts, [istighfarMeta.otherId]: 0 }, currentDateKey);
     }
     if (isReadingMode && scrollRef.current) scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  }, [activeTime, currentDateKey, currentDzikirList, isReadingMode]);
 
-  const startReading = (time) => {
+  const startReading = useCallback((time) => {
     setActiveTime(time);
     setSettingsOrigin('home');
     setIsReadingMode(true);
     requestAnimationFrame(() => scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' }));
-  };
+  }, []);
 
-  const openSettingsFromReading = () => {
+  const openSettingsFromReading = useCallback(() => {
     setSettingsOrigin('reading');
     setActiveTab('settings');
     setIsReadingMode(false);
     requestAnimationFrame(() => scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' }));
-  };
+  }, []);
 
-  const handleBackToReading = () => {
+  const handleBackToReading = useCallback(() => {
     setIsReadingMode(true);
     requestAnimationFrame(() => scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' }));
-  };
+  }, []);
 
   const progress = useMemo(() => {
     if (Object.keys(counts).length === 0) return 0;
-    let totalTarget = 0; let totalCompleted = 0;
-    currentDzikirList.forEach((d) => { totalTarget += d.target; totalCompleted += Math.min(counts[d.id] || 0, d.target); });
-    return totalTarget === 0 ? 0 : Math.round((totalCompleted / totalTarget) * 100);
+    return getProgressFromCounts(currentDzikirList, counts);
   }, [counts, currentDzikirList]);
 
-  const getProgressForTime = (time) => {
-    const list = getDzikirListForTime(time, tahlilTargetByTime);
-    const savedCounts = time === activeTime ? counts : readStoredCounts(time, currentDateKey);
-    let totalTarget = 0; let totalCompleted = 0;
-    list.forEach((item) => { totalTarget += item.target; totalCompleted += Math.min(savedCounts[item.id] || 0, item.target); });
-    return totalTarget === 0 ? 0 : Math.round((totalCompleted / totalTarget) * 100);
-  };
+  const progressByTime = useMemo(() => ({
+    pagi: activeTime === 'pagi' ? getProgressFromCounts(dzikirListByTime.pagi, counts) : getProgressFromCounts(dzikirListByTime.pagi, readStoredCounts('pagi', currentDateKey)),
+    petang: activeTime === 'petang' ? getProgressFromCounts(dzikirListByTime.petang, counts) : getProgressFromCounts(dzikirListByTime.petang, readStoredCounts('petang', currentDateKey)),
+  }), [activeTime, counts, currentDateKey, dzikirListByTime]);
 
-  const morningProgress = getProgressForTime('pagi');
-  const eveningProgress = getProgressForTime('petang');
+  const morningProgress = progressByTime.pagi;
+  const eveningProgress = progressByTime.petang;
   const dailyProgress = Math.round((morningProgress + eveningProgress) / 2);
 
-  const handleInstallApp = async () => {
+  const handleInstallApp = useCallback(async () => {
     if (!installPromptEvent) return;
     await installPromptEvent.prompt();
     await installPromptEvent.userChoice;
     setInstallPromptEvent(null);
     setIsInstallModalOpen(false);
-  };
+  }, [installPromptEvent]);
+
+  const handleOpenHome = useCallback(() => {
+    setSettingsOrigin('home');
+    setActiveTab('home');
+  }, []);
+
+  const handleOpenSettings = useCallback(() => {
+    setSettingsOrigin('home');
+    setActiveTab('settings');
+  }, []);
+
+  const setActiveTimeTahlilTarget = useCallback((value) => {
+    setTahlilTargetByTime((prev) => ({ ...prev, [activeTime]: value }));
+  }, [activeTime]);
 
   return (
     <div className={`min-h-screen bg-gray-50 font-sans text-gray-800 flex justify-center items-stretch lg:items-center overflow-x-hidden selection:bg-emerald-200 px-0 sm:px-4 lg:px-8 ${isNightView ? 'night-view' : ''}`}>
       <div className="app-shell w-full max-w-4xl h-[100dvh] lg:h-[92vh] bg-white relative flex flex-col overflow-hidden sm:rounded-[2rem] lg:shadow-2xl lg:border border-gray-200">
-        <div className={`flex min-h-0 flex-1 flex-col transition-all duration-300 ${isInstallModalOpen ? 'app-shell__backdrop is-blurred' : ''}`}>
+        <div className={`flex min-h-0 flex-1 flex-col transition-all duration-300 ${(isInstallModalOpen || isReminderModalOpen) ? 'app-shell__backdrop is-blurred' : ''}`}>
           {!isReadingMode && (
             <header className="app-header px-5 sm:px-6 text-white shadow-md z-10 relative shrink-0">
               <div className="app-header__glow" />
@@ -390,11 +360,6 @@ export default function App() {
             {activeTab === 'home' && !isReadingMode && <HomeTab isNightView={isNightView} setIsNightView={setIsNightView} startReading={startReading} handleReset={handleReset} dailyProgress={dailyProgress} morningProgress={morningProgress} eveningProgress={eveningProgress} isMobileView={isMobileView} isStandaloneMode={isStandaloneMode} showInstallBanner={showInstallBanner} setIsInstallModalOpen={setIsInstallModalOpen} />}
             {activeTab === 'settings' && !isReadingMode && (
               <SettingsTab
-                remindersEnabled={remindersEnabled}
-                onRemindersToggle={handleReminderToggle}
-                notificationPermission={notificationPermission}
-                installPlatform={installPlatform}
-                isStandaloneMode={isStandaloneMode}
                 fontSize={fontSize}
                 setFontSize={setFontSize}
                 showArabic={showArabic}
@@ -405,12 +370,21 @@ export default function App() {
                 setShowTranslation={setShowTranslation}
                 showBackToReading={settingsOrigin === 'reading'}
                 onBackToReading={handleBackToReading}
+                morningReminderTime={morningReminderTime}
+                setMorningReminderTime={setMorningReminderTime}
+                eveningReminderTime={eveningReminderTime}
+                setEveningReminderTime={setEveningReminderTime}
+                reminderDuration={reminderDuration}
+                setReminderDuration={setReminderDuration}
+                reminderSummary={reminderSummary}
+                onOpenReminderModal={handleOpenReminderModal}
+                isMobileView={isMobileView}
               />
             )}
-            {isReadingMode && <ReadingTab currentDzikirList={currentDzikirList} counts={counts} showArabic={showArabic} fontSize={fontSize} fontSizeClasses={fontSizeClasses} showLatin={showLatin} showTranslation={showTranslation} handleIncrement={handleIncrement} setActiveDalil={setActiveDalil} dalilByTitle={dalilByTitle} progress={progress} activeTime={activeTime} setIsReadingMode={setIsReadingMode} setActiveTab={setActiveTab} tahlilTarget={tahlilTargetByTime[activeTime]} setTahlilTarget={(value) => setTahlilTargetByTime((prev) => ({ ...prev, [activeTime]: value }))} />}
+            {isReadingMode && <ReadingTab currentDzikirList={currentDzikirList} counts={counts} showArabic={showArabic} fontSize={fontSize} fontSizeClasses={fontSizeClasses} showLatin={showLatin} showTranslation={showTranslation} handleIncrement={handleIncrement} setActiveDalil={setActiveDalil} dalilByTitle={dalilByTitle} progress={progress} activeTime={activeTime} setIsReadingMode={setIsReadingMode} setActiveTab={setActiveTab} tahlilTarget={tahlilTargetByTime[activeTime]} setTahlilTarget={setActiveTimeTahlilTarget} />}
           </div>
 
-          {!isReadingMode && <nav className="absolute bottom-0 w-full bg-white border-t border-gray-100 px-4 sm:px-6 py-3 sm:py-4 flex justify-around items-center z-20 pb-safe shrink-0"><button onClick={() => { setSettingsOrigin('home'); setActiveTab('home'); }} className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'home' ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}><div className={`p-2 rounded-xl transition-colors ${activeTab === 'home' ? 'bg-emerald-50' : 'bg-transparent'}`}><BookOpen className="w-6 h-6" /></div><span className="text-[10px] font-semibold">Dzikir</span></button><button onClick={() => { setSettingsOrigin('home'); setActiveTab('settings'); }} className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'settings' ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}><div className={`p-2 rounded-xl transition-colors ${activeTab === 'settings' ? 'bg-emerald-50' : 'bg-transparent'}`}><Settings2 className="w-6 h-6" /></div><span className="text-[10px] font-semibold">Pengaturan</span></button></nav>}
+          {!isReadingMode && <nav className="absolute bottom-0 w-full bg-white border-t border-gray-100 px-4 sm:px-6 py-3 sm:py-4 flex justify-around items-center z-20 pb-safe shrink-0"><button onClick={handleOpenHome} className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'home' ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}><div className={`p-2 rounded-xl transition-colors ${activeTab === 'home' ? 'bg-emerald-50' : 'bg-transparent'}`}><BookOpen className="w-6 h-6" /></div><span className="text-[10px] font-semibold">Dzikir</span></button><button onClick={handleOpenSettings} className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'settings' ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}><div className={`p-2 rounded-xl transition-colors ${activeTab === 'settings' ? 'bg-emerald-50' : 'bg-transparent'}`}><Settings2 className="w-6 h-6" /></div><span className="text-[10px] font-semibold">Pengaturan</span></button></nav>}
         </div>
 
         {isInstallModalOpen && !isReadingMode && (
@@ -433,9 +407,8 @@ export default function App() {
               </div>
 
               <div className="rounded-3xl bg-emerald-50/70 p-4">
-                {installPlatform === 'ios' && <ol className="list-decimal space-y-2 pl-5 text-sm text-emerald-900"><li>Buka aplikasi ini lewat Safari.</li><li>Ketuk tombol <strong>Share</strong> (ikon kotak + panah).</li><li>Pilih <strong>Add to Home Screen</strong>, lalu tekan <strong>Add</strong>.</li></ol>}
-                {installPlatform === 'android' && <ol className="list-decimal space-y-2 pl-5 text-sm text-emerald-900"><li>Tekan tombol <strong>Install sekarang</strong> di bawah untuk memunculkan prompt instal.</li><li>Kalau prompt belum muncul, buka menu browser <strong>⋮</strong>.</li><li>Pilih <strong>Install app</strong> atau <strong>Add to Home screen</strong>.</li></ol>}
-                {installPlatform === 'other' && <p className="text-sm text-emerald-900">Gunakan menu browser, lalu pilih <strong>Install app</strong> atau <strong>Add to Home Screen</strong> bila tersedia di perangkat Anda.</p>}
+                {isStandaloneMode === false && <p className="text-sm text-emerald-900">Tambahkan aplikasi ke Home Screen agar pengalaman membuka dzikir dan file kalender terasa seperti aplikasi native di perangkat Anda.</p>}
+                {isMobileView && installPromptEvent ? <p className="mt-2 text-sm text-emerald-900">Setelah terpasang, Anda tetap bisa membuka file kalender pengingat kapan saja dari menu Pengaturan.</p> : null}
               </div>
 
               <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
@@ -447,7 +420,7 @@ export default function App() {
                   Tutup
                 </button>
 
-                {installPlatform === 'android' && installPromptEvent ? (
+                {installPromptEvent ? (
                   <button
                     type="button"
                     onClick={handleInstallApp}
@@ -457,6 +430,84 @@ export default function App() {
                     Install sekarang
                   </button>
                 ) : null}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isReminderModalOpen && !isReadingMode && (
+          <div className="absolute inset-0 z-40 flex items-center justify-center bg-slate-950/38 p-4" onClick={() => setIsReminderModalOpen(false)}>
+            <div className="w-full max-w-md rounded-[2rem] border border-emerald-100 bg-white p-5 shadow-xl animate-fade-in-up" onClick={(event) => event.stopPropagation()}>
+              <div className="mb-4 flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-600">Reminder Dzikir</p>
+                  <h3 className="mt-1 text-lg font-bold text-gray-900">Buat Pengingat Dzikir</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-gray-500">Atur waktu dzikir pagi dan petang, lalu export menjadi kalender pengingat yang siap diimpor.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsReminderModalOpen(false)}
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-700"
+                  aria-label="Tutup popup pengingat dzikir"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <label className="space-y-2 text-sm font-medium text-gray-700">
+                    <span>Dzikir pagi</span>
+                    <input type="time" value={morningReminderTime} onChange={(e) => setMorningReminderTime(e.target.value)} className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-800 outline-none transition-colors focus:border-emerald-400 focus:bg-white" />
+                  </label>
+                  <label className="space-y-2 text-sm font-medium text-gray-700">
+                    <span>Dzikir petang</span>
+                    <input type="time" value={eveningReminderTime} onChange={(e) => setEveningReminderTime(e.target.value)} className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-800 outline-none transition-colors focus:border-emerald-400 focus:bg-white" />
+                  </label>
+                </div>
+
+                <div className="space-y-2 text-sm font-medium text-gray-700">
+                  <span>Durasi pengingat</span>
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    {[
+                      ['day', '1 hari'],
+                      ['week', '1 minggu'],
+                      ['month', '1 bulan'],
+                    ].map(([value, title]) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setReminderDuration(value)}
+                        className={`rounded-2xl border px-4 py-4 text-left transition-all ${reminderDuration === value ? 'border-emerald-500 bg-emerald-50 shadow-sm shadow-emerald-100' : 'border-gray-200 bg-gray-50 hover:bg-white'}`}
+                      >
+                        <div className="font-semibold text-gray-800">{title}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl bg-emerald-50/70 p-4">
+                  <p className="text-sm font-semibold text-emerald-900">Ringkasan export</p>
+                  <p className="mt-1 text-xs leading-relaxed text-emerald-700">{reminderSummary}</p>
+                </div>
+              </div>
+
+              <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  onClick={() => setIsReminderModalOpen(false)}
+                  className="inline-flex items-center justify-center rounded-2xl border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-600 transition-colors hover:border-gray-300 hover:bg-gray-50"
+                >
+                  Tutup
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExportReminderCalendar}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-600"
+                >
+                  <Download className="h-4 w-4" />
+                  Buat Pengingat Dzikir
+                </button>
               </div>
             </div>
           </div>

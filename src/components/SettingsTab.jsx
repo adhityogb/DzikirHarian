@@ -1,13 +1,7 @@
-import React from 'react';
-import { BellRing, Type, Languages, AlignLeft, ChevronLeft } from 'lucide-react';
+import React, { memo } from 'react';
+import { CalendarDays, ChevronLeft, Type, Languages, AlignLeft, Sunrise, Sunset } from 'lucide-react';
 
-export default function SettingsTab({ remindersEnabled, onRemindersToggle, notificationPermission, installPlatform, isStandaloneMode, fontSize, setFontSize, showArabic, setShowArabic, showLatin, setShowLatin, showTranslation, setShowTranslation, showBackToReading, onBackToReading }) {
-  const notificationHint = installPlatform === 'ios'
-    ? (isStandaloneMode
-      ? 'Pastikan izin notifikasi sudah diizinkan agar pengingat tetap bisa muncul dari app yang dipasang di Home Screen.'
-      : 'Untuk iPhone/iPad, pasang app ke Home Screen terlebih dahulu sebelum mengaktifkan notifikasi.')
-    : 'Aktifkan izin notifikasi browser agar pengingat dzikir dapat berjalan dengan lebih andal.';
-
+function SettingsTab({ fontSize, setFontSize, showArabic, setShowArabic, showLatin, setShowLatin, showTranslation, setShowTranslation, showBackToReading, onBackToReading, morningReminderTime, eveningReminderTime, reminderSummary, onOpenReminderModal, isMobileView }) {
   return (
     <div className="p-6 space-y-8 animate-fade-in-up pb-[calc(env(safe-area-inset-bottom,16px)+8.5rem)]">
       <div className="space-y-4">
@@ -23,10 +17,43 @@ export default function SettingsTab({ remindersEnabled, onRemindersToggle, notif
         )}
         <h2 className="font-bold text-gray-800 text-xl">Pengaturan Tampilan</h2>
       </div>
-      <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
-        <div className="flex items-center justify-between gap-4"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-500"><BellRing className="w-5 h-5" /></div><div><h4 className="font-semibold text-gray-800">Notifikasi Pengingat</h4><p className="text-xs text-gray-500">Pagi 05.30 & Petang 17.00</p></div></div><label className="relative inline-flex items-center cursor-pointer"><input type="checkbox" checked={remindersEnabled} onChange={(e) => { void onRemindersToggle(e.target.checked); }} className="sr-only peer" /><div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div></label></div>
-        <p className="text-xs text-gray-500 mt-3 leading-relaxed">{notificationHint}</p>
-        {notificationPermission === 'denied' && <p className="text-xs text-rose-500 mt-2 leading-relaxed">Izin notifikasi sedang diblokir. Ubah izin di pengaturan browser/perangkat jika ingin menyalakannya kembali.</p>}
+
+      <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 space-y-4">
+        <div className="flex items-start gap-3">
+          <div className="w-11 h-11 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 shrink-0"><CalendarDays className="w-5 h-5" /></div>
+          <div className="min-w-0">
+            <h4 className="font-semibold text-gray-800">Kalender Pengingat Dzikir</h4>
+            <p className="mt-1 text-xs leading-relaxed text-gray-500">Atur jadwal dzikir pagi dan petang, lalu export ke kalender perangkat Anda.</p>
+          </div>
+        </div>
+
+        {isMobileView ? (
+          <button type="button" onClick={onOpenReminderModal} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-4 py-3.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-600">
+            <CalendarDays className="h-4 w-4" /> Atur Pengingat Dzikir
+          </button>
+        ) : (
+          <>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
+                <div className="inline-flex items-center gap-2 text-xs font-semibold text-gray-500"><Sunrise className="w-4 h-4 text-amber-500" /> Dzikir pagi</div>
+                <div className="mt-2 text-base font-bold text-gray-800">{morningReminderTime}</div>
+              </div>
+              <div className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
+                <div className="inline-flex items-center gap-2 text-xs font-semibold text-gray-500"><Sunset className="w-4 h-4 text-indigo-500" /> Dzikir petang</div>
+                <div className="mt-2 text-base font-bold text-gray-800">{eveningReminderTime}</div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3">
+              <p className="text-sm font-medium text-emerald-900">Ringkasan</p>
+              <p className="mt-1 text-xs leading-relaxed text-emerald-700">{reminderSummary}</p>
+            </div>
+
+            <button type="button" onClick={onOpenReminderModal} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-600">
+              <CalendarDays className="h-4 w-4" /> Buat Pengingat Dzikir
+            </button>
+          </>
+        )}
       </div>
 
       <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
@@ -46,3 +73,5 @@ export default function SettingsTab({ remindersEnabled, onRemindersToggle, notif
     </div>
   );
 }
+
+export default memo(SettingsTab);
