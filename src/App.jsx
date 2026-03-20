@@ -378,6 +378,7 @@ export default function App() {
                 setReminderDuration={setReminderDuration}
                 reminderSummary={reminderSummary}
                 onOpenReminderModal={handleOpenReminderModal}
+                isMobileView={isMobileView}
               />
             )}
             {isReadingMode && <ReadingTab currentDzikirList={currentDzikirList} counts={counts} showArabic={showArabic} fontSize={fontSize} fontSizeClasses={fontSizeClasses} showLatin={showLatin} showTranslation={showTranslation} handleIncrement={handleIncrement} setActiveDalil={setActiveDalil} dalilByTitle={dalilByTitle} progress={progress} activeTime={activeTime} setIsReadingMode={setIsReadingMode} setActiveTab={setActiveTab} tahlilTarget={tahlilTargetByTime[activeTime]} setTahlilTarget={setActiveTimeTahlilTarget} />}

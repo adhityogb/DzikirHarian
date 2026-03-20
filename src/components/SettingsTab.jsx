@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import { CalendarDays, ChevronLeft, Type, Languages, AlignLeft, Sunrise, Sunset } from 'lucide-react';
 
-function SettingsTab({ fontSize, setFontSize, showArabic, setShowArabic, showLatin, setShowLatin, showTranslation, setShowTranslation, showBackToReading, onBackToReading, morningReminderTime, eveningReminderTime, reminderSummary, onOpenReminderModal }) {
+function SettingsTab({ fontSize, setFontSize, showArabic, setShowArabic, showLatin, setShowLatin, showTranslation, setShowTranslation, showBackToReading, onBackToReading, morningReminderTime, eveningReminderTime, reminderSummary, onOpenReminderModal, isMobileView }) {
   return (
     <div className="p-6 space-y-8 animate-fade-in-up pb-[calc(env(safe-area-inset-bottom,16px)+8.5rem)]">
       <div className="space-y-4">
@@ -27,25 +27,33 @@ function SettingsTab({ fontSize, setFontSize, showArabic, setShowArabic, showLat
           </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
-            <div className="inline-flex items-center gap-2 text-xs font-semibold text-gray-500"><Sunrise className="w-4 h-4 text-amber-500" /> Dzikir pagi</div>
-            <div className="mt-2 text-base font-bold text-gray-800">{morningReminderTime}</div>
-          </div>
-          <div className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
-            <div className="inline-flex items-center gap-2 text-xs font-semibold text-gray-500"><Sunset className="w-4 h-4 text-indigo-500" /> Dzikir petang</div>
-            <div className="mt-2 text-base font-bold text-gray-800">{eveningReminderTime}</div>
-          </div>
-        </div>
+        {isMobileView ? (
+          <button type="button" onClick={onOpenReminderModal} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-4 py-3.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-600">
+            <CalendarDays className="h-4 w-4" /> Atur Pengingat Dzikir
+          </button>
+        ) : (
+          <>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
+                <div className="inline-flex items-center gap-2 text-xs font-semibold text-gray-500"><Sunrise className="w-4 h-4 text-amber-500" /> Dzikir pagi</div>
+                <div className="mt-2 text-base font-bold text-gray-800">{morningReminderTime}</div>
+              </div>
+              <div className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
+                <div className="inline-flex items-center gap-2 text-xs font-semibold text-gray-500"><Sunset className="w-4 h-4 text-indigo-500" /> Dzikir petang</div>
+                <div className="mt-2 text-base font-bold text-gray-800">{eveningReminderTime}</div>
+              </div>
+            </div>
 
-        <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3">
-          <p className="text-sm font-medium text-emerald-900">Ringkasan</p>
-          <p className="mt-1 text-xs leading-relaxed text-emerald-700">{reminderSummary}</p>
-        </div>
+            <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3">
+              <p className="text-sm font-medium text-emerald-900">Ringkasan</p>
+              <p className="mt-1 text-xs leading-relaxed text-emerald-700">{reminderSummary}</p>
+            </div>
 
-        <button type="button" onClick={onOpenReminderModal} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-600">
-          <CalendarDays className="h-4 w-4" /> Buat Pengingat Dzikir
-        </button>
+            <button type="button" onClick={onOpenReminderModal} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-600">
+              <CalendarDays className="h-4 w-4" /> Buat Pengingat Dzikir
+            </button>
+          </>
+        )}
       </div>
 
       <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
