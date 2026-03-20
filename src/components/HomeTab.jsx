@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Sun, Moon, ChevronRight, RotateCcw, Download } from 'lucide-react';
 
-export default function HomeTab({
+function HomeTab({
   isNightView,
   setIsNightView,
   startReading,
@@ -71,3 +71,4 @@ export default function HomeTab({
     </div>
   );
 }
+export default memo(HomeTab);
