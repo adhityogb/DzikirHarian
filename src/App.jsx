@@ -6,7 +6,7 @@ import HomeTab from './components/HomeTab';
 import SettingsTab from './components/SettingsTab';
 import ReadingTab from './components/ReadingTab';
 import { STORAGE_KEYS, isStandaloneDisplay, dalilByTitle, dzikirData, ISTIGHFAR_LINK, readStoredCounts, writeStoredCounts } from './data/dzikirContent';
-import { getPushSupport, removePushSubscription, sendPushTest, syncPushSubscriptionState, upsertPushSubscription } from './lib/pushNotifications';
+import { downloadReminderCalendar, getReminderSummary } from './lib/calendarReminders';
 
 const getLocalDateKey = () => new Date().toLocaleDateString('en-CA');
 const fontSizeClasses = ['text-2xl', 'text-3xl', 'text-4xl', 'text-5xl'];
@@ -57,7 +57,6 @@ export default function App() {
   const [showLatin, setShowLatin] = useState(() => localStorage.getItem(STORAGE_KEYS.showLatin) !== 'false');
   const [showTranslation, setShowTranslation] = useState(() => localStorage.getItem(STORAGE_KEYS.showTranslation) !== 'false');
   const [isNightView, setIsNightView] = useState(() => localStorage.getItem(STORAGE_KEYS.nightView) === 'true');
-  const [remindersEnabled, setRemindersEnabled] = useState(() => localStorage.getItem(STORAGE_KEYS.remindersEnabled) !== 'false');
   const [currentDateKey, setCurrentDateKey] = useState(getLocalDateKey());
   const [installPromptEvent, setInstallPromptEvent] = useState(null);
   const [isMobileView, setIsMobileView] = useState(() => window.innerWidth < 768);
@@ -65,23 +64,13 @@ export default function App() {
   const [showInstallBanner, setShowInstallBanner] = useState(() => window.innerWidth < 768 && !isStandaloneDisplay());
   const [activeDalil, setActiveDalil] = useState(null);
   const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
-  const [notificationPermission, setNotificationPermission] = useState(() => ('Notification' in window ? Notification.permission : 'default'));
-  const [hasPushSubscription, setHasPushSubscription] = useState(false);
-  const [isReminderBusy, setIsReminderBusy] = useState(false);
-  const [reminderStatusMessage, setReminderStatusMessage] = useState('Menyiapkan status pengingat cloud…');
+  const [reminderTime, setReminderTime] = useState(() => localStorage.getItem('dzikir_calendar_reminder_time') || '05:30');
+  const [reminderFrequency, setReminderFrequency] = useState(() => Number(localStorage.getItem('dzikir_calendar_reminder_frequency') || 2));
+  const [reminderDuration, setReminderDuration] = useState(() => localStorage.getItem('dzikir_calendar_reminder_duration') || 'week');
   const [tahlilTargetByTime, setTahlilTargetByTime] = useState(() => ({
     pagi: Number(localStorage.getItem('dzikir_tahlil_target_pagi') || 10),
     petang: Number(localStorage.getItem('dzikir_tahlil_target_petang') || 10),
   }));
-
-  const installPlatform = useMemo(() => {
-    const ua = window.navigator.userAgent.toLowerCase();
-    if (/iphone|ipad|ipod/.test(ua)) return 'ios';
-    if (/android/.test(ua)) return 'android';
-    return 'other';
-  }, []);
-
-  const pushSupport = useMemo(() => getPushSupport(), []);
 
   const registerServiceWorker = useCallback(async () => {
     if (!('serviceWorker' in navigator)) return null;
@@ -94,64 +83,13 @@ export default function App() {
   }), [tahlilTargetByTime]);
 
   const currentDzikirList = dzikirListByTime[activeTime];
+  const reminderSummary = useMemo(() => getReminderSummary({ time: reminderTime, frequencyPerDay: reminderFrequency, durationKey: reminderDuration }), [reminderTime, reminderFrequency, reminderDuration]);
 
   useEffect(() => {
     registerServiceWorker().catch(() => {
       // no-op
     });
   }, [registerServiceWorker]);
-
-  useEffect(() => {
-    const syncPushState = async () => {
-      setNotificationPermission('Notification' in window ? Notification.permission : 'default');
-
-      if (!pushSupport.notifications || !pushSupport.serviceWorker || !pushSupport.pushManager) {
-        setHasPushSubscription(false);
-        setRemindersEnabled(false);
-        setReminderStatusMessage('Browser ini belum mendukung Web Push.');
-        return;
-      }
-
-      if (!pushSupport.configReady) {
-        setHasPushSubscription(false);
-        setRemindersEnabled(false);
-        setReminderStatusMessage('Push worker belum dikonfigurasi. Isi env VITE_PUSH_WORKER_URL dan VITE_WEB_PUSH_PUBLIC_KEY.');
-        return;
-      }
-
-      try {
-        const registration = await registerServiceWorker();
-        const subscription = await syncPushSubscriptionState(registration);
-        const isEnabled = Boolean(subscription) && Notification.permission === 'granted';
-
-        setHasPushSubscription(Boolean(subscription));
-        setRemindersEnabled(isEnabled);
-        setReminderStatusMessage(
-          isEnabled
-            ? 'Pengingat cloud aktif. Worker Cloudflare akan mengirim notifikasi walau aplikasi sedang tertutup.'
-            : 'Pengingat cloud belum aktif di perangkat ini.',
-        );
-      } catch {
-        setHasPushSubscription(false);
-        setRemindersEnabled(false);
-        setReminderStatusMessage('Gagal memeriksa status push subscription.');
-      }
-    };
-
-    void syncPushState();
-
-    const handleVisibility = () => {
-      void syncPushState();
-    };
-
-    document.addEventListener('visibilitychange', handleVisibility);
-    window.addEventListener('focus', handleVisibility);
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibility);
-      window.removeEventListener('focus', handleVisibility);
-    };
-  }, [pushSupport, registerServiceWorker]);
 
   useEffect(() => {
     const savedCounts = readStoredCounts(activeTime, currentDateKey);
@@ -188,7 +126,9 @@ export default function App() {
   useEffect(() => { localStorage.setItem(STORAGE_KEYS.showArabic, String(showArabic)); }, [showArabic]);
   useEffect(() => { localStorage.setItem(STORAGE_KEYS.showLatin, String(showLatin)); }, [showLatin]);
   useEffect(() => { localStorage.setItem(STORAGE_KEYS.showTranslation, String(showTranslation)); }, [showTranslation]);
-  useEffect(() => { localStorage.setItem(STORAGE_KEYS.remindersEnabled, String(remindersEnabled)); }, [remindersEnabled]);
+  useEffect(() => { localStorage.setItem('dzikir_calendar_reminder_time', reminderTime); }, [reminderTime]);
+  useEffect(() => { localStorage.setItem('dzikir_calendar_reminder_frequency', String(reminderFrequency)); }, [reminderFrequency]);
+  useEffect(() => { localStorage.setItem('dzikir_calendar_reminder_duration', reminderDuration); }, [reminderDuration]);
   useEffect(() => {
     localStorage.setItem('dzikir_tahlil_target_pagi', String(tahlilTargetByTime.pagi));
     localStorage.setItem('dzikir_tahlil_target_petang', String(tahlilTargetByTime.petang));
@@ -272,85 +212,9 @@ export default function App() {
     };
   }, []);
 
-  const handleReminderToggle = useCallback(async (enabled) => {
-    if (isReminderBusy) return;
-
-    if (!enabled) {
-      try {
-        setIsReminderBusy(true);
-        const registration = await registerServiceWorker();
-        await removePushSubscription({ registration });
-        setHasPushSubscription(false);
-        setRemindersEnabled(false);
-        setReminderStatusMessage('Pengingat cloud dimatikan untuk perangkat ini.');
-      } catch {
-        window.alert('Terjadi kendala saat mematikan pengingat. Silakan coba lagi.');
-      } finally {
-        setIsReminderBusy(false);
-      }
-      return;
-    }
-
-    if (!pushSupport.notifications || !pushSupport.serviceWorker || !pushSupport.pushManager) {
-      window.alert('Perangkat atau browser ini belum mendukung Web Push.');
-      setRemindersEnabled(false);
-      return;
-    }
-
-    if (!pushSupport.configReady) {
-      window.alert('Push worker belum dikonfigurasi. Isi env VITE_PUSH_WORKER_URL dan VITE_WEB_PUSH_PUBLIC_KEY terlebih dahulu.');
-      setRemindersEnabled(false);
-      return;
-    }
-
-    if (installPlatform === 'ios' && !isStandaloneMode) {
-      window.alert('Di iPhone/iPad, tambahkan aplikasi ke Home Screen terlebih dahulu agar notifikasi web dapat diaktifkan.');
-      setRemindersEnabled(false);
-      return;
-    }
-
-    try {
-      setIsReminderBusy(true);
-      const registration = await registerServiceWorker();
-      let permission = Notification.permission;
-
-      if (permission !== 'granted') {
-        permission = await Notification.requestPermission();
-      }
-
-      setNotificationPermission(permission);
-
-      if (permission !== 'granted') {
-        setRemindersEnabled(false);
-        window.alert('Izin notifikasi belum diberikan, jadi pengingat belum bisa diaktifkan.');
-        return;
-      }
-
-      await upsertPushSubscription({ registration });
-      setHasPushSubscription(true);
-      setRemindersEnabled(true);
-      setReminderStatusMessage('Pengingat cloud aktif. Worker Cloudflare akan mengirim push saat jadwal pagi dan petang meski aplikasi tertutup.');
-    } catch (error) {
-      setHasPushSubscription(false);
-      setRemindersEnabled(false);
-      window.alert(error instanceof Error ? error.message : 'Terjadi kendala saat mengaktifkan notifikasi cloud. Silakan coba lagi.');
-    } finally {
-      setIsReminderBusy(false);
-    }
-  }, [installPlatform, isReminderBusy, isStandaloneMode, pushSupport, registerServiceWorker]);
-
-  const handleSendTestNotification = useCallback(async () => {
-    try {
-      setIsReminderBusy(true);
-      const registration = await registerServiceWorker();
-      await sendPushTest({ registration });
-      setReminderStatusMessage('Notifikasi uji berhasil dikirim. Jika browser mengizinkan, push akan muncul walau tab sedang di background.');
-    } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'Gagal mengirim notifikasi uji.');
-    } finally {
-      setIsReminderBusy(false);
-    }
-  }, [registerServiceWorker]);
+  const handleExportReminderCalendar = useCallback(() => {
+    downloadReminderCalendar({ time: reminderTime, frequencyPerDay: reminderFrequency, durationKey: reminderDuration });
+  }, [reminderDuration, reminderFrequency, reminderTime]);
 
   const handleIncrement = useCallback((id, target, index) => {
     setCounts((prev) => {
@@ -490,11 +354,6 @@ export default function App() {
             {activeTab === 'home' && !isReadingMode && <HomeTab isNightView={isNightView} setIsNightView={setIsNightView} startReading={startReading} handleReset={handleReset} dailyProgress={dailyProgress} morningProgress={morningProgress} eveningProgress={eveningProgress} isMobileView={isMobileView} isStandaloneMode={isStandaloneMode} showInstallBanner={showInstallBanner} setIsInstallModalOpen={setIsInstallModalOpen} />}
             {activeTab === 'settings' && !isReadingMode && (
               <SettingsTab
-                remindersEnabled={remindersEnabled}
-                onRemindersToggle={handleReminderToggle}
-                notificationPermission={notificationPermission}
-                installPlatform={installPlatform}
-                isStandaloneMode={isStandaloneMode}
                 fontSize={fontSize}
                 setFontSize={setFontSize}
                 showArabic={showArabic}
@@ -505,11 +364,14 @@ export default function App() {
                 setShowTranslation={setShowTranslation}
                 showBackToReading={settingsOrigin === 'reading'}
                 onBackToReading={handleBackToReading}
-                reminderStatusMessage={reminderStatusMessage}
-                isReminderBusy={isReminderBusy}
-                isPushConfigured={pushSupport.configReady}
-                hasPushSubscription={hasPushSubscription}
-                onSendTestNotification={handleSendTestNotification}
+                reminderTime={reminderTime}
+                setReminderTime={setReminderTime}
+                reminderFrequency={reminderFrequency}
+                setReminderFrequency={setReminderFrequency}
+                reminderDuration={reminderDuration}
+                setReminderDuration={setReminderDuration}
+                reminderSummary={reminderSummary}
+                onExportReminderCalendar={handleExportReminderCalendar}
               />
             )}
             {isReadingMode && <ReadingTab currentDzikirList={currentDzikirList} counts={counts} showArabic={showArabic} fontSize={fontSize} fontSizeClasses={fontSizeClasses} showLatin={showLatin} showTranslation={showTranslation} handleIncrement={handleIncrement} setActiveDalil={setActiveDalil} dalilByTitle={dalilByTitle} progress={progress} activeTime={activeTime} setIsReadingMode={setIsReadingMode} setActiveTab={setActiveTab} tahlilTarget={tahlilTargetByTime[activeTime]} setTahlilTarget={setActiveTimeTahlilTarget} />}
@@ -538,9 +400,8 @@ export default function App() {
               </div>
 
               <div className="rounded-3xl bg-emerald-50/70 p-4">
-                {installPlatform === 'ios' && <ol className="list-decimal space-y-2 pl-5 text-sm text-emerald-900"><li>Buka aplikasi ini lewat Safari.</li><li>Ketuk tombol <strong>Share</strong> (ikon kotak + panah).</li><li>Pilih <strong>Add to Home Screen</strong>, lalu tekan <strong>Add</strong>.</li></ol>}
-                {installPlatform === 'android' && <ol className="list-decimal space-y-2 pl-5 text-sm text-emerald-900"><li>Tekan tombol <strong>Install sekarang</strong> di bawah untuk memunculkan prompt instal.</li><li>Kalau prompt belum muncul, buka menu browser <strong>⋮</strong>.</li><li>Pilih <strong>Install app</strong> atau <strong>Add to Home screen</strong>.</li></ol>}
-                {installPlatform === 'other' && <p className="text-sm text-emerald-900">Gunakan menu browser, lalu pilih <strong>Install app</strong> atau <strong>Add to Home Screen</strong> bila tersedia di perangkat Anda.</p>}
+                {isStandaloneMode === false && <p className="text-sm text-emerald-900">Tambahkan aplikasi ke Home Screen agar pengalaman membuka dzikir dan file kalender terasa seperti aplikasi native di perangkat Anda.</p>}
+                {isMobileView && installPromptEvent ? <p className="mt-2 text-sm text-emerald-900">Setelah terpasang, Anda tetap bisa membuka file kalender pengingat kapan saja dari menu Pengaturan.</p> : null}
               </div>
 
               <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
@@ -552,7 +413,7 @@ export default function App() {
                   Tutup
                 </button>
 
-                {installPlatform === 'android' && installPromptEvent ? (
+                {installPromptEvent ? (
                   <button
                     type="button"
                     onClick={handleInstallApp}
