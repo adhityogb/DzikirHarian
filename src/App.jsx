@@ -6,17 +6,10 @@ import HomeTab from './components/HomeTab';
 import SettingsTab from './components/SettingsTab';
 import ReadingTab from './components/ReadingTab';
 import { STORAGE_KEYS, isStandaloneDisplay, dalilByTitle, dzikirData, ISTIGHFAR_LINK, readStoredCounts, writeStoredCounts } from './data/dzikirContent';
+import { getPushSupport, removePushSubscription, sendPushTest, syncPushSubscriptionState, upsertPushSubscription } from './lib/pushNotifications';
 
 const getLocalDateKey = () => new Date().toLocaleDateString('en-CA');
 const fontSizeClasses = ['text-2xl', 'text-3xl', 'text-4xl', 'text-5xl'];
-
-const getMsUntilNextTrigger = (hour, minute) => {
-  const now = new Date();
-  const next = new Date(now);
-  next.setHours(hour, minute, 0, 0);
-  if (next <= now) next.setDate(next.getDate() + 1);
-  return next.getTime() - now.getTime();
-};
 
 const getMsUntilNextMidnight = () => {
   const now = new Date();
@@ -73,6 +66,9 @@ export default function App() {
   const [activeDalil, setActiveDalil] = useState(null);
   const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
   const [notificationPermission, setNotificationPermission] = useState(() => ('Notification' in window ? Notification.permission : 'default'));
+  const [hasPushSubscription, setHasPushSubscription] = useState(false);
+  const [isReminderBusy, setIsReminderBusy] = useState(false);
+  const [reminderStatusMessage, setReminderStatusMessage] = useState('Menyiapkan status pengingat cloud…');
   const [tahlilTargetByTime, setTahlilTargetByTime] = useState(() => ({
     pagi: Number(localStorage.getItem('dzikir_tahlil_target_pagi') || 10),
     petang: Number(localStorage.getItem('dzikir_tahlil_target_petang') || 10),
@@ -84,6 +80,8 @@ export default function App() {
     if (/android/.test(ua)) return 'android';
     return 'other';
   }, []);
+
+  const pushSupport = useMemo(() => getPushSupport(), []);
 
   const registerServiceWorker = useCallback(async () => {
     if (!('serviceWorker' in navigator)) return null;
@@ -102,6 +100,58 @@ export default function App() {
       // no-op
     });
   }, [registerServiceWorker]);
+
+  useEffect(() => {
+    const syncPushState = async () => {
+      setNotificationPermission('Notification' in window ? Notification.permission : 'default');
+
+      if (!pushSupport.notifications || !pushSupport.serviceWorker || !pushSupport.pushManager) {
+        setHasPushSubscription(false);
+        setRemindersEnabled(false);
+        setReminderStatusMessage('Browser ini belum mendukung Web Push.');
+        return;
+      }
+
+      if (!pushSupport.configReady) {
+        setHasPushSubscription(false);
+        setRemindersEnabled(false);
+        setReminderStatusMessage('Push worker belum dikonfigurasi. Isi env VITE_PUSH_WORKER_URL dan VITE_WEB_PUSH_PUBLIC_KEY.');
+        return;
+      }
+
+      try {
+        const registration = await registerServiceWorker();
+        const subscription = await syncPushSubscriptionState(registration);
+        const isEnabled = Boolean(subscription) && Notification.permission === 'granted';
+
+        setHasPushSubscription(Boolean(subscription));
+        setRemindersEnabled(isEnabled);
+        setReminderStatusMessage(
+          isEnabled
+            ? 'Pengingat cloud aktif. Worker Cloudflare akan mengirim notifikasi walau aplikasi sedang tertutup.'
+            : 'Pengingat cloud belum aktif di perangkat ini.',
+        );
+      } catch {
+        setHasPushSubscription(false);
+        setRemindersEnabled(false);
+        setReminderStatusMessage('Gagal memeriksa status push subscription.');
+      }
+    };
+
+    void syncPushState();
+
+    const handleVisibility = () => {
+      void syncPushState();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('focus', handleVisibility);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('focus', handleVisibility);
+    };
+  }, [pushSupport, registerServiceWorker]);
 
   useEffect(() => {
     const savedCounts = readStoredCounts(activeTime, currentDateKey);
@@ -171,52 +221,6 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!('Notification' in window)) return;
-    const syncPermission = () => setNotificationPermission(Notification.permission);
-    document.addEventListener('visibilitychange', syncPermission);
-    window.addEventListener('focus', syncPermission);
-    return () => {
-      document.removeEventListener('visibilitychange', syncPermission);
-      window.removeEventListener('focus', syncPermission);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!('Notification' in window) || !('serviceWorker' in navigator) || !remindersEnabled || notificationPermission !== 'granted') return;
-    let mounted = true;
-    let morningTimeout;
-    let eveningTimeout;
-
-    const scheduleReminder = async (hour, minute, title, body, assignTimeout) => {
-      const registration = await navigator.serviceWorker.ready;
-      const run = async () => {
-        if (!mounted) return;
-        if (Notification.permission === 'granted') {
-          await registration.showNotification(title, { body, tag: title, renotify: true, icon: '/icons/android-chrome-192x192.png', badge: '/icons/favicon-48x48.png' });
-        }
-        assignTimeout(window.setTimeout(run, getMsUntilNextTrigger(hour, minute)));
-      };
-      assignTimeout(window.setTimeout(run, getMsUntilNextTrigger(hour, minute)));
-    };
-
-    (async () => {
-      try {
-        await registerServiceWorker();
-        await scheduleReminder(5, 30, 'Dzikir Pagi', 'Waktunya dzikir pagi. Tenangkan hati, awali hari dengan mengingat Allah.', (t) => { morningTimeout = t; });
-        await scheduleReminder(17, 0, 'Dzikir Petang', 'Waktunya dzikir petang. Tutup sore dengan dzikir dan doa.', (t) => { eveningTimeout = t; });
-      } catch {
-        // no-op
-      }
-    })();
-
-    return () => {
-      mounted = false;
-      window.clearTimeout(morningTimeout);
-      window.clearTimeout(eveningTimeout);
-    };
-  }, [registerServiceWorker, remindersEnabled, notificationPermission]);
-
-  useEffect(() => {
     const syncInstallState = () => {
       const mobile = window.innerWidth < 768;
       const standalone = isStandaloneDisplay();
@@ -269,13 +273,32 @@ export default function App() {
   }, []);
 
   const handleReminderToggle = useCallback(async (enabled) => {
+    if (isReminderBusy) return;
+
     if (!enabled) {
+      try {
+        setIsReminderBusy(true);
+        const registration = await registerServiceWorker();
+        await removePushSubscription({ registration });
+        setHasPushSubscription(false);
+        setRemindersEnabled(false);
+        setReminderStatusMessage('Pengingat cloud dimatikan untuk perangkat ini.');
+      } catch {
+        window.alert('Terjadi kendala saat mematikan pengingat. Silakan coba lagi.');
+      } finally {
+        setIsReminderBusy(false);
+      }
+      return;
+    }
+
+    if (!pushSupport.notifications || !pushSupport.serviceWorker || !pushSupport.pushManager) {
+      window.alert('Perangkat atau browser ini belum mendukung Web Push.');
       setRemindersEnabled(false);
       return;
     }
 
-    if (!('Notification' in window) || !('serviceWorker' in navigator)) {
-      window.alert('Perangkat atau browser ini belum mendukung notifikasi aplikasi web.');
+    if (!pushSupport.configReady) {
+      window.alert('Push worker belum dikonfigurasi. Isi env VITE_PUSH_WORKER_URL dan VITE_WEB_PUSH_PUBLIC_KEY terlebih dahulu.');
       setRemindersEnabled(false);
       return;
     }
@@ -287,21 +310,47 @@ export default function App() {
     }
 
     try {
-      await registerServiceWorker();
+      setIsReminderBusy(true);
+      const registration = await registerServiceWorker();
       let permission = Notification.permission;
+
       if (permission !== 'granted') {
         permission = await Notification.requestPermission();
       }
+
       setNotificationPermission(permission);
-      setRemindersEnabled(permission === 'granted');
+
       if (permission !== 'granted') {
+        setRemindersEnabled(false);
         window.alert('Izin notifikasi belum diberikan, jadi pengingat belum bisa diaktifkan.');
+        return;
       }
-    } catch {
+
+      await upsertPushSubscription({ registration });
+      setHasPushSubscription(true);
+      setRemindersEnabled(true);
+      setReminderStatusMessage('Pengingat cloud aktif. Worker Cloudflare akan mengirim push saat jadwal pagi dan petang meski aplikasi tertutup.');
+    } catch (error) {
+      setHasPushSubscription(false);
       setRemindersEnabled(false);
-      window.alert('Terjadi kendala saat mengaktifkan notifikasi. Silakan coba lagi.');
+      window.alert(error instanceof Error ? error.message : 'Terjadi kendala saat mengaktifkan notifikasi cloud. Silakan coba lagi.');
+    } finally {
+      setIsReminderBusy(false);
     }
-  }, [installPlatform, isStandaloneMode, registerServiceWorker]);
+  }, [installPlatform, isReminderBusy, isStandaloneMode, pushSupport, registerServiceWorker]);
+
+  const handleSendTestNotification = useCallback(async () => {
+    try {
+      setIsReminderBusy(true);
+      const registration = await registerServiceWorker();
+      await sendPushTest({ registration });
+      setReminderStatusMessage('Notifikasi uji berhasil dikirim. Jika browser mengizinkan, push akan muncul walau tab sedang di background.');
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : 'Gagal mengirim notifikasi uji.');
+    } finally {
+      setIsReminderBusy(false);
+    }
+  }, [registerServiceWorker]);
 
   const handleIncrement = useCallback((id, target, index) => {
     setCounts((prev) => {
@@ -456,6 +505,11 @@ export default function App() {
                 setShowTranslation={setShowTranslation}
                 showBackToReading={settingsOrigin === 'reading'}
                 onBackToReading={handleBackToReading}
+                reminderStatusMessage={reminderStatusMessage}
+                isReminderBusy={isReminderBusy}
+                isPushConfigured={pushSupport.configReady}
+                hasPushSubscription={hasPushSubscription}
+                onSendTestNotification={handleSendTestNotification}
               />
             )}
             {isReadingMode && <ReadingTab currentDzikirList={currentDzikirList} counts={counts} showArabic={showArabic} fontSize={fontSize} fontSizeClasses={fontSizeClasses} showLatin={showLatin} showTranslation={showTranslation} handleIncrement={handleIncrement} setActiveDalil={setActiveDalil} dalilByTitle={dalilByTitle} progress={progress} activeTime={activeTime} setIsReadingMode={setIsReadingMode} setActiveTab={setActiveTab} tahlilTarget={tahlilTargetByTime[activeTime]} setTahlilTarget={setActiveTimeTahlilTarget} />}

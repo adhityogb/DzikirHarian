@@ -1,12 +1,12 @@
 import React, { memo } from 'react';
-import { BellRing, Type, Languages, AlignLeft, ChevronLeft } from 'lucide-react';
+import { BellRing, Type, Languages, AlignLeft, ChevronLeft, CheckCircle2, Cloud, Send } from 'lucide-react';
 
-function SettingsTab({ remindersEnabled, onRemindersToggle, notificationPermission, installPlatform, isStandaloneMode, fontSize, setFontSize, showArabic, setShowArabic, showLatin, setShowLatin, showTranslation, setShowTranslation, showBackToReading, onBackToReading }) {
+function SettingsTab({ remindersEnabled, onRemindersToggle, notificationPermission, installPlatform, isStandaloneMode, fontSize, setFontSize, showArabic, setShowArabic, showLatin, setShowLatin, showTranslation, setShowTranslation, showBackToReading, onBackToReading, reminderStatusMessage, isReminderBusy, isPushConfigured, hasPushSubscription, onSendTestNotification }) {
   const notificationHint = installPlatform === 'ios'
     ? (isStandaloneMode
-      ? 'Pastikan izin notifikasi sudah diizinkan agar pengingat tetap bisa muncul dari app yang dipasang di Home Screen.'
+      ? 'Pastikan izin notifikasi Safari/PWA sudah diizinkan. Pengiriman notifikasi dijalankan dari Cloudflare Worker sehingga tetap bisa masuk saat app tertutup.'
       : 'Untuk iPhone/iPad, pasang app ke Home Screen terlebih dahulu sebelum mengaktifkan notifikasi.')
-    : 'Aktifkan izin notifikasi browser agar pengingat dzikir dapat berjalan dengan lebih andal.';
+    : 'Pengingat dikirim via Web Push + Cloudflare Worker agar tetap berjalan walau tab atau aplikasi sedang tertutup.';
 
   return (
     <div className="p-6 space-y-8 animate-fade-in-up pb-[calc(env(safe-area-inset-bottom,16px)+8.5rem)]">
@@ -23,10 +23,23 @@ function SettingsTab({ remindersEnabled, onRemindersToggle, notificationPermissi
         )}
         <h2 className="font-bold text-gray-800 text-xl">Pengaturan Tampilan</h2>
       </div>
-      <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
-        <div className="flex items-center justify-between gap-4"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-500"><BellRing className="w-5 h-5" /></div><div><h4 className="font-semibold text-gray-800">Notifikasi Pengingat</h4><p className="text-xs text-gray-500">Pagi 05.30 & Petang 17.00</p></div></div><label className="relative inline-flex items-center cursor-pointer"><input type="checkbox" checked={remindersEnabled} onChange={(e) => { void onRemindersToggle(e.target.checked); }} className="sr-only peer" /><div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div></label></div>
-        <p className="text-xs text-gray-500 mt-3 leading-relaxed">{notificationHint}</p>
-        {notificationPermission === 'denied' && <p className="text-xs text-rose-500 mt-2 leading-relaxed">Izin notifikasi sedang diblokir. Ubah izin di pengaturan browser/perangkat jika ingin menyalakannya kembali.</p>}
+      <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 space-y-4">
+        <div className="flex items-center justify-between gap-4"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-500"><BellRing className="w-5 h-5" /></div><div><h4 className="font-semibold text-gray-800">Notifikasi Pengingat Cloud</h4><p className="text-xs text-gray-500">Pagi 05.30 & Petang 17.00 • tetap aktif saat app tertutup</p></div></div><label className="relative inline-flex items-center cursor-pointer"><input type="checkbox" checked={remindersEnabled} disabled={isReminderBusy} onChange={(e) => { void onRemindersToggle(e.target.checked); }} className="sr-only peer" /><div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-disabled:opacity-50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div></label></div>
+        <p className="text-xs text-gray-500 leading-relaxed">{notificationHint}</p>
+        <div className={`rounded-2xl border px-4 py-3 text-sm ${hasPushSubscription ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-slate-200 bg-slate-50 text-slate-700'}`}>
+          <div className="flex items-start gap-3">
+            <div className={`mt-0.5 rounded-full p-1 ${hasPushSubscription ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-200 text-slate-500'}`}>
+              {hasPushSubscription ? <CheckCircle2 className="h-4 w-4" /> : <Cloud className="h-4 w-4" />}
+            </div>
+            <div className="space-y-1">
+              <p className="font-semibold">{hasPushSubscription ? 'Subscription tersimpan di Cloudflare' : 'Subscription belum aktif'}</p>
+              <p className="text-xs leading-relaxed">{reminderStatusMessage}</p>
+            </div>
+          </div>
+        </div>
+        {!isPushConfigured && <p className="text-xs text-amber-600 leading-relaxed">Mode cloud belum siap karena env frontend untuk Worker/VAPID belum diisi.</p>}
+        {notificationPermission === 'denied' && <p className="text-xs text-rose-500 leading-relaxed">Izin notifikasi sedang diblokir. Ubah izin di pengaturan browser/perangkat jika ingin menyalakannya kembali.</p>}
+        <button type="button" disabled={!hasPushSubscription || isReminderBusy} onClick={() => { void onSendTestNotification(); }} className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"><Send className="h-4 w-4" /> Kirim notifikasi uji</button>
       </div>
 
       <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
