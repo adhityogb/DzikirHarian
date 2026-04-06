@@ -4,6 +4,7 @@ export const STORAGE_KEYS = {
   showArabic: 'dzikir_show_arabic',
   showLatin: 'dzikir_show_latin',
   showTranslation: 'dzikir_show_translation',
+  showBenefitsSources: 'dzikir_show_benefits_sources',
   remindersEnabled: 'dzikir_reminders_enabled',
 };
 

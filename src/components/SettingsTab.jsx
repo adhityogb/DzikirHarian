@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
-import { CalendarDays, ChevronLeft, Type, Languages, AlignLeft, Sunrise, Sunset } from 'lucide-react';
+import { CalendarDays, ChevronLeft, Type, Languages, AlignLeft, Sunrise, Sunset, BookMarked } from 'lucide-react';
 
-function SettingsTab({ fontSize, setFontSize, showArabic, setShowArabic, showLatin, setShowLatin, showTranslation, setShowTranslation, showBackToReading, onBackToReading, morningReminderTime, eveningReminderTime, reminderSummary, onOpenReminderModal, isMobileView }) {
+function SettingsTab({ fontSize, setFontSize, showArabic, setShowArabic, showLatin, setShowLatin, showTranslation, setShowTranslation, showBenefitsSources, setShowBenefitsSources, showBackToReading, onBackToReading, morningReminderTime, eveningReminderTime, reminderSummary, onOpenReminderModal, isMobileView }) {
   return (
     <div className="p-6 space-y-8 animate-fade-in-up pb-[calc(env(safe-area-inset-bottom,16px)+8.5rem)]">
       <div className="space-y-4">
@@ -66,6 +66,7 @@ function SettingsTab({ fontSize, setFontSize, showArabic, setShowArabic, showLat
           ['ع', 'Teks Arab', 'Tampilkan tulisan Arab', showArabic, setShowArabic, 'bg-emerald-50', 'text-emerald-500'],
           [<Languages className="w-5 h-5" key="latin" />, 'Teks Latin', 'Tampilkan cara baca', showLatin, setShowLatin, 'bg-blue-50', 'text-blue-500'],
           [<AlignLeft className="w-5 h-5" key="tr" />, 'Terjemahan', 'Tampilkan arti bahasa', showTranslation, setShowTranslation, 'bg-purple-50', 'text-purple-500'],
+          [<BookMarked className="w-5 h-5" key="benefits" />, 'Keutamaan & Sumber', 'Tampilkan keutamaan dan referensi hadits', showBenefitsSources, setShowBenefitsSources, 'bg-amber-50', 'text-amber-500'],
         ].map(([icon, title, subtitle, checked, setter, bg, color]) => (
           <div key={title} className="p-5 flex items-center justify-between"><div className="flex items-center gap-3"><div className={`w-10 h-10 rounded-full ${bg} flex items-center justify-center ${color}`}>{icon}</div><div><h4 className="font-semibold text-gray-800">{title}</h4><p className="text-xs text-gray-500">{subtitle}</p></div></div><label className="relative inline-flex items-center cursor-pointer"><input type="checkbox" checked={checked} onChange={(e) => setter(e.target.checked)} className="sr-only peer" /><div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div></label></div>
         ))}
