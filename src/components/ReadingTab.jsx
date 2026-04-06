@@ -1,7 +1,5 @@
-import React, { memo, useCallback } from 'react';
-import { Check, Pause, Play } from 'lucide-react';
-
-const getAutoIntervalLabel = (seconds) => `${seconds.toFixed(1).replace('.0', '')} detik`;
+import React, { memo, useCallback, useRef } from 'react';
+import { Check } from 'lucide-react';
 
 const ReadingItem = memo(function ReadingItem({
   dzikir,
@@ -21,9 +19,46 @@ const ReadingItem = memo(function ReadingItem({
   activeAutoCounter,
   onToggleAutoCounter,
 }) {
+  const longPressTimerRef = useRef(null);
+  const didLongPressRef = useRef(false);
   const isCompleted = currentCount >= dzikir.target;
   const isAutoCountEnabled = autoCountConfig && !isCompleted;
   const isAutoCounting = isAutoCountEnabled && activeAutoCounter === dzikir.id;
+  const longPressDuration = 420;
+
+  const clearLongPressTimer = useCallback(() => {
+    if (longPressTimerRef.current) {
+      window.clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  }, []);
+
+  const handlePressStart = useCallback(() => {
+    if (!isAutoCountEnabled) return;
+    clearLongPressTimer();
+    didLongPressRef.current = false;
+    longPressTimerRef.current = window.setTimeout(() => {
+      didLongPressRef.current = true;
+      onToggleAutoCounter(dzikir.id);
+    }, longPressDuration);
+  }, [clearLongPressTimer, dzikir.id, isAutoCountEnabled, onToggleAutoCounter]);
+
+  const handlePressEnd = useCallback(() => {
+    clearLongPressTimer();
+  }, [clearLongPressTimer]);
+
+  const handleCountButtonClick = useCallback(() => {
+    if (isCompleted) return;
+    if (didLongPressRef.current) {
+      didLongPressRef.current = false;
+      return;
+    }
+    if (isAutoCounting) {
+      onToggleAutoCounter(dzikir.id);
+      return;
+    }
+    onIncrement(dzikir.id, dzikir.target, index);
+  }, [dzikir.id, dzikir.target, index, isAutoCounting, isCompleted, onIncrement, onToggleAutoCounter]);
 
   return (
     <div id={`dzikir-${dzikir.id}`} className={`dzikir-card bg-white rounded-[2rem] shadow-sm border overflow-hidden relative transition-all duration-500 ${isCompleted ? 'border-emerald-200 ring-1 ring-emerald-50 opacity-70' : 'border-gray-100'}`}>
@@ -56,26 +91,29 @@ const ReadingItem = memo(function ReadingItem({
           </div>
         )}
 
-        {isAutoCountEnabled && (
-          <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Hitung Otomatis</p>
-                <p className="mt-1 text-sm text-emerald-900">Tambah hitungan tiap {getAutoIntervalLabel(autoCountConfig.intervalMs / 1000)}.</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => onToggleAutoCounter(dzikir.id)}
-                className={`inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition-colors ${isAutoCounting ? 'bg-emerald-600 text-white' : 'bg-white text-emerald-700 border border-emerald-200 hover:bg-emerald-100'}`}
-              >
-                {isAutoCounting ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                {isAutoCounting ? 'Berhenti' : 'Mulai'}
-              </button>
-            </div>
-          </div>
-        )}
       </div>
-      <div className="p-4 bg-gray-50/50 flex flex-col gap-3"><button onClick={() => onIncrement(dzikir.id, dzikir.target, index)} disabled={isCompleted} className={`relative w-full py-4 rounded-2xl font-bold text-lg transition-all transform active:scale-[0.98] flex justify-center items-center gap-2 overflow-hidden group ${isCompleted ? 'bg-emerald-500 text-white cursor-default' : 'bg-gray-900 text-white shadow-md hover:bg-gray-800 active:bg-gray-700'}`}>{isCompleted ? <><Check className="w-6 h-6 animate-scale-in" /> Selesai</> : <>Hitung ({currentCount}/{dzikir.target})</>}{!isCompleted && <div className="absolute inset-0 bg-white/20 opacity-0 active:opacity-100 transition-opacity" />}</button></div>
+      <div className="p-4 bg-gray-50/50 flex flex-col gap-3">
+        {isAutoCountEnabled && (
+          <p className={`text-xs leading-relaxed rounded-xl px-3 py-2 ${isAutoCounting ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'}`}>
+            {isAutoCounting ? 'Hitung otomatis sedang berjalan. Tekan tombol Hitung untuk mematikan.' : 'Tekan agak lama tombol Hitung untuk menyalakan hitung otomatis.'}
+          </p>
+        )}
+        <button
+          onClick={handleCountButtonClick}
+          onMouseDown={handlePressStart}
+          onMouseUp={handlePressEnd}
+          onMouseLeave={handlePressEnd}
+          onTouchStart={handlePressStart}
+          onTouchEnd={handlePressEnd}
+          onTouchCancel={handlePressEnd}
+          onContextMenu={(event) => event.preventDefault()}
+          disabled={isCompleted}
+          className={`relative w-full py-4 rounded-2xl font-bold text-lg transition-all transform active:scale-[0.98] flex justify-center items-center gap-2 overflow-hidden group ${isCompleted ? 'bg-emerald-500 text-white cursor-default' : isAutoCounting ? 'bg-emerald-600 text-white shadow-md shadow-emerald-200 hover:bg-emerald-700 active:bg-emerald-700' : 'bg-gray-900 text-white shadow-md hover:bg-gray-800 active:bg-gray-700'}`}
+        >
+          {isCompleted ? <><Check className="w-6 h-6 animate-scale-in" /> Selesai</> : <>Hitung ({currentCount}/{dzikir.target})</>}
+          {!isCompleted && <div className="absolute inset-0 bg-white/20 opacity-0 active:opacity-100 transition-opacity" />}
+        </button>
+      </div>
     </div>
   );
 }, (prevProps, nextProps) => (
