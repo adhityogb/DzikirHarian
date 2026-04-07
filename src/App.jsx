@@ -219,7 +219,7 @@ export default function App() {
   useEffect(() => {
     if (!activeAutoCounter) return undefined;
     const autoEntry = currentDzikirList.find((item) => item.id === activeAutoCounter);
-    const autoIntervalMs = autoEntry?.title === 'Tasbih' ? 2500 : autoEntry?.title === 'Istighfar' ? 3000 : null;
+    const autoIntervalMs = autoEntry?.title === 'Tasbih' ? 2000 : autoEntry?.title === 'Istighfar' ? 2500 : null;
     if (!autoEntry || !autoIntervalMs) return undefined;
 
     const timer = window.setInterval(() => {

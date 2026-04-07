@@ -144,8 +144,8 @@ function ReadingTab({ currentDzikirList, counts, showArabic, fontSize, fontSizeC
   }, [setActiveTab, setIsReadingMode]);
 
   const autoCounterByTitle = {
-    Tasbih: { intervalMs: 2500 },
-    Istighfar: { intervalMs: 3000 },
+    Tasbih: { intervalMs: 2000 },
+    Istighfar: { intervalMs: 2500 },
   };
 
   return (
