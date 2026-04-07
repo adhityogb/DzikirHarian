@@ -35,6 +35,7 @@ const ReadingItem = memo(function ReadingItem({
 
   const handlePressStart = useCallback(() => {
     if (!isAutoCountEnabled) return;
+    if (longPressTimerRef.current) return;
     clearLongPressTimer();
     didLongPressRef.current = false;
     longPressTimerRef.current = window.setTimeout(() => {
@@ -100,12 +101,10 @@ const ReadingItem = memo(function ReadingItem({
         )}
         <button
           onClick={handleCountButtonClick}
-          onMouseDown={handlePressStart}
-          onMouseUp={handlePressEnd}
-          onMouseLeave={handlePressEnd}
-          onTouchStart={handlePressStart}
-          onTouchEnd={handlePressEnd}
-          onTouchCancel={handlePressEnd}
+          onPointerDown={handlePressStart}
+          onPointerUp={handlePressEnd}
+          onPointerLeave={handlePressEnd}
+          onPointerCancel={handlePressEnd}
           onContextMenu={(event) => event.preventDefault()}
           disabled={isCompleted}
           className={`relative w-full py-4 rounded-2xl font-bold text-lg transition-all transform active:scale-[0.98] flex justify-center items-center gap-2 overflow-hidden group ${isCompleted ? 'bg-emerald-500 text-white cursor-default' : isAutoCounting ? 'bg-emerald-600 text-white shadow-md shadow-emerald-200 hover:bg-emerald-700 active:bg-emerald-700' : 'bg-gray-900 text-white shadow-md hover:bg-gray-800 active:bg-gray-700'}`}
