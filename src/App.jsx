@@ -56,6 +56,7 @@ export default function App() {
   const [showArabic, setShowArabic] = useState(() => localStorage.getItem(STORAGE_KEYS.showArabic) !== 'false');
   const [showLatin, setShowLatin] = useState(() => localStorage.getItem(STORAGE_KEYS.showLatin) !== 'false');
   const [showTranslation, setShowTranslation] = useState(() => localStorage.getItem(STORAGE_KEYS.showTranslation) !== 'false');
+  const [showBenefitsSources, setShowBenefitsSources] = useState(() => localStorage.getItem(STORAGE_KEYS.showBenefitsSources) !== 'false');
   const [isNightView, setIsNightView] = useState(() => localStorage.getItem(STORAGE_KEYS.nightView) === 'true');
   const [currentDateKey, setCurrentDateKey] = useState(getLocalDateKey());
   const [installPromptEvent, setInstallPromptEvent] = useState(null);
@@ -72,6 +73,7 @@ export default function App() {
     pagi: Number(localStorage.getItem('dzikir_tahlil_target_pagi') || 10),
     petang: Number(localStorage.getItem('dzikir_tahlil_target_petang') || 10),
   }));
+  const [activeAutoCounter, setActiveAutoCounter] = useState(null);
 
   const registerServiceWorker = useCallback(async () => {
     if (!('serviceWorker' in navigator)) return null;
@@ -127,6 +129,7 @@ export default function App() {
   useEffect(() => { localStorage.setItem(STORAGE_KEYS.showArabic, String(showArabic)); }, [showArabic]);
   useEffect(() => { localStorage.setItem(STORAGE_KEYS.showLatin, String(showLatin)); }, [showLatin]);
   useEffect(() => { localStorage.setItem(STORAGE_KEYS.showTranslation, String(showTranslation)); }, [showTranslation]);
+  useEffect(() => { localStorage.setItem(STORAGE_KEYS.showBenefitsSources, String(showBenefitsSources)); }, [showBenefitsSources]);
   useEffect(() => { localStorage.setItem('dzikir_calendar_morning_reminder_time', morningReminderTime); }, [morningReminderTime]);
   useEffect(() => { localStorage.setItem('dzikir_calendar_evening_reminder_time', eveningReminderTime); }, [eveningReminderTime]);
   useEffect(() => { localStorage.setItem('dzikir_calendar_reminder_duration', reminderDuration); }, [reminderDuration]);
@@ -213,6 +216,30 @@ export default function App() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!activeAutoCounter) return undefined;
+    const autoEntry = currentDzikirList.find((item) => item.id === activeAutoCounter);
+    const autoIntervalMs = autoEntry?.title === 'Tasbih' ? 2000 : autoEntry?.title === 'Istighfar' ? 2500 : null;
+    if (!autoEntry || !autoIntervalMs) return undefined;
+
+    const timer = window.setInterval(() => {
+      setCounts((prev) => {
+        const current = prev[autoEntry.id] || 0;
+        if (current >= autoEntry.target) {
+          window.clearInterval(timer);
+          setActiveAutoCounter(null);
+          return prev;
+        }
+
+        const nextCount = current + 1;
+        if (window.navigator?.vibrate) window.navigator.vibrate(20);
+        return { ...prev, [autoEntry.id]: nextCount };
+      });
+    }, autoIntervalMs);
+
+    return () => window.clearInterval(timer);
+  }, [activeAutoCounter, currentDzikirList]);
+
   const handleExportReminderCalendar = useCallback(() => {
     downloadReminderCalendar({ morningTime: morningReminderTime, eveningTime: eveningReminderTime, durationKey: reminderDuration });
     setIsReminderModalOpen(false);
@@ -249,12 +276,14 @@ export default function App() {
       writeStoredCounts(istighfarMeta.otherTime, { ...oppositeCounts, [istighfarMeta.otherId]: 0 }, currentDateKey);
     }
     if (isReadingMode && scrollRef.current) scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    setActiveAutoCounter(null);
   }, [activeTime, currentDateKey, currentDzikirList, isReadingMode]);
 
   const startReading = useCallback((time) => {
     setActiveTime(time);
     setSettingsOrigin('home');
     setIsReadingMode(true);
+    setActiveAutoCounter(null);
     requestAnimationFrame(() => scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' }));
   }, []);
 
@@ -262,12 +291,18 @@ export default function App() {
     setSettingsOrigin('reading');
     setActiveTab('settings');
     setIsReadingMode(false);
+    setActiveAutoCounter(null);
     requestAnimationFrame(() => scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' }));
   }, []);
 
   const handleBackToReading = useCallback(() => {
     setIsReadingMode(true);
+    setActiveAutoCounter(null);
     requestAnimationFrame(() => scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' }));
+  }, []);
+
+  const toggleAutoCounter = useCallback((id) => {
+    setActiveAutoCounter((prev) => (prev === id ? null : id));
   }, []);
 
   const progress = useMemo(() => {
@@ -295,11 +330,18 @@ export default function App() {
   const handleOpenHome = useCallback(() => {
     setSettingsOrigin('home');
     setActiveTab('home');
+    setActiveAutoCounter(null);
   }, []);
 
   const handleOpenSettings = useCallback(() => {
     setSettingsOrigin('home');
     setActiveTab('settings');
+    setActiveAutoCounter(null);
+  }, []);
+
+  const handleCloseReading = useCallback(() => {
+    setIsReadingMode(false);
+    setActiveAutoCounter(null);
   }, []);
 
   const setActiveTimeTahlilTarget = useCallback((value) => {
@@ -342,7 +384,7 @@ export default function App() {
 
           {isReadingMode && (
             <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100 bg-white/95 backdrop-blur z-20 shrink-0 shadow-sm">
-              <button onClick={() => setIsReadingMode(false)} className="p-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
+              <button onClick={handleCloseReading} className="p-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
                 <X className="w-6 h-6" />
               </button>
               <div className="text-center flex-1">
@@ -368,6 +410,8 @@ export default function App() {
                 setShowLatin={setShowLatin}
                 showTranslation={showTranslation}
                 setShowTranslation={setShowTranslation}
+                showBenefitsSources={showBenefitsSources}
+                setShowBenefitsSources={setShowBenefitsSources}
                 showBackToReading={settingsOrigin === 'reading'}
                 onBackToReading={handleBackToReading}
                 morningReminderTime={morningReminderTime}
@@ -381,7 +425,7 @@ export default function App() {
                 isMobileView={isMobileView}
               />
             )}
-            {isReadingMode && <ReadingTab currentDzikirList={currentDzikirList} counts={counts} showArabic={showArabic} fontSize={fontSize} fontSizeClasses={fontSizeClasses} showLatin={showLatin} showTranslation={showTranslation} handleIncrement={handleIncrement} setActiveDalil={setActiveDalil} dalilByTitle={dalilByTitle} progress={progress} activeTime={activeTime} setIsReadingMode={setIsReadingMode} setActiveTab={setActiveTab} tahlilTarget={tahlilTargetByTime[activeTime]} setTahlilTarget={setActiveTimeTahlilTarget} />}
+            {isReadingMode && <ReadingTab currentDzikirList={currentDzikirList} counts={counts} showArabic={showArabic} fontSize={fontSize} fontSizeClasses={fontSizeClasses} showLatin={showLatin} showTranslation={showTranslation} showBenefitsSources={showBenefitsSources} handleIncrement={handleIncrement} setActiveDalil={setActiveDalil} dalilByTitle={dalilByTitle} progress={progress} activeTime={activeTime} setIsReadingMode={setIsReadingMode} setActiveTab={setActiveTab} tahlilTarget={tahlilTargetByTime[activeTime]} setTahlilTarget={setActiveTimeTahlilTarget} activeAutoCounter={activeAutoCounter} onToggleAutoCounter={toggleAutoCounter} />}
           </div>
 
           {!isReadingMode && <nav className="absolute bottom-0 w-full bg-white border-t border-gray-100 px-4 sm:px-6 py-3 sm:py-4 flex justify-around items-center z-20 pb-safe shrink-0"><button onClick={handleOpenHome} className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'home' ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}><div className={`p-2 rounded-xl transition-colors ${activeTab === 'home' ? 'bg-emerald-50' : 'bg-transparent'}`}><BookOpen className="w-6 h-6" /></div><span className="text-[10px] font-semibold">Dzikir</span></button><button onClick={handleOpenSettings} className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'settings' ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}><div className={`p-2 rounded-xl transition-colors ${activeTab === 'settings' ? 'bg-emerald-50' : 'bg-transparent'}`}><Settings2 className="w-6 h-6" /></div><span className="text-[10px] font-semibold">Pengaturan</span></button></nav>}
