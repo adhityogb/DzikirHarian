@@ -8,6 +8,13 @@ npm install
 npm run dev
 ```
 
+## Dukungan offline (tanpa internet)
+Aplikasi kini dapat tetap dibuka saat perangkat offline setelah kunjungan pertama berhasil memuat app shell.
+Service Worker akan:
+- Menyimpan halaman utama (`/` dan `index.html`) serta aset manifest/icon ke cache.
+- Menggunakan cache runtime untuk file JS/CSS/gambar yang sudah pernah diakses.
+- Memakai fallback ke `index.html` saat navigasi dilakukan ketika offline.
+
 ## Konfigurasi Web Push Cloudflare
 Frontend sekarang memakai Cloudflare Worker untuk menyimpan Web Push subscription dan mengirim pengingat saat app sedang tertutup.
 
