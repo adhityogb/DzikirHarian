@@ -1,9 +1,82 @@
-self.addEventListener('install', () => {
-  self.skipWaiting();
+const APP_CACHE_VERSION = 'dzikir-harian-v1';
+const APP_SHELL_CACHE = `app-shell-${APP_CACHE_VERSION}`;
+const RUNTIME_CACHE = `runtime-${APP_CACHE_VERSION}`;
+
+const APP_SHELL_URLS = [
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/favicon.svg',
+  '/icons/android-chrome-192x192.png',
+  '/icons/android-chrome-512x512.png',
+];
+
+self.addEventListener('install', (event) => {
+  event.waitUntil((async () => {
+    const cache = await caches.open(APP_SHELL_CACHE);
+    await cache.addAll(APP_SHELL_URLS);
+    await self.skipWaiting();
+  })());
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    const validCaches = [APP_SHELL_CACHE, RUNTIME_CACHE];
+
+    await Promise.all(
+      keys
+        .filter((key) => !validCaches.includes(key))
+        .map((key) => caches.delete(key)),
+    );
+
+    await self.clients.claim();
+  })());
+});
+
+const isHttpRequest = (request) => request.url.startsWith('http');
+
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+
+  if (request.method !== 'GET' || !isHttpRequest(request)) return;
+
+  if (request.mode === 'navigate') {
+    event.respondWith((async () => {
+      try {
+        const networkResponse = await fetch(request);
+        const runtimeCache = await caches.open(RUNTIME_CACHE);
+        runtimeCache.put(request, networkResponse.clone());
+        return networkResponse;
+      } catch {
+        const cachedPage = await caches.match(request);
+        if (cachedPage) return cachedPage;
+
+        const appShell = await caches.match('/index.html');
+        if (appShell) return appShell;
+
+        return Response.error();
+      }
+    })());
+
+    return;
+  }
+
+  event.respondWith((async () => {
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) return cachedResponse;
+
+    try {
+      const networkResponse = await fetch(request);
+      if (networkResponse.ok && request.url.startsWith(self.location.origin)) {
+        const runtimeCache = await caches.open(RUNTIME_CACHE);
+        runtimeCache.put(request, networkResponse.clone());
+      }
+      return networkResponse;
+    } catch {
+      return Response.error();
+    }
+  })());
 });
 
 const getFallbackReminder = () => {
