@@ -95,7 +95,7 @@ const ReadingItem = memo(function ReadingItem({
       </div>
       <div className="p-4 bg-gray-50/50 flex flex-col gap-3">
         {isAutoCountEnabled && (
-          <p className={`text-xs leading-relaxed rounded-xl px-3 py-2 ${isAutoCounting ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'}`}>
+          <p className={`auto-count-hint text-xs leading-relaxed rounded-xl px-3 py-2 ${isAutoCounting ? 'auto-count-hint--active bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'}`}>
             {isAutoCounting ? 'Hitung otomatis sedang berjalan. Tekan tombol Hitung untuk mematikan.' : 'Tekan agak lama tombol Hitung untuk menyalakan hitung otomatis.'}
           </p>
         )}
