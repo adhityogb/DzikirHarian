@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { Settings2, BookOpen, X, Info, Download } from 'lucide-react';
+import { Settings2, BookOpen, X, Info, Download, Share, PlusSquare, Sparkles } from 'lucide-react';
 import './App.css';
 import AppLogo from './components/AppLogo';
 import HomeTab from './components/HomeTab';
@@ -74,6 +74,11 @@ export default function App() {
     petang: Number(localStorage.getItem('dzikir_tahlil_target_petang') || 10),
   }));
   const [activeAutoCounter, setActiveAutoCounter] = useState(null);
+
+  const isIOSDevice = useMemo(() => {
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    return /iPad|iPhone|iPod/.test(userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }, []);
 
   const registerServiceWorker = useCallback(async () => {
     if (!('serviceWorker' in navigator)) return null;
@@ -451,7 +456,17 @@ export default function App() {
               </div>
 
               <div className="rounded-3xl bg-emerald-50/70 p-4">
-                {isStandaloneMode === false && <p className="text-sm text-emerald-900">Tambahkan aplikasi ke Home Screen agar pengalaman membuka dzikir dan file kalender terasa seperti aplikasi native di perangkat Anda.</p>}
+                {isStandaloneMode === false && isIOSDevice ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-emerald-900">Ikuti 3 langkah berikut di Safari agar Dzikir Harian terpasang di Home Screen:</p>
+                    <ol className="space-y-2 text-sm text-emerald-900">
+                      <li className="flex items-start gap-2"><Share className="mt-0.5 h-4 w-4 shrink-0" /> <span><strong>1.</strong> Tekan ikon <strong>Bagikan</strong> (kotak dengan panah ke atas) di bagian bawah Safari.</span></li>
+                      <li className="flex items-start gap-2"><PlusSquare className="mt-0.5 h-4 w-4 shrink-0" /> <span><strong>2.</strong> Scroll menu lalu pilih <strong>Add to Home Screen</strong>.</span></li>
+                      <li className="flex items-start gap-2"><Sparkles className="mt-0.5 h-4 w-4 shrink-0" /> <span><strong>3.</strong> Tekan <strong>Add</strong> di kanan atas. Setelah itu buka dari ikon di Home Screen.</span></li>
+                    </ol>
+                  </div>
+                ) : null}
+                {isStandaloneMode === false && !isIOSDevice && <p className="text-sm text-emerald-900">Tambahkan aplikasi ke Home Screen agar pengalaman membuka dzikir dan file kalender terasa seperti aplikasi native di perangkat Anda.</p>}
                 {isMobileView && installPromptEvent ? <p className="mt-2 text-sm text-emerald-900">Setelah terpasang, Anda tetap bisa membuka file kalender pengingat kapan saja dari menu Pengaturan.</p> : null}
               </div>
 
